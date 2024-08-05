@@ -1,4 +1,4 @@
-# Authors: 
+# Authors:
 #   Trevor Perrin
 #   Dave Baggett (Arcode Corporation) - Added TLSUnsupportedError.
 #
@@ -8,6 +8,7 @@
 import socket
 
 from .constants import AlertDescription, AlertLevel
+
 
 class BaseTLSException(Exception):
     """

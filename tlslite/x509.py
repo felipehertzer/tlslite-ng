@@ -10,8 +10,12 @@ from ecdsa.keys import VerifyingKey
 
 from .utils.asn1parser import ASN1Parser
 from .utils.cryptomath import *
-from .utils.keyfactory import _createPublicRSAKey, _create_public_ecdsa_key, \
-    _create_public_dsa_key, _create_public_eddsa_key
+from .utils.keyfactory import (
+    _createPublicRSAKey,
+    _create_public_ecdsa_key,
+    _create_public_dsa_key,
+    _create_public_eddsa_key,
+)
 from .utils.pem import *
 from .utils.compat import compatHMAC, b2a_hex
 from .constants import AlgorithmOID, RSA_PSS_OID
@@ -111,19 +115,20 @@ class X509(object):
             subject_public_key_info_index = 5
 
         # Get serial number
-        self.serial_number = bytesToNumber(tbs_certificate.getChild(serial_number_index).value)
+        self.serial_number = bytesToNumber(
+            tbs_certificate.getChild(serial_number_index).value
+        )
 
         # Get the issuer
-        self.issuer = tbs_certificate.getChildBytes(
-            subject_public_key_info_index - 3)
+        self.issuer = tbs_certificate.getChildBytes(subject_public_key_info_index - 3)
 
         # Get the subject
-        self.subject = tbs_certificate.getChildBytes(
-            subject_public_key_info_index - 1)
+        self.subject = tbs_certificate.getChildBytes(subject_public_key_info_index - 1)
 
         # Get the subjectPublicKeyInfo
         subject_public_key_info = tbs_certificate.getChild(
-            subject_public_key_info_index)
+            subject_public_key_info_index
+        )
 
         # Get the AlgorithmIdentifier
         alg_identifier = subject_public_key_info.getChild(0)
@@ -153,18 +158,21 @@ class X509(object):
                 raise SyntaxError("Missing parameters in AlgorithmIdentifier")
             params = alg_identifier.getChild(1)
             if params.value != bytearray(0):
-                raise SyntaxError("Unexpected non-NULL parameters in "
-                                  "AlgorithmIdentifier")
+                raise SyntaxError(
+                    "Unexpected non-NULL parameters in " "AlgorithmIdentifier"
+                )
         elif self.certAlg == "ecdsa":
             self._ecdsa_pubkey_parsing(
-                tbs_certificate.getChildBytes(subject_public_key_info_index))
+                tbs_certificate.getChildBytes(subject_public_key_info_index)
+            )
             return
         elif self.certAlg == "dsa":
             self._dsa_pubkey_parsing(subject_public_key_info)
             return
         elif self.certAlg == "Ed25519" or self.certAlg == "Ed448":
             self._eddsa_pubkey_parsing(
-                tbs_certificate.getChildBytes(subject_public_key_info_index))
+                tbs_certificate.getChildBytes(subject_public_key_info_index)
+            )
             return
         else:  # rsa-pss
             pass  # ignore parameters, if any - don't apply key restrictions
@@ -181,11 +189,9 @@ class X509(object):
         try:
             # python ecdsa knows how to parse curve OIDs so re-use that
             # code
-            public_key = VerifyingKey.from_der(compatHMAC(
-                subject_public_key_info))
+            public_key = VerifyingKey.from_der(compatHMAC(subject_public_key_info))
         except Exception:
-            raise SyntaxError("Malformed or unsupported public key in "
-                              "certificate")
+            raise SyntaxError("Malformed or unsupported public key in " "certificate")
         self.publicKey = _create_public_eddsa_key(public_key)
 
     def _rsa_pubkey_parsing(self, subject_public_key_info):
@@ -231,11 +237,9 @@ class X509(object):
         try:
             # python ecdsa knows how to parse curve OIDs so re-use that
             # code
-            public_key = VerifyingKey.from_der(compatHMAC(
-                subject_public_key_info))
+            public_key = VerifyingKey.from_der(compatHMAC(subject_public_key_info))
         except Exception:
-            raise SyntaxError("Malformed or unsupported public key in "
-                              "certificate")
+            raise SyntaxError("Malformed or unsupported public key in " "certificate")
         x = public_key.pubkey.point.x()
         y = public_key.pubkey.point.y()
         curve_name = public_key.curve.name
@@ -283,5 +287,3 @@ class X509(object):
     def writeBytes(self):
         """Serialise object to a DER encoded string."""
         return self.bytes
-
-

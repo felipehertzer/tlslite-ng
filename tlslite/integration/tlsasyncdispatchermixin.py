@@ -1,4 +1,4 @@
-# Authors: 
+# Authors:
 #   Trevor Perrin
 #   Martin von Loewis - python 3 port
 #
@@ -80,17 +80,16 @@ class TLSAsyncDispatcherMixIn(AsyncStateMachine):
     and removes this instance from the asyncore loop.
     """
 
-
     def __init__(self, sock=None):
         AsyncStateMachine.__init__(self)
 
         if sock:
             self.tlsConnection = TLSConnection(sock)
 
-        #Calculate the sibling I'm being mixed in with.
-        #This is necessary since we override functions
-        #like readable(), handle_read(), etc., but we
-        #also want to call the sibling's versions.
+        # Calculate the sibling I'm being mixed in with.
+        # This is necessary since we override functions
+        # like readable(), handle_read(), etc., but we
+        # also want to call the sibling's versions.
         for cl in self.__class__.__bases__:
             if cl != TLSAsyncDispatcherMixIn and cl != AsyncStateMachine:
                 self.siblingClass = cl

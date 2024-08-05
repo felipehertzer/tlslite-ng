@@ -9,13 +9,16 @@ from tlslite.utils import openssl_aes
 
 
 if m2cryptoLoaded:
+
     def new(key, tagLength=16):
         return OPENSSL_AESCCM(key, "openssl", bytearray(16), tagLength)
 
 
 class OPENSSL_AESCCM(AESCCM):
     def __init__(self, key, implementation, rawAesEncrypt, tagLength):
-        super(OPENSSL_AESCCM, self).__init__(key, implementation, rawAesEncrypt, tagLength)
+        super(OPENSSL_AESCCM, self).__init__(
+            key, implementation, rawAesEncrypt, tagLength
+        )
 
-        self._ctr = openssl_aes.new(key, 6, bytearray(b'\x00' * 16))
-        self._cbc = openssl_aes.new(key, 2, bytearray(b'\x00' * 16))
+        self._ctr = openssl_aes.new(key, 6, bytearray(b"\x00" * 16))
+        self._cbc = openssl_aes.new(key, 2, bytearray(b"\x00" * 16))

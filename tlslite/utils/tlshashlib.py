@@ -7,6 +7,7 @@
 # fields to suppport the same uses
 # pylint: disable=unused-wildcard-import, wildcard-import
 from hashlib import *
+
 # pylint: enable=unused-wildcard-import, wildcard-import
 import hashlib
 
@@ -29,4 +30,6 @@ def md5(*args, **kwargs):
 def new(*args, **kwargs):
     """General constructor that works in FIPS mode."""
     return _fipsFunction(hashlib.new, *args, **kwargs)
+
+
 # pylint: enable=function-redefined

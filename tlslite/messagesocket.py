@@ -11,6 +11,7 @@ from .constants import ContentType
 from .messages import RecordHeader3, Message
 from .utils.codec import Parser
 
+
 class MessageSocket(RecordLayer):
 
     """TLS Record Layer socket that provides Message level abstraction
@@ -52,8 +53,10 @@ class MessageSocket(RecordLayer):
         super(MessageSocket, self).__init__(sock)
 
         self.defragmenter = defragmenter
-        self.unfragmentedDataTypes = (ContentType.application_data,
-                                      ContentType.heartbeat)
+        self.unfragmentedDataTypes = (
+            ContentType.application_data,
+            ContentType.heartbeat,
+        )
         self._lastRecordVersion = (0, 0)
 
         self._sendBuffer = bytearray(0)
@@ -76,9 +79,7 @@ class MessageSocket(RecordLayer):
                 ret = self.defragmenter.get_message()
                 if ret is None:
                     break
-                header = RecordHeader3().create(self._lastRecordVersion,
-                                                ret[0],
-                                                0)
+                header = RecordHeader3().create(self._lastRecordVersion, ret[0], 0)
                 yield header, Parser(ret[1])
 
             for ret in self.recvRecord():
@@ -115,8 +116,8 @@ class MessageSocket(RecordLayer):
         :rtype: generator
         """
         while len(self._sendBuffer) > 0:
-            recordPayload = self._sendBuffer[:self.recordSize]
-            self._sendBuffer = self._sendBuffer[self.recordSize:]
+            recordPayload = self._sendBuffer[: self.recordSize]
+            self._sendBuffer = self._sendBuffer[self.recordSize :]
             msg = Message(self._sendBufferType, recordPayload)
             for res in self.sendRecord(msg):
                 yield res

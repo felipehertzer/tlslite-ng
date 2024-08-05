@@ -7,14 +7,19 @@ from smtplib import SMTP
 from tlslite.tlsconnection import TLSConnection
 from tlslite.integration.clienthelper import ClientHelper
 
+
 class SMTP_TLS(SMTP):
     """This class extends :py:class:`smtplib.SMTP` with TLS support."""
 
-    def starttls(self,
-                 username=None, password=None,
-                 certChain=None, privateKey=None,
-                 checker=None,
-                 settings=None):
+    def starttls(
+        self,
+        username=None,
+        password=None,
+        certChain=None,
+        privateKey=None,
+        checker=None,
+        settings=None,
+    ):
         """Puts the connection to the SMTP server into TLS mode.
 
         If the server supports TLS, this will encrypt the rest of the SMTP
@@ -69,12 +74,10 @@ class SMTP_TLS(SMTP):
         (resp, reply) = self.docmd("STARTTLS")
         if resp == 220:
             helper = ClientHelper(
-                     username, password, 
-                     certChain, privateKey,
-                     checker,
-                     settings)
+                username, password, certChain, privateKey, checker, settings
+            )
             conn = TLSConnection(self.sock)
             helper._handshake(conn)
             self.sock = conn
-            self.file = conn.makefile('rb')
+            self.file = conn.makefile("rb")
         return (resp, reply)

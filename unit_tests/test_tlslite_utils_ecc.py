@@ -1,4 +1,3 @@
-
 # Copyright (c) 2014, Hubert Kario
 #
 # See the LICENSE file for legal information regarding use of this file.
@@ -10,17 +9,19 @@ try:
 except ImportError:
     import unittest
 
-from tlslite.utils.ecc import getCurveByName,getPointByteSize
+from tlslite.utils.ecc import getCurveByName, getPointByteSize
 import ecdsa
+
 
 class TestCurveLookup(unittest.TestCase):
     def test_with_correct_name(self):
-        curve = getCurveByName('secp256r1')
+        curve = getCurveByName("secp256r1")
         self.assertIs(curve, ecdsa.NIST256p)
 
     def test_with_invalid_name(self):
         with self.assertRaises(ValueError):
-            getCurveByName('NIST256p')
+            getCurveByName("NIST256p")
+
 
 class TestGetPointByteSize(unittest.TestCase):
     def test_with_curve(self):

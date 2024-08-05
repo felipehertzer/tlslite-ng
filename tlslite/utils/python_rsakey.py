@@ -7,14 +7,15 @@ from .cryptomath import *
 from .rsakey import *
 from .pem import *
 from .deprecations import deprecated_params
+
 if GMPY2_LOADED:
     from gmpy2 import mpz
 elif gmpyLoaded:
     from gmpy import mpz
 
+
 class Python_RSAKey(RSAKey):
-    def __init__(self, n=0, e=0, d=0, p=0, q=0, dP=0, dQ=0, qInv=0,
-                 key_type="rsa"):
+    def __init__(self, n=0, e=0, d=0, p=0, q=0, dP=0, dQ=0, qInv=0, key_type="rsa"):
         """Initialise key directly from integers.
 
         see also generate() and parsePEM()."""
@@ -66,8 +67,7 @@ class Python_RSAKey(RSAKey):
             # Create blinding values, on the first pass:
             if not self.blinder:
                 self.unblinder = getRandomNumber(2, n)
-                self.blinder = powMod(invMod(self.unblinder, n), self.e,
-                                      n)
+                self.blinder = powMod(invMod(self.unblinder, n), self.e, n)
             unblinder = self.unblinder
             blinder = self.blinder
 
@@ -88,10 +88,10 @@ class Python_RSAKey(RSAKey):
         return cipher
 
     def _rawPrivateKeyOpHelper(self, m):
-        #Non-CRT version
-        #c = pow(m, self.d, self.n)
+        # Non-CRT version
+        # c = pow(m, self.d, self.n)
 
-        #CRT version  (~3x faster).
+        # CRT version  (~3x faster).
         p, q = self.p, self.q
         s1 = pow(m, self.dP, p)
         s2 = pow(m, self.dQ, q)
@@ -118,12 +118,12 @@ class Python_RSAKey(RSAKey):
         # pylint: disable=invalid-name
         key = Python_RSAKey()
         while True:
-            p = getRandomPrime(bits//2, False)
-            q = getRandomPrime(bits//2, False)
+            p = getRandomPrime(bits // 2, False)
+            q = getRandomPrime(bits // 2, False)
             if gmpyLoaded or GMPY2_LOADED:
                 p = mpz(p)
                 q = mpz(q)
-            t = lcm(p-1, q-1)
+            t = lcm(p - 1, q - 1)
             # since we need to calculate inverse of 65537 mod t, they
             # must be relatively prime (coprime)
             if gcd(t, 65537) == 1:
@@ -136,8 +136,8 @@ class Python_RSAKey(RSAKey):
         key.d = invMod(key.e, t)
         key.p = p
         key.q = q
-        key.dP = key.d % (p-1)
-        key.dQ = key.d % (q-1)
+        key.dP = key.d % (p - 1)
+        key.dQ = key.d % (q - 1)
         key.qInv = invMod(q, p)
         key.key_type = key_type
         # pylint: enable=invalid-name
@@ -148,4 +148,5 @@ class Python_RSAKey(RSAKey):
     def parsePEM(data, password_callback=None):
         """Parse a string containing a PEM-encoded <privateKey>."""
         from .python_key import Python_Key
+
         return Python_Key.parsePEM(data, password_callback)

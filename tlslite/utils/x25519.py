@@ -6,6 +6,7 @@
 """Handling X25519 and X448 curve based key agreement protocol."""
 
 from .cryptomath import bytesToNumber, numberToByteArray, divceil
+
 # the names of the variables come directly from RFC 7748 so changing them
 # would make the code harder to audit/compare
 # pylint: disable=invalid-name
@@ -108,7 +109,7 @@ def _x25519_generic(k, u, bits, a24, p):
     z_3 = 1
     swap = 0
 
-    for t in range(bits-1, -1, -1):
+    for t in range(bits - 1, -1, -1):
         k_t = (k >> t) & 1
         swap ^= k_t
         x_2, x_3 = cswap(swap, x_2, x_3)
@@ -133,4 +134,6 @@ def _x25519_generic(k, u, bits, a24, p):
     z_2, z_3 = cswap(swap, z_2, z_3)
     ret = (x_2 * pow(z_2, p - 2, p)) % p
     return numberToByteArray(ret, divceil(bits, 8), endian="little")
+
+
 # pylint: enable=invalid-name

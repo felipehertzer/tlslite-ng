@@ -1,11 +1,18 @@
 # Author: Frantisek Krenzelok
 """Pure-Python RSA implementation."""
-from ecdsa.der import encode_sequence, encode_integer,  \
-    remove_sequence, remove_integer
+from ecdsa.der import encode_sequence, encode_integer, remove_sequence, remove_integer
 
-from .cryptomath import getRandomNumber, getRandomPrime,    \
-    powMod, numBits, bytesToNumber, invMod,   \
-    secureHash, GMPY2_LOADED, gmpyLoaded
+from .cryptomath import (
+    getRandomNumber,
+    getRandomPrime,
+    powMod,
+    numBits,
+    bytesToNumber,
+    invMod,
+    secureHash,
+    GMPY2_LOADED,
+    gmpyLoaded,
+)
 
 from .compat import compatHMAC
 
@@ -16,11 +23,13 @@ elif gmpyLoaded:
 
 from .dsakey import DSAKey
 
+
 class Python_DSAKey(DSAKey):
     """
     Concrete implementaion of DSA object.
     for func docstring see tlslite/dsakey.py
     """
+
     def __init__(self, p=0, q=0, g=0, x=0, y=0):
         if gmpyLoaded or GMPY2_LOADED:
             p = mpz(p)
@@ -49,9 +58,9 @@ class Python_DSAKey(DSAKey):
         key = Python_DSAKey()
         (q, p) = Python_DSAKey.generate_qp(L, N)
 
-        index = getRandomNumber(1, (p-1))
-        g = powMod(index, int((p-1)/q), p)
-        x = getRandomNumber(1, q-1)
+        index = getRandomNumber(1, (p - 1))
+        g = powMod(index, int((p - 1) / q), p)
+        x = getRandomNumber(1, q - 1)
         y = powMod(g, x, p)
         if gmpyLoaded or GMPY2_LOADED:
             p = mpz(p)
@@ -73,12 +82,12 @@ class Python_DSAKey(DSAKey):
         q = int(getRandomPrime(N))
         while True:
             p = int(getRandomPrime(L))
-            if (p-1) % q:
+            if (p - 1) % q:
                 break
         return (q, p)
 
     def hashAndSign(self, data, hAlg="sha1"):
-        hashData = (secureHash(bytearray(data), hAlg))
+        hashData = secureHash(bytearray(data), hAlg)
         return self.sign(hashData)
 
     def sign(self, data, padding=None, hashAlg=None, saltLen=None):
@@ -102,7 +111,7 @@ class Python_DSAKey(DSAKey):
         if N < digest_len:
             digest >>= digest_len - N
 
-        k = getRandomNumber(1, (self.q-1))
+        k = getRandomNumber(1, (self.q - 1))
         if gmpyLoaded or GMPY2_LOADED:
             k = mpz(k)
             digest = mpz(digest)
@@ -111,8 +120,7 @@ class Python_DSAKey(DSAKey):
 
         return encode_sequence(encode_integer(r), encode_integer(s))
 
-    def verify(self, signature, hashData, padding=None, hashAlg=None,
-               saltLen=None):
+    def verify(self, signature, hashData, padding=None, hashAlg=None, saltLen=None):
         """Verify the passed-in bytes with the signature.
 
         This verifies a DSA signature on the passed-in data.
@@ -164,8 +172,10 @@ class Python_DSAKey(DSAKey):
             w = invMod(s, self.q)
             u1 = (digest * w) % self.q
             u2 = (r * w) % self.q
-            v = ((powMod(self.g, u1, self.p) * \
-                  powMod(self.public_key, u2, self.p)) % self.p) % self.q
+            v = (
+                (powMod(self.g, u1, self.p) * powMod(self.public_key, u2, self.p))
+                % self.p
+            ) % self.q
             return r == v
         return False
 

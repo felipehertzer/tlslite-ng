@@ -7,24 +7,42 @@
 
 """Class for setting handshake parameters."""
 
-from .constants import CertificateType
-from .utils import cryptomath
+from .constants import CertificateType, CompressionAlgorithms
+from .utils import cryptomath, compression
 from .utils import cipherfactory
 from .utils.compat import ecdsaAllCurves, int_types
 
-CIPHER_NAMES = ["chacha20-poly1305",
-                "aes256gcm", "aes128gcm",
-                "aes256ccm", "aes128ccm",
-                "aes256", "aes128",
-                "3des"]
-ALL_CIPHER_NAMES = CIPHER_NAMES + ["chacha20-poly1305_draft00",
-                                   "aes128ccm_8", "aes256ccm_8",
-                                   "rc4", "null"]
+CIPHER_NAMES = [
+    "chacha20-poly1305",
+    "aes256gcm",
+    "aes128gcm",
+    "aes256ccm",
+    "aes128ccm",
+    "aes256",
+    "aes128",
+    "3des",
+]
+ALL_CIPHER_NAMES = CIPHER_NAMES + [
+    "chacha20-poly1305_draft00",
+    "aes128ccm_8",
+    "aes256ccm_8",
+    "rc4",
+    "null",
+]
 # Don't allow "md5" by default
 MAC_NAMES = ["sha", "sha256", "sha384", "aead"]
 ALL_MAC_NAMES = MAC_NAMES + ["md5"]
-KEY_EXCHANGE_NAMES = ["ecdhe_ecdsa", "rsa", "dhe_rsa", "ecdhe_rsa", "srp_sha",
-                      "srp_sha_rsa", "ecdh_anon", "dh_anon", "dhe_dsa"]
+KEY_EXCHANGE_NAMES = [
+    "ecdhe_ecdsa",
+    "rsa",
+    "dhe_rsa",
+    "ecdhe_rsa",
+    "srp_sha",
+    "srp_sha_rsa",
+    "ecdh_anon",
+    "dh_anon",
+    "dhe_dsa",
+]
 CIPHER_IMPLEMENTATIONS = ["openssl", "pycrypto", "python"]
 CERTIFICATE_TYPES = ["x509"]
 RSA_SIGNATURE_HASHES = ["sha512", "sha384", "sha256", "sha224", "sha1"]
@@ -35,31 +53,50 @@ SIGNATURE_SCHEMES = ["Ed25519", "Ed448"]
 RSA_SCHEMES = ["pss", "pkcs1"]
 # while secp521r1 is the most secure, it's also much slower than the others
 # so place it as the last one
-CURVE_NAMES = ["x25519", "x448", "secp384r1", "secp256r1",
-               "secp521r1"]
-ALL_CURVE_NAMES = CURVE_NAMES + ["secp256k1", "brainpoolP512r1",
-                                 "brainpoolP384r1", "brainpoolP256r1"]
+CURVE_NAMES = ["x25519", "x448", "secp384r1", "secp256r1", "secp521r1"]
+ALL_CURVE_NAMES = CURVE_NAMES + [
+    "secp256k1",
+    "brainpoolP512r1",
+    "brainpoolP384r1",
+    "brainpoolP256r1",
+]
 if ecdsaAllCurves:
     ALL_CURVE_NAMES += ["secp224r1", "secp192r1"]
-ALL_DH_GROUP_NAMES = ["ffdhe2048", "ffdhe3072", "ffdhe4096", "ffdhe6144",
-                      "ffdhe8192"]
-CURVE_ALIASES = {"secp256r1": ('NIST256p', 'prime256v1', 'P-256'),
-                 "secp384r1": ('NIST384p', 'P-384'),
-                 "secp521r1": ('NIST521p', 'P-521'),
-                 "secp256k1": ('SECP256k1',),
-                 "secp192r1": ('NIST192p', 'P-192'),
-                 "secp224r1": ('NIST224p', 'P-224'),
-                 "brainpoolP256r1": ('BRAINPOOLP256r1',),
-                 "brainpoolP384r1": ('BRAINPOOLP384r1',),
-                 "brainpoolP512r1": ('BRAINPOOLP512r1',)}
+ALL_DH_GROUP_NAMES = ["ffdhe2048", "ffdhe3072", "ffdhe4096", "ffdhe6144", "ffdhe8192"]
+CURVE_ALIASES = {
+    "secp256r1": ("NIST256p", "prime256v1", "P-256"),
+    "secp384r1": ("NIST384p", "P-384"),
+    "secp521r1": ("NIST521p", "P-521"),
+    "secp256k1": ("SECP256k1",),
+    "secp192r1": ("NIST192p", "P-192"),
+    "secp224r1": ("NIST224p", "P-224"),
+    "brainpoolP256r1": ("BRAINPOOLP256r1",),
+    "brainpoolP384r1": ("BRAINPOOLP384r1",),
+    "brainpoolP512r1": ("BRAINPOOLP512r1",),
+}
 # list of supported groups in TLS 1.3 as per RFC 8446, chapter 4.2.7. (excluding private use here)
-TLS13_PERMITTED_GROUPS = ["secp256r1", "secp384r1", "secp521r1",
-                          "x25519", "x448", "ffdhe2048",
-                          "ffdhe3072", "ffdhe4096", "ffdhe6144",
-                          "ffdhe8192"]
+TLS13_PERMITTED_GROUPS = [
+    "secp256r1",
+    "secp384r1",
+    "secp521r1",
+    "x25519",
+    "x448",
+    "ffdhe2048",
+    "ffdhe3072",
+    "ffdhe4096",
+    "ffdhe6144",
+    "ffdhe8192",
+]
 KNOWN_VERSIONS = ((3, 0), (3, 1), (3, 2), (3, 3), (3, 4))
-TICKET_CIPHERS = ["chacha20-poly1305", "aes256gcm", "aes128gcm", "aes128ccm",
-                  "aes128ccm_8", "aes256ccm", "aes256ccm_8"]
+TICKET_CIPHERS = [
+    "chacha20-poly1305",
+    "aes256gcm",
+    "aes128gcm",
+    "aes128ccm",
+    "aes128ccm_8",
+    "aes256ccm",
+    "aes256ccm_8",
+]
 PSK_MODES = ["psk_dhe_ke", "psk_ke"]
 
 
@@ -80,6 +117,7 @@ class Keypair(object):
     :ivar certificates: the certificates to send to peer if the key is selected
         for use. The first one MUST include the public key of the ``key``
     """
+
     def __init__(self, key=None, certificates=tuple()):
         self.key = key
         self.certificates = certificates
@@ -353,6 +391,14 @@ class HandshakeSettings(object):
     :vartype keyExchangeNames: list
     :ivar keyExchangeNames: Enabled key exchange types for the connection,
         influences selected cipher suites.
+
+    :vartype use_certificate_compression: bool
+    :ivar use_certificate_compression: Whether to advertise support for
+        compress_certificate extension.
+
+    :vartype certificate_compression_algorithms: tuple(int)
+    :ivar certificate_compression_algorithms: A tuple of integers that signal
+        which algorithms to support for certificate compression
     """
 
     def _init_key_settings(self):
@@ -384,6 +430,9 @@ class HandshakeSettings(object):
         self.usePaddingExtension = True
         self.useExtendedMasterSecret = True
         self.requireExtendedMasterSecret = False
+        # certificate compression extensions
+        self.use_certificate_compression = False
+        self.certificate_compression_algorithms = compression.DEFAULT
         # PSKs
         self.pskConfigs = []
         self.psk_modes = list(PSK_MODES)
@@ -391,7 +440,7 @@ class HandshakeSettings(object):
         self.ticketKeys = []
         self.ticketCipher = "aes256gcm"
         self.ticketLifetime = 24 * 60 * 60
-        self.max_early_data = 2 ** 14 + 16  # full record + tag
+        self.max_early_data = 2**14 + 16  # full record + tag
         # send two tickets so that client can quickly ramp up number of
         # resumed connections (as tickets are single-use in TLS 1.3
         self.ticket_count = 2
@@ -445,14 +494,11 @@ class HandshakeSettings(object):
 
         unknownKex = not_matching(other.keyExchangeNames, KEY_EXCHANGE_NAMES)
         if unknownKex:
-            raise ValueError("Unknown key exchange name: {0}"
-                             .format(unknownKex))
+            raise ValueError("Unknown key exchange name: {0}".format(unknownKex))
 
-        unknownImpl = not_matching(other.cipherImplementations,
-                                   CIPHER_IMPLEMENTATIONS)
+        unknownImpl = not_matching(other.cipherImplementations, CIPHER_IMPLEMENTATIONS)
         if unknownImpl:
-            raise ValueError("Unknown cipher implementation: {0}"
-                             .format(unknownImpl))
+            raise ValueError("Unknown cipher implementation: {0}".format(unknownImpl))
 
     @staticmethod
     def _sanityCheckECDHSettings(other):
@@ -461,43 +507,52 @@ class HandshakeSettings(object):
 
         unknownCurve = not_matching(other.eccCurves, ALL_CURVE_NAMES)
         if unknownCurve:
-            raise ValueError("Unknown ECC Curve name: {0}"
-                             .format(unknownCurve))
+            raise ValueError("Unknown ECC Curve name: {0}".format(unknownCurve))
 
         if other.defaultCurve not in ALL_CURVE_NAMES:
-            raise ValueError("Unknown default ECC Curve name: {0}"
-                             .format(other.defaultCurve))
+            raise ValueError(
+                "Unknown default ECC Curve name: {0}".format(other.defaultCurve)
+            )
 
-        nonAdvertisedGroup = [val for val in other.keyShares
-                              if val not in other.eccCurves and
-                              val not in other.dhGroups]
+        nonAdvertisedGroup = [
+            val
+            for val in other.keyShares
+            if val not in other.eccCurves and val not in other.dhGroups
+        ]
         if nonAdvertisedGroup:
-            raise ValueError("Key shares for not enabled groups specified: {0}"
-                             .format(nonAdvertisedGroup))
+            raise ValueError(
+                "Key shares for not enabled groups specified: {0}".format(
+                    nonAdvertisedGroup
+                )
+            )
 
-        unknownSigHash = not_matching(other.ecdsaSigHashes,
-                                      ECDSA_SIGNATURE_HASHES)
+        unknownSigHash = not_matching(other.ecdsaSigHashes, ECDSA_SIGNATURE_HASHES)
         if unknownSigHash:
-            raise ValueError("Unknown ECDSA signature hash: '{0}'".\
-                             format(unknownSigHash))
+            raise ValueError(
+                "Unknown ECDSA signature hash: '{0}'".format(unknownSigHash)
+            )
 
-        unknownSigHash = not_matching(other.more_sig_schemes,
-                                      SIGNATURE_SCHEMES)
+        unknownSigHash = not_matching(other.more_sig_schemes, SIGNATURE_SCHEMES)
         if unknownSigHash:
-            raise ValueError("Unkonwn more_sig_schemes specified: '{0}'"
-                             .format(unknownSigHash))
+            raise ValueError(
+                "Unkonwn more_sig_schemes specified: '{0}'".format(unknownSigHash)
+            )
 
         unknownDHGroup = not_matching(other.dhGroups, ALL_DH_GROUP_NAMES)
         if unknownDHGroup:
-            raise ValueError("Unknown FFDHE group name: '{0}'"
-                             .format(unknownDHGroup))
+            raise ValueError("Unknown FFDHE group name: '{0}'".format(unknownDHGroup))
 
         # TLS 1.3 limits the allowed groups (RFC 8446,ch. 4.2.7.)
         if other.maxVersion == (3, 4):
-            forbiddenGroup = HandshakeSettings._not_matching(other.eccCurves, TLS13_PERMITTED_GROUPS)
+            forbiddenGroup = HandshakeSettings._not_matching(
+                other.eccCurves, TLS13_PERMITTED_GROUPS
+            )
             if forbiddenGroup:
-                raise ValueError("The following enabled groups are forbidden in TLS 1.3: {0}"
-                                 .format(forbiddenGroup))
+                raise ValueError(
+                    "The following enabled groups are forbidden in TLS 1.3: {0}".format(
+                        forbiddenGroup
+                    )
+                )
 
     @staticmethod
     def _sanityCheckDHSettings(other):
@@ -506,16 +561,19 @@ class HandshakeSettings(object):
 
         HandshakeSettings._sanityCheckECDHSettings(other)
 
-        unknownKeyShare = [val for val in other.keyShares
-                           if val not in ALL_DH_GROUP_NAMES and
-                           val not in ALL_CURVE_NAMES]
+        unknownKeyShare = [
+            val
+            for val in other.keyShares
+            if val not in ALL_DH_GROUP_NAMES and val not in ALL_CURVE_NAMES
+        ]
         if unknownKeyShare:
-            raise ValueError("Unknown key share: '{0}'"
-                             .format(unknownKeyShare))
+            raise ValueError("Unknown key share: '{0}'".format(unknownKeyShare))
 
-        if other.dhParams and (len(other.dhParams) != 2 or
-                               not isinstance(other.dhParams[0], int_types) or
-                               not isinstance(other.dhParams[1], int_types)):
+        if other.dhParams and (
+            len(other.dhParams) != 2
+            or not isinstance(other.dhParams[0], int_types)
+            or not isinstance(other.dhParams[1], int_types)
+        ):
             raise ValueError("DH parameters need to be a tuple of integers")
 
     @staticmethod
@@ -528,29 +586,27 @@ class HandshakeSettings(object):
 
         unknownType = not_matching(other.certificateTypes, CERTIFICATE_TYPES)
         if unknownType:
-            raise ValueError("Unknown certificate type: {0}"
-                             .format(unknownType))
+            raise ValueError("Unknown certificate type: {0}".format(unknownType))
 
-        unknownSigHash = not_matching(other.rsaSigHashes,
-                                      ALL_RSA_SIGNATURE_HASHES)
+        unknownSigHash = not_matching(other.rsaSigHashes, ALL_RSA_SIGNATURE_HASHES)
         if unknownSigHash:
-            raise ValueError("Unknown RSA signature hash: '{0}'"
-                             .format(unknownSigHash))
+            raise ValueError("Unknown RSA signature hash: '{0}'".format(unknownSigHash))
 
         unknownRSAPad = not_matching(other.rsaSchemes, RSA_SCHEMES)
         if unknownRSAPad:
-            raise ValueError("Unknown RSA padding mode: '{0}'"
-                             .format(unknownRSAPad))
+            raise ValueError("Unknown RSA padding mode: '{0}'".format(unknownRSAPad))
 
-        unknownSigHash = not_matching(other.dsaSigHashes,
-                                      DSA_SIGNATURE_HASHES)
+        unknownSigHash = not_matching(other.dsaSigHashes, DSA_SIGNATURE_HASHES)
         if unknownSigHash:
-            raise ValueError("Unknown DSA signature hash: '{0}'"
-                             .format(unknownSigHash))
+            raise ValueError("Unknown DSA signature hash: '{0}'".format(unknownSigHash))
 
-        if not other.rsaSigHashes and not other.ecdsaSigHashes and \
-                not other.dsaSigHashes and not other.more_sig_schemes and \
-                other.maxVersion >= (3, 3):
+        if (
+            not other.rsaSigHashes
+            and not other.ecdsaSigHashes
+            and not other.dsaSigHashes
+            and not other.more_sig_schemes
+            and other.maxVersion >= (3, 3)
+        ):
             raise ValueError("TLS 1.2 requires signature algorithms to be set")
 
     @staticmethod
@@ -572,12 +628,50 @@ class HandshakeSettings(object):
         if other.useExtendedMasterSecret not in (True, False):
             raise ValueError("useExtendedMasterSecret must be True or False")
         if other.requireExtendedMasterSecret not in (True, False):
-            raise ValueError("requireExtendedMasterSecret must be True "
-                             "or False")
-        if other.requireExtendedMasterSecret and \
-                not other.useExtendedMasterSecret:
-            raise ValueError("requireExtendedMasterSecret requires "
-                             "useExtendedMasterSecret")
+            raise ValueError("requireExtendedMasterSecret must be True " "or False")
+        if other.requireExtendedMasterSecret and not other.useExtendedMasterSecret:
+            raise ValueError(
+                "requireExtendedMasterSecret requires " "useExtendedMasterSecret"
+            )
+
+    @staticmethod
+    def _sanityCheckCertCompressExtension(other):
+        """
+        Check if compress_certificate extension settings are valid
+        """
+
+        if other.maxVersion < (3, 4) and other.use_certificate_compression:
+            # Problem: certificate compression can only be sent on TLS 1.3. However, submitting it as True on lower
+            # TLS settings doesn't really change much since the setting will just be ignored. So, should we raise an
+            # exception or just a present a simple warning? Do nothing for now (needs to be changed).
+            pass
+
+        if not other.certificate_compression_algorithms:
+            raise ValueError(
+                "no algorithm was supplied to be advertised for certificate compression"
+            )
+
+        for algo in other.certificate_compression_algorithms:
+            try:
+                is_supported = compression.is_installed(algo)
+            except KeyError:
+                raise ValueError(
+                    "unknown algorithm ({}) provided for certificate compression".format(
+                        algo
+                    )
+                )
+            if not is_supported:
+                # is_supported can only be False if algorithm is brotli or zstd (zlib is part of standard module)
+                algo_library = (
+                    "brotli" if algo == CompressionAlgorithms.brotli else "zstandard"
+                )
+                raise ValueError(
+                    "Preference for {} compression was provided, but dependency was not found. You can "
+                    "install it by doing:\n"
+                    "    pip install {}".format(
+                        CompressionAlgorithms.toRepr(algo), algo_library
+                    )
+                )
 
     @staticmethod
     def _sanityCheckExtensions(other):
@@ -591,15 +685,22 @@ class HandshakeSettings(object):
         if other.use_heartbeat_extension not in (True, False):
             raise ValueError("use_heartbeat_extension must be True or False")
 
-        if other.heartbeat_response_callback and not other.use_heartbeat_extension:
-            raise ValueError("heartbeat_response_callback requires "
-                             "use_heartbeat_extension")
+        if other.use_certificate_compression not in (True, False):
+            raise ValueError("use_certificate_compression must be True or False")
 
-        if other.record_size_limit is not None and \
-                not 64 <= other.record_size_limit <= 2**14 + 1:
+        if other.heartbeat_response_callback and not other.use_heartbeat_extension:
+            raise ValueError(
+                "heartbeat_response_callback requires " "use_heartbeat_extension"
+            )
+
+        if (
+            other.record_size_limit is not None
+            and not 64 <= other.record_size_limit <= 2**14 + 1
+        ):
             raise ValueError("record_size_limit cannot exceed 2**14+1 bytes")
 
         HandshakeSettings._sanityCheckEMSExtension(other)
+        HandshakeSettings._sanityCheckCertCompressExtension(other)
 
     @staticmethod
     def _not_allowed_len(values, sieve):
@@ -611,43 +712,54 @@ class HandshakeSettings(object):
     def _sanityCheckPsks(other):
         """Check if the set PSKs are sane."""
         if HandshakeSettings._not_allowed_len(other.pskConfigs, [2, 3]):
-            raise ValueError("pskConfigs items must be a 2 or 3-element"
-                             "tuples")
+            raise ValueError("pskConfigs items must be a 2 or 3-element" "tuples")
 
-        badHashes = [i[2] for i in other.pskConfigs if
-                     len(i) == 3 and i[2] not in set(['sha256', 'sha384'])]
+        badHashes = [
+            i[2]
+            for i in other.pskConfigs
+            if len(i) == 3 and i[2] not in set(["sha256", "sha384"])
+        ]
         if badHashes:
-            raise ValueError("pskConfigs include invalid hash specifications: "
-                             "{0}".format(badHashes))
+            raise ValueError(
+                "pskConfigs include invalid hash specifications: "
+                "{0}".format(badHashes)
+            )
 
-        bad_psk_modes = [i for i in other.psk_modes if
-                         i not in PSK_MODES]
+        bad_psk_modes = [i for i in other.psk_modes if i not in PSK_MODES]
         if bad_psk_modes:
-            raise ValueError("psk_modes includes invalid key exchange modes: "
-                             "{0}".format(bad_psk_modes))
+            raise ValueError(
+                "psk_modes includes invalid key exchange modes: "
+                "{0}".format(bad_psk_modes)
+            )
 
     @staticmethod
     def _sanityCheckTicketSettings(other):
         """Check if the session ticket settings are sane."""
         if other.ticketCipher not in TICKET_CIPHERS:
-            raise ValueError("Invalid cipher for session ticket encryption: "
-                             "{0}".format(other.ticketCipher))
+            raise ValueError(
+                "Invalid cipher for session ticket encryption: "
+                "{0}".format(other.ticketCipher)
+            )
 
         if HandshakeSettings._not_allowed_len(other.ticketKeys, [16, 32]):
-            raise ValueError("Session ticket encryption keys must be 16 or 32"
-                             "bytes long")
+            raise ValueError(
+                "Session ticket encryption keys must be 16 or 32" "bytes long"
+            )
 
         if not 0 < other.ticketLifetime <= 7 * 24 * 60 * 60:
-            raise ValueError("Ticket lifetime must be a positive integer "
-                             "smaller or equal 604800 (7 days)")
+            raise ValueError(
+                "Ticket lifetime must be a positive integer "
+                "smaller or equal 604800 (7 days)"
+            )
 
         # while not ticket setting per-se, it is related to session tickets
         if not 0 < other.max_early_data <= 2**64:
             raise ValueError("max_early_data must be between 0 and 2GiB")
 
         if not 0 <= other.ticket_count < 2**16:
-            raise ValueError("Incorrect amount for number of new session "
-                             "tickets to send")
+            raise ValueError(
+                "Incorrect amount for number of new session " "tickets to send"
+            )
 
     def _copy_cipher_settings(self, other):
         """Copy values related to cipher selection."""
@@ -667,6 +779,11 @@ class HandshakeSettings(object):
         other.sendFallbackSCSV = self.sendFallbackSCSV
         other.useEncryptThenMAC = self.useEncryptThenMAC
         other.usePaddingExtension = self.usePaddingExtension
+        # cert compress
+        other.use_certificate_compression = self.use_certificate_compression
+        other.certificate_compression_algorithms = (
+            self.certificate_compression_algorithms
+        )
         # session tickets
         other.padding_cb = self.padding_cb
         other.ticketKeys = self.ticketKeys
@@ -751,8 +868,7 @@ class HandshakeSettings(object):
 
         if other.maxVersion < (3, 3):
             # No sha-2 and AEAD pre TLS 1.2
-            other.macNames = [e for e in self.macNames if
-                              e == "sha" or e == "md5"]
+            other.macNames = [e for e in self.macNames if e == "sha" or e == "md5"]
 
         self._sanityCheckPsks(other)
 

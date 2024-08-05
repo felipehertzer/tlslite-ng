@@ -16,9 +16,12 @@ except ImportError:
     import unittest.mock as mock
     from unittest.mock import call
 
-from tlslite.utils.deprecations import deprecated_params, \
-        deprecated_attrs, deprecated_class_name, \
-        deprecated_method
+from tlslite.utils.deprecations import (
+    deprecated_params,
+    deprecated_attrs,
+    deprecated_class_name,
+    deprecated_method,
+)
 
 # see https://github.com/pytest-dev/py/issues/110
 # preload the list until the list of loaded modules is static
@@ -27,11 +30,12 @@ try:
 except ImportError:
     pass  # ignore
 import sys
+
 while True:
     end = True
     for v in list(sys.modules.values()):
         old = set(sys.modules.values())
-        _ = getattr(v, '__warningregistry__', None)
+        _ = getattr(v, "__warningregistry__", None)
         new = set(sys.modules.values())
         if new - old:
             end = False
@@ -39,7 +43,7 @@ while True:
         break
 for v in list(sys.modules.values()):
     old = set(sys.modules.values())
-    _ = getattr(v, '__warningregistry__', None)
+    _ = getattr(v, "__warningregistry__", None)
     new = set(sys.modules.values())
     if new - old:
         print("changed: {0}".format(new - old))
@@ -47,7 +51,7 @@ for v in list(sys.modules.values()):
 
 class TestDeprecatedClassName(unittest.TestCase):
     def test_check_class(self):
-        @deprecated_class_name('bad_name')
+        @deprecated_class_name("bad_name")
         class Test1(object):
             def __init__(self, param):
                 self.param = param
@@ -55,41 +59,42 @@ class TestDeprecatedClassName(unittest.TestCase):
             def method(self):
                 return self.param
 
-        instance = Test1('value')
-        self.assertEqual('value', instance.method())
+        instance = Test1("value")
+        self.assertEqual("value", instance.method())
         self.assertIsInstance(instance, bad_name)
         self.assertIsInstance(instance, Test1)
 
         with self.assertWarns(DeprecationWarning) as e:
-            instance = bad_name('value')
-        self.assertIn('Test1', str(e.warning))
-        self.assertIn('bad_name', str(e.warning))
+            instance = bad_name("value")
+        self.assertIn("Test1", str(e.warning))
+        self.assertIn("bad_name", str(e.warning))
 
         with self.assertWarns(DeprecationWarning) as e:
-            val = bad_name('value')
-        self.assertIn('Test1', str(e.warning))
-        self.assertIn('bad_name', str(e.warning))
+            val = bad_name("value")
+        self.assertIn("Test1", str(e.warning))
+        self.assertIn("bad_name", str(e.warning))
 
     def test_check_callable(self):
-        @deprecated_class_name('bad_func')
+        @deprecated_class_name("bad_func")
         def good_func(param):
             return "got '{0}'".format(param)
 
-        self.assertEqual("got 'some'", good_func('some'))
+        self.assertEqual("got 'some'", good_func("some"))
 
         with self.assertWarns(DeprecationWarning) as e:
-            val = bad_func('other')
-        self.assertIn('good_func', str(e.warning))
-        self.assertIn('bad_func', str(e.warning))
+            val = bad_func("other")
+        self.assertIn("good_func", str(e.warning))
+        self.assertIn("bad_func", str(e.warning))
         self.assertEqual("got 'other'", val)
 
     def test_check_with_duplicated_name(self):
-        @deprecated_class_name('bad_func2')
+        @deprecated_class_name("bad_func2")
         def good_func():
             return None
 
         with self.assertRaises(NameError):
-            @deprecated_class_name('bad_func2')
+
+            @deprecated_class_name("bad_func2")
             def other_func():
                 return None
 
@@ -114,7 +119,7 @@ class TestDeprecatedParams(unittest.TestCase):
         self.assertEqual("Some doc string.", method.__doc__)
 
     def test_change_param(self):
-        @deprecated_params({'param_a': 'old_param'})
+        @deprecated_params({"param_a": "old_param"})
         def method(param_a, param_b):
             return (param_a, param_b)
 
@@ -129,10 +134,10 @@ class TestDeprecatedParams(unittest.TestCase):
         self.assertIs(r[0], old)
         self.assertIs(r[1], b)
 
-        self.assertIn('old_param', str(e.warning))
+        self.assertIn("old_param", str(e.warning))
 
     def test_both_params(self):
-        @deprecated_params({'param_a': 'older_param'})
+        @deprecated_params({"param_a": "older_param"})
         def method(param_a, param_b):
             return (param_a, param_b)
 
@@ -143,7 +148,7 @@ class TestDeprecatedParams(unittest.TestCase):
         with self.assertRaises(TypeError) as e:
             method(param_a=a, param_b=b, older_param=c)
 
-        self.assertIn('multiple values', str(e.exception))
+        self.assertIn("multiple values", str(e.exception))
 
     def test_in_class(self):
         class Clazz(object):
@@ -167,9 +172,8 @@ class TestDeprecatedParams(unittest.TestCase):
         self.assertIn("new_param", str(e.warning))
 
     def test_deprecated_twice(self):
-        @deprecated_params({'param_a': 'paramA'})
-        @deprecated_params({'param_b': 'ParamB'},
-                           "{old_name} custom {new_name}")
+        @deprecated_params({"param_a": "paramA"})
+        @deprecated_params({"param_b": "ParamB"}, "{old_name} custom {new_name}")
         def method(param_a, param_b):
             return "{0} {1}".format(param_a, param_b)
 
@@ -190,10 +194,10 @@ class TestDeprecatedParams(unittest.TestCase):
 
 class TestDeprecatedFields(unittest.TestCase):
     def test_no_change(self):
-
         @deprecated_attrs({})
         class Clazz(object):
             """Some nice class."""
+
             class_field = "I'm class_field"
 
             def __init__(self):
@@ -457,7 +461,6 @@ class TestDeprecatedFields(unittest.TestCase):
 
 class TestDeprecatedMethods(unittest.TestCase):
     def test_deprecated_method(self):
-
         @deprecated_method("Please use foo method instead.")
         def test(param):
             return param
@@ -466,6 +469,7 @@ class TestDeprecatedMethods(unittest.TestCase):
             r = test("test")
             self.assertEqual(r, "test")
 
-        self.assertEqual("test is a deprecated method. Please" \
-                         " use foo method instead.",
-                         str(e.warning))
+        self.assertEqual(
+            "test is a deprecated method. Please" " use foo method instead.",
+            str(e.warning),
+        )

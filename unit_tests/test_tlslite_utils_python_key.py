@@ -1,4 +1,3 @@
-
 try:
     import unittest2 as unittest
 except ImportError:
@@ -15,6 +14,7 @@ from tlslite.utils.python_key import Python_Key
 from tlslite.utils.python_rsakey import Python_RSAKey
 from tlslite.utils.python_ecdsakey import Python_ECDSAKey
 from tlslite.utils.python_dsakey import Python_DSAKey
+
 
 class TestKey(unittest.TestCase):
     def test_rsa_key(self):
@@ -46,24 +46,27 @@ class TestKey(unittest.TestCase):
             "WN8C3ty06qLbD99kiWqEC2gSXc94rk7K7R/1XgfxXV8uOA9eUPDBpchd9PUnhwBE\n"
             "tnkuQZ0fZ1P6EpNTumeL/UvIaA2UFtqrzxxJPJQExPRqX5foT6FhXVtGrNGKw78C\n"
             "Ft7IqSkjX742rx0ephmvZgE=\n"
-            "-----END PRIVATE KEY-----")
+            "-----END PRIVATE KEY-----"
+        )
 
         parsed_key = Python_Key.parsePEM(key)
 
         self.assertIsInstance(parsed_key, Python_RSAKey)
 
-        exp_n = int("29060443439214279856616714317441381282994349643640084870"
-                    "42194472422505198384747878467307665661184232728624861572"
-                    "46118030874616185167217887082030330066913757629456433183"
-                    "57727014263595982166729996386221650476766003639153689499"
-                    "85761113451052281630236293941677142748838601564606627814"
-                    "78871504321887555454323655057925411605057705083616507918"
-                    "02130319371355483088627276339169052633563469569700890323"
-                    "45345689545843561543977465544801728579255200638380126710"
-                    "78271693450544506178122783381759966742683127796190767251"
-                    "31801425088592558384516012482302720815493207137857605058"
-                    "06980478584101642143302393556465736571436454903701271051"
-                    "7")
+        exp_n = int(
+            "29060443439214279856616714317441381282994349643640084870"
+            "42194472422505198384747878467307665661184232728624861572"
+            "46118030874616185167217887082030330066913757629456433183"
+            "57727014263595982166729996386221650476766003639153689499"
+            "85761113451052281630236293941677142748838601564606627814"
+            "78871504321887555454323655057925411605057705083616507918"
+            "02130319371355483088627276339169052633563469569700890323"
+            "45345689545843561543977465544801728579255200638380126710"
+            "78271693450544506178122783381759966742683127796190767251"
+            "31801425088592558384516012482302720815493207137857605058"
+            "06980478584101642143302393556465736571436454903701271051"
+            "7"
+        )
 
         self.assertEqual(parsed_key.n, exp_n)
 
@@ -73,14 +76,19 @@ class TestKey(unittest.TestCase):
             "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgCOZr0Ovs0eCmh+XM\n"
             "QWDYVpsQ+sJdjiq/itp/kYnWNSahRANCAATINGMQAl7cXlPrYzJluGOgmc8sYvae\n"
             "tO2EsXKYG6lnYhudZiepVYORP8vqLyxCF/bMIuuVKOPWSfsRGo/H8pnK\n"
-            "-----END PRIVATE KEY-----\n")
+            "-----END PRIVATE KEY-----\n"
+        )
 
         parsed_key = Python_Key.parsePEM(key)
 
         self.assertIsInstance(parsed_key, Python_ECDSAKey)
-        self.assertEqual(parsed_key.private_key.privkey.secret_multiplier,
-                         int("40256217329389834316473379676481509423"
-                             "54978248437138490984956489316429083942"))
+        self.assertEqual(
+            parsed_key.private_key.privkey.secret_multiplier,
+            int(
+                "40256217329389834316473379676481509423"
+                "54978248437138490984956489316429083942"
+            ),
+        )
         self.assertIsNotNone(parsed_key.public_key)
 
     def test_ecdsa_key_ssleay(self):
@@ -89,14 +97,19 @@ class TestKey(unittest.TestCase):
             "MHcCAQEEIAjma9Dr7NHgpoflzEFg2FabEPrCXY4qv4raf5GJ1jUmoAoGCCqGSM49\n"
             "AwEHoUQDQgAEyDRjEAJe3F5T62MyZbhjoJnPLGL2nrTthLFymBupZ2IbnWYnqVWD\n"
             "kT/L6i8sQhf2zCLrlSjj1kn7ERqPx/KZyg==\n"
-            "-----END EC PRIVATE KEY-----\n")
+            "-----END EC PRIVATE KEY-----\n"
+        )
 
         parsed_key = Python_Key.parsePEM(key)
 
         self.assertIsInstance(parsed_key, Python_ECDSAKey)
-        self.assertEqual(parsed_key.private_key.privkey.secret_multiplier,
-                         int("40256217329389834316473379676481509423"
-                             "54978248437138490984956489316429083942"))
+        self.assertEqual(
+            parsed_key.private_key.privkey.secret_multiplier,
+            int(
+                "40256217329389834316473379676481509423"
+                "54978248437138490984956489316429083942"
+            ),
+        )
         self.assertIsNotNone(parsed_key.public_key)
 
     def test_ecdsa_p224(self):
@@ -105,7 +118,8 @@ class TestKey(unittest.TestCase):
             "MHgCAQAwEAYHKoZIzj0CAQYFK4EEACEEYTBfAgEBBBxFHtoSt2Sbng5P70Pq04xU\n"
             "dYOeuyeaf03bQojMoTwDOgAED9EfhLHR46fj4wD1SDbSU7wwgnjzXdCTcidCsuC5\n"
             "fvLd2Tvc4Pdjmhxc0btlNvWMM5HmoRqj4vk=\n"
-            "-----END PRIVATE KEY-----\n")
+            "-----END PRIVATE KEY-----\n"
+        )
 
         # secp224r1 is not supported by tlslite-ng
         with self.assertRaises(SyntaxError) as e:
@@ -120,7 +134,8 @@ class TestKey(unittest.TestCase):
             "pE6QSrzpSxmW2HvQm6D2l6+w48insmcdZkIoDSTCclVlZpihZANiAATz74XG7gPG\n"
             "DOe2ipv1WN3QYQ8dCsJ5evMTX2VmMxF3wByPqrdr9g4dpQo2U9Rm2xxTwi6xZvFK\n"
             "08lqBXsIjrUYnEahj25AKDMsyiZgiUJPlTFlg9/qprk5+4o9WMQBalQ=\n"
-            "-----END PRIVATE KEY-----\n")
+            "-----END PRIVATE KEY-----\n"
+        )
 
         parsed_key = Python_Key.parsePEM(key)
 
@@ -136,7 +151,8 @@ class TestKey(unittest.TestCase):
             "U6FqdQItZQze162e6xaDZOrHOMeYGGiO+KdJmCF7pACSOS13NdebB7GH6kgAuM2t\n"
             "rN12KXJk4qvC65CxpUudQW04fK0zcRi3zRNAuWgSClTQC1WMF2QgjlVgQr3ZD1A5\n"
             "sw==\n"
-            "-----END PRIVATE KEY-----\n")
+            "-----END PRIVATE KEY-----\n"
+        )
 
         parsed_key = Python_Key.parsePEM(key)
 
@@ -145,13 +161,15 @@ class TestKey(unittest.TestCase):
 
     def test_dsa_key_pkcs8(self):
         key_PKCS8 = (
-                "-----BEGIN PRIVATE KEY-----\n"
-                "MIGEAgEAMGcGByqGSM44BAEwXAIhAJnhWwlIVVGYFaZY1zm4ZkWkGCENdmEq/c5Q\n"
-                "o2tpKU4lAhUAnwsmoLxA5ICuZx6rHGmJRd9npEcCIGIKTT/CY1cXyeD9yBKztO6q\n"
-                "s1kttYUsjIbGgjdGp9DrBBYCFAmQlcW6FkMRHVfA7C82IVhQ89lo\n"
-                "-----END PRIVATE KEY-----\n")
+            "-----BEGIN PRIVATE KEY-----\n"
+            "MIGEAgEAMGcGByqGSM44BAEwXAIhAJnhWwlIVVGYFaZY1zm4ZkWkGCENdmEq/c5Q\n"
+            "o2tpKU4lAhUAnwsmoLxA5ICuZx6rHGmJRd9npEcCIGIKTT/CY1cXyeD9yBKztO6q\n"
+            "s1kttYUsjIbGgjdGp9DrBBYCFAmQlcW6FkMRHVfA7C82IVhQ89lo\n"
+            "-----END PRIVATE KEY-----\n"
+        )
         parsed_key = Python_Key.parsePEM(key_PKCS8)
         self.assertIsInstance(parsed_key, Python_DSAKey)
         self.assertTrue(parsed_key.hasPrivateKey())
-        self.assertEqual(parsed_key.private_key,    \
-                54605271259585079176392566431938393409383029096)
+        self.assertEqual(
+            parsed_key.private_key, 54605271259585079176392566431938393409383029096
+        )

@@ -10,22 +10,24 @@ from __future__ import division
 from .compat import compat26Str
 import copy
 import struct
+
 try:
     # in Python 3 the native zip returns iterator
     from itertools import izip
 except ImportError:
     izip = zip
 
+
 class ChaCha(object):
 
     """Pure python implementation of ChaCha cipher"""
 
-    constants = [0x61707865, 0x3320646e, 0x79622d32, 0x6b206574]
+    constants = [0x61707865, 0x3320646E, 0x79622D32, 0x6B206574]
 
     @staticmethod
     def rotl32(v, c):
         """Rotate left a 32 bit integer v by c bits"""
-        return ((v << c) & 0xffffffff) | (v >> (32 - c))
+        return ((v << c) & 0xFFFFFFFF) | (v >> (32 - c))
 
     @staticmethod
     def quarter_round(x, a, b, c, d):
@@ -35,35 +37,37 @@ class ChaCha(object):
         xc = x[c]
         xd = x[d]
 
-        xa = (xa + xb) & 0xffffffff
+        xa = (xa + xb) & 0xFFFFFFFF
         xd = xd ^ xa
-        xd = ((xd << 16) & 0xffffffff | (xd >> 16))
+        xd = (xd << 16) & 0xFFFFFFFF | (xd >> 16)
 
-        xc = (xc + xd) & 0xffffffff
+        xc = (xc + xd) & 0xFFFFFFFF
         xb = xb ^ xc
-        xb = ((xb << 12) & 0xffffffff | (xb >> 20))
+        xb = (xb << 12) & 0xFFFFFFFF | (xb >> 20)
 
-        xa = (xa + xb) & 0xffffffff
+        xa = (xa + xb) & 0xFFFFFFFF
         xd = xd ^ xa
-        xd = ((xd << 8) & 0xffffffff | (xd >> 24))
+        xd = (xd << 8) & 0xFFFFFFFF | (xd >> 24)
 
-        xc = (xc + xd) & 0xffffffff
+        xc = (xc + xd) & 0xFFFFFFFF
         xb = xb ^ xc
-        xb = ((xb << 7) & 0xffffffff | (xb >> 25))
+        xb = (xb << 7) & 0xFFFFFFFF | (xb >> 25)
 
         x[a] = xa
         x[b] = xb
         x[c] = xc
         x[d] = xd
 
-    _round_mixup_box = [(0, 4, 8, 12),
-                        (1, 5, 9, 13),
-                        (2, 6, 10, 14),
-                        (3, 7, 11, 15),
-                        (0, 5, 10, 15),
-                        (1, 6, 11, 12),
-                        (2, 7, 8, 13),
-                        (3, 4, 9, 14)]
+    _round_mixup_box = [
+        (0, 4, 8, 12),
+        (1, 5, 9, 13),
+        (2, 6, 10, 14),
+        (3, 7, 11, 15),
+        (0, 5, 10, 15),
+        (1, 6, 11, 12),
+        (2, 7, 8, 13),
+        (3, 4, 9, 14),
+    ]
 
     @classmethod
     def double_round(cls, x):
@@ -74,21 +78,21 @@ class ChaCha(object):
             xc = x[c]
             xd = x[d]
 
-            xa = (xa + xb) & 0xffffffff
+            xa = (xa + xb) & 0xFFFFFFFF
             xd = xd ^ xa
-            xd = ((xd << 16) & 0xffffffff | (xd >> 16))
+            xd = (xd << 16) & 0xFFFFFFFF | (xd >> 16)
 
-            xc = (xc + xd) & 0xffffffff
+            xc = (xc + xd) & 0xFFFFFFFF
             xb = xb ^ xc
-            xb = ((xb << 12) & 0xffffffff | (xb >> 20))
+            xb = (xb << 12) & 0xFFFFFFFF | (xb >> 20)
 
-            xa = (xa + xb) & 0xffffffff
+            xa = (xa + xb) & 0xFFFFFFFF
             xd = xd ^ xa
-            xd = ((xd << 8) & 0xffffffff | (xd >> 24))
+            xd = (xd << 8) & 0xFFFFFFFF | (xd >> 24)
 
-            xc = (xc + xd) & 0xffffffff
+            xc = (xc + xd) & 0xFFFFFFFF
             xb = xb ^ xc
-            xb = ((xb << 7) & 0xffffffff | (xb >> 25))
+            xb = (xb << 7) & 0xFFFFFFFF | (xb >> 25)
 
             x[a] = xa
             x[b] = xb
@@ -105,21 +109,19 @@ class ChaCha(object):
         for _ in range(0, rounds // 2):
             dbl_round(working_state)
 
-        return [(st + wrkSt) & 0xffffffff for st, wrkSt
-                in izip(state, working_state)]
+        return [(st + wrkSt) & 0xFFFFFFFF for st, wrkSt in izip(state, working_state)]
 
     @staticmethod
     def word_to_bytearray(state):
         """Convert state to little endian bytestream"""
-        return bytearray(struct.pack('<LLLLLLLLLLLLLLLL', *state))
+        return bytearray(struct.pack("<LLLLLLLLLLLLLLLL", *state))
 
     @staticmethod
     def _bytearray_to_words(data):
         """Convert a bytearray to array of word sized ints"""
         ret = []
-        for i in range(0, len(data)//4):
-            ret.extend(struct.unpack('<L',
-                                     compat26Str(data[i*4:(i+1)*4])))
+        for i in range(0, len(data) // 4):
+            ret.extend(struct.unpack("<L", compat26Str(data[i * 4 : (i + 1) * 4])))
         return ret
 
     def __init__(self, key, nonce, counter=0, rounds=20):
@@ -140,15 +142,14 @@ class ChaCha(object):
     def encrypt(self, plaintext):
         """Encrypt the data"""
         encrypted_message = bytearray()
-        for i, block in enumerate(plaintext[i:i+64] for i
-                                  in range(0, len(plaintext), 64)):
-            key_stream = ChaCha.chacha_block(self.key,
-                                             self.counter + i,
-                                             self.nonce,
-                                             self.rounds)
+        for i, block in enumerate(
+            plaintext[i : i + 64] for i in range(0, len(plaintext), 64)
+        ):
+            key_stream = ChaCha.chacha_block(
+                self.key, self.counter + i, self.nonce, self.rounds
+            )
             key_stream = ChaCha.word_to_bytearray(key_stream)
-            encrypted_message += bytearray(x ^ y for x, y
-                                           in izip(key_stream, block))
+            encrypted_message += bytearray(x ^ y for x, y in izip(key_stream, block))
 
         return encrypted_message
 

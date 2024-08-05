@@ -37,7 +37,8 @@ class HandshakeHelpers(object):
             # we want to get 512 bytes in total, including the padding
             # extension header (4B)
             paddingExtensionInstance = PaddingExtension().create(
-                max(512 - clientHelloLength - 4, 0))
+                max(512 - clientHelloLength - 4, 0)
+            )
             clientHello.extensions.append(paddingExtensionInstance)
 
     @staticmethod
@@ -46,8 +47,8 @@ class HandshakeHelpers(object):
         Calculate the binder value for a given HandshakeHash (that includes
         a truncated client hello already)
         """
-        assert prf in ('sha256', 'sha384')
-        key_len = 32 if prf == 'sha256' else 48
+        assert prf in ("sha256", "sha384")
+        key_len = 32 if prf == "sha256" else 48
 
         # HKDF-Extract(0, PSK)
         early_secret = secureHMAC(bytearray(key_len), psk, prf)
@@ -55,8 +56,7 @@ class HandshakeHelpers(object):
             binder_key = derive_secret(early_secret, b"ext binder", None, prf)
         else:
             binder_key = derive_secret(early_secret, b"res binder", None, prf)
-        finished_key = HKDF_expand_label(binder_key, b"finished", b"", key_len,
-                                         prf)
+        finished_key = HKDF_expand_label(binder_key, b"finished", b"", key_len, prf)
         binder = secureHMAC(finished_key, handshake_hash.digest(prf), prf)
         return binder
 
@@ -65,16 +65,25 @@ class HandshakeHelpers(object):
         """Calculate PSK associated with provided ticket identity."""
         ticket = [i for i in tickets if i.ticket == iden.identity][0]
 
-        ticket_hash = 'sha256' if len(res_master_secret) == 32 else 'sha384'
+        ticket_hash = "sha256" if len(res_master_secret) == 32 else "sha384"
 
-        psk = HKDF_expand_label(res_master_secret, b"resumption",
-                                ticket.ticket_nonce, len(res_master_secret),
-                                ticket_hash)
+        psk = HKDF_expand_label(
+            res_master_secret,
+            b"resumption",
+            ticket.ticket_nonce,
+            len(res_master_secret),
+            ticket_hash,
+        )
         return psk
 
     @staticmethod
-    def update_binders(client_hello, handshake_hashes, psk_configs,
-                       tickets=None, res_master_secret=None):
+    def update_binders(
+        client_hello,
+        handshake_hashes,
+        psk_configs,
+        tickets=None,
+        res_master_secret=None,
+    ):
         """
         Sign the Client Hello using TLS 1.3 PSK binders.
 
@@ -90,8 +99,9 @@ class HandshakeHelpers(object):
         """
         ext = client_hello.extensions[-1]
         if not isinstance(ext, PreSharedKeyExtension):
-            raise ValueError("Last extension in client_hello must be "
-                             "PreSharedKeyExtension")
+            raise ValueError(
+                "Last extension in client_hello must be " "PreSharedKeyExtension"
+            )
         if tickets and not res_master_secret:
             raise ValueError("Tickets require setting res_master_secret")
 
@@ -107,10 +117,10 @@ class HandshakeHelpers(object):
         for i, iden in enumerate(ext.identities):
             # identities that are tickets don't carry PSK directly
             if iden.identity in ticket_idens:
-                binder_hash = 'sha256' if len(res_master_secret) == 32 \
-                    else 'sha384'
+                binder_hash = "sha256" if len(res_master_secret) == 32 else "sha384"
                 psk = HandshakeHelpers.calc_res_binder_psk(
-                    iden, res_master_secret, tickets)
+                    iden, res_master_secret, tickets
+                )
                 external = False
             else:
                 try:
@@ -118,24 +128,23 @@ class HandshakeHelpers(object):
                     while config[0] != iden.identity:
                         config = next(configs_iter)
                 except StopIteration:
-                    raise ValueError("psk_configs don't match the "
-                                     "PreSharedKeyExtension")
+                    raise ValueError(
+                        "psk_configs don't match the " "PreSharedKeyExtension"
+                    )
 
-                binder_hash = config[2] if len(config) > 2 else 'sha256'
+                binder_hash = config[2] if len(config) > 2 else "sha256"
                 psk = config[1]
                 external = True
 
-            binder = HandshakeHelpers._calc_binder(binder_hash,
-                                                   psk,
-                                                   hh,
-                                                   external)
+            binder = HandshakeHelpers._calc_binder(binder_hash, psk, hh, external)
 
             # replace the fake value with calculated one
             ext.binders[i] = binder
 
     @staticmethod
-    def verify_binder(client_hello, handshake_hashes, position, secret, prf,
-                      external=True):
+    def verify_binder(
+        client_hello, handshake_hashes, position, secret, prf, external=True
+    ):
         """Verify the PSK binder value in client hello.
 
         :param client_hello: ClientHello to verify
@@ -147,16 +156,13 @@ class HandshakeHelpers(object):
         ext = client_hello.extensions[-1]
         if not isinstance(ext, PreSharedKeyExtension):
             raise TLSIllegalParameterException(
-                "Last extension in client_hello must be "
-                "PreSharedKeyExtension")
+                "Last extension in client_hello must be " "PreSharedKeyExtension"
+            )
 
         hh = handshake_hashes.copy()
         hh.update(client_hello.psk_truncate())
 
-        binder = HandshakeHelpers._calc_binder(prf,
-                                               secret,
-                                               hh,
-                                               external)
+        binder = HandshakeHelpers._calc_binder(prf, secret, hh, external)
 
         if not ct_compare_digest(binder, ext.binders[position]):
             raise TLSIllegalParameterException("Binder does not verify")

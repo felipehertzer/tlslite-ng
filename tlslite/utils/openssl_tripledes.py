@@ -12,7 +12,6 @@ if m2cryptoLoaded:
         return OpenSSL_TripleDES(key, mode, IV)
 
     class OpenSSL_TripleDES(TripleDES):
-
         def __init__(self, key, mode, IV):
             TripleDES.__init__(self, key, mode, IV, "openssl")
             self._IV, self._key = IV, key
@@ -22,8 +21,7 @@ if m2cryptoLoaded:
         def _init_context(self, encrypt=True):
             cipherType = m2.des_ede3_cbc()
             self._context = m2.cipher_ctx_new()
-            m2.cipher_init(self._context, cipherType, self._key, self._IV,
-                           int(encrypt))
+            m2.cipher_init(self._context, cipherType, self._key, self._IV, int(encrypt))
             m2.cipher_set_padding(self._context, 0)
             self._encrypt = encrypt
 
@@ -31,7 +29,7 @@ if m2cryptoLoaded:
             if self._context is None:
                 self._init_context(encrypt=True)
             else:
-                assert self._encrypt, '.encrypt() not allowed after .decrypt()'
+                assert self._encrypt, ".encrypt() not allowed after .decrypt()"
             TripleDES.encrypt(self, plaintext)
             ciphertext = m2.cipher_update(self._context, plaintext)
             return bytearray(ciphertext)
@@ -40,8 +38,7 @@ if m2cryptoLoaded:
             if self._context is None:
                 self._init_context(encrypt=False)
             else:
-                assert not self._encrypt, \
-                       '.decrypt() not allowed after .encrypt()'
+                assert not self._encrypt, ".decrypt() not allowed after .encrypt()"
             TripleDES.decrypt(self, ciphertext)
             plaintext = m2.cipher_update(self._context, ciphertext)
             return bytearray(plaintext)

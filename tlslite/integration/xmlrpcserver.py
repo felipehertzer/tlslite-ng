@@ -21,11 +21,11 @@ class TLSXMLRPCRequestHandler(SimpleXMLRPCRequestHandler):
     def setup(self):
         """Setup the connection for TLS."""
         self.connection = self.request
-        if getattr(self, 'timeout', None) is not None:
+        if getattr(self, "timeout", None) is not None:
             # Python 2.7
             self.connection.settimeout(self.timeout)
-        self.rfile = self.connection.makefile('rb', self.rbufsize)
-        self.wfile = self.connection.makefile('wb', self.wbufsize)
+        self.rfile = self.connection.makefile("rb", self.rbufsize)
+        self.wfile = self.connection.makefile("wb", self.wbufsize)
 
     def do_POST(self):
         """Handle the HTTPS POST request."""
@@ -37,13 +37,12 @@ class TLSXMLRPCRequestHandler(SimpleXMLRPCRequestHandler):
             pass
 
 
-class TLSXMLRPCServer(TLSSocketServerMixIn,
-                      SimpleXMLRPCServer):
+class TLSXMLRPCServer(TLSSocketServerMixIn, SimpleXMLRPCServer):
     """Simple XML-RPC server using TLS."""
 
     def __init__(self, addr, *args, **kwargs):
-        if not args and not 'requestHandler' in kwargs:
-            kwargs['requestHandler'] = TLSXMLRPCRequestHandler
+        if not args and not "requestHandler" in kwargs:
+            kwargs["requestHandler"] = TLSXMLRPCRequestHandler
         SimpleXMLRPCServer.__init__(self, addr, *args, **kwargs)
 
 

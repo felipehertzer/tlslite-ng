@@ -5,5 +5,6 @@
 
 from tlslite.utils.aesccm import AESCCM
 
+
 def new(key, tagLength=16):
     return AESCCM(key, "python", bytearray(16), tagLength)

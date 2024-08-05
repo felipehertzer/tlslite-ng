@@ -22,6 +22,7 @@ if cryptomath.pycryptoLoaded:
 # Factory Functions for RSA Keys
 # **************************************************************************
 
+
 def generateRSAKey(bits, implementations=["openssl", "python"]):
     """Generate an RSA key with the specified bit length.
 
@@ -38,9 +39,15 @@ def generateRSAKey(bits, implementations=["openssl", "python"]):
             return Python_RSAKey.generate(bits)
     raise ValueError("No acceptable implementations")
 
-#Parse as an OpenSSL or Python key
-def parsePEMKey(s, private=False, public=False, passwordCallback=None,
-                implementations=["openssl", "python"]):
+
+# Parse as an OpenSSL or Python key
+def parsePEMKey(
+    s,
+    private=False,
+    public=False,
+    passwordCallback=None,
+    implementations=["openssl", "python"],
+):
     """Parse a PEM-format key.
 
     The PEM format is used by OpenSSL and other tools.  The
@@ -108,8 +115,11 @@ def parsePEMKey(s, private=False, public=False, passwordCallback=None,
         pass
 
     for implementation in implementations:
-        if implementation == "openssl" and cryptomath.m2cryptoLoaded \
-                and key_type == "rsa":
+        if (
+            implementation == "openssl"
+            and cryptomath.m2cryptoLoaded
+            and key_type == "rsa"
+        ):
             key = OpenSSL_RSAKey.parse(s, passwordCallback)
             break
         elif implementation == "python":
@@ -132,8 +142,12 @@ def _parseKeyHelper(key, private, public):
         if cryptomath.m2cryptoLoaded:
             if type(key) == Python_RSAKey:
                 return _createPrivateKey(key)
-            assert type(key) in (OpenSSL_RSAKey, Python_ECDSAKey,
-                Python_DSAKey, Python_EdDSAKey), type(key)
+            assert type(key) in (
+                OpenSSL_RSAKey,
+                Python_ECDSAKey,
+                Python_DSAKey,
+                Python_EdDSAKey,
+            ), type(key)
             return key
         elif hasattr(key, "d"):
             return _createPrivateKey(key)
@@ -153,6 +167,7 @@ def parseAsPublicKey(s):
     """
     return parsePEMKey(s, public=True)
 
+
 def parsePrivateKey(s):
     """Parse a PEM-formatted private key.
 
@@ -166,6 +181,7 @@ def parsePrivateKey(s):
     """
     return parsePEMKey(s, private=True)
 
+
 def _createPublicKey(key):
     """
     Create a new public key.  Discard any private component,
@@ -175,6 +191,7 @@ def _createPublicKey(key):
         raise AssertionError()
     return _createPublicRSAKey(key.n, key.e, key.key_type)
 
+
 def _createPrivateKey(key):
     """
     Create a new private key.  Return the most efficient key possible.
@@ -183,14 +200,17 @@ def _createPrivateKey(key):
         raise AssertionError()
     if not key.hasPrivateKey():
         raise AssertionError()
-    return _createPrivateRSAKey(key.n, key.e, key.d, key.p, key.q, key.dP,
-                                key.dQ, key.qInv, key.key_type)
+    return _createPrivateRSAKey(
+        key.n, key.e, key.d, key.p, key.q, key.dP, key.dQ, key.qInv, key.key_type
+    )
+
 
 # n, e, d, etc. are the names used in mathematical proofs for the variables
 # so using so short names makes it actually more readable
 # pylint: disable=invalid-name
-def _createPublicRSAKey(n, e, key_type,
-                        implementations=("openssl", "pycrypto", "python")):
+def _createPublicRSAKey(
+    n, e, key_type, implementations=("openssl", "pycrypto", "python")
+):
     for implementation in implementations:
         if implementation == "openssl" and cryptomath.m2cryptoLoaded:
             return OpenSSL_RSAKey(n, e, key_type=key_type)
@@ -200,21 +220,22 @@ def _createPublicRSAKey(n, e, key_type,
             return Python_RSAKey(n, e, key_type=key_type)
     raise ValueError("No acceptable implementations")
 
-def _createPrivateRSAKey(n, e, d, p, q, dP, dQ, qInv, key_type,
-                         implementations=("pycrypto", "python")):
+
+def _createPrivateRSAKey(
+    n, e, d, p, q, dP, dQ, qInv, key_type, implementations=("pycrypto", "python")
+):
     for implementation in implementations:
         if implementation == "pycrypto" and cryptomath.pycryptoLoaded:
-            return PyCrypto_RSAKey(n, e, d, p, q, dP, dQ, qInv,
-                                   key_type=key_type)
+            return PyCrypto_RSAKey(n, e, d, p, q, dP, dQ, qInv, key_type=key_type)
         elif implementation == "python":
-            return Python_RSAKey(n, e, d, p, q, dP, dQ, qInv,
-                                 key_type=key_type)
+            return Python_RSAKey(n, e, d, p, q, dP, dQ, qInv, key_type=key_type)
     raise ValueError("No acceptable implementations")
+
+
 # pylint: enable=invalid-name
 
 
-def _create_public_ecdsa_key(point_x, point_y, curve_name,
-                             implementations=("python",)):
+def _create_public_ecdsa_key(point_x, point_y, curve_name, implementations=("python",)):
     """
     Convert public key parameters into concrete implementation of verifier.
 
@@ -240,8 +261,7 @@ def _create_public_ecdsa_key(point_x, point_y, curve_name,
     raise ValueError("No acceptable implementation")
 
 
-def _create_public_eddsa_key(public_key,
-                             implementations=("python",)):
+def _create_public_eddsa_key(public_key, implementations=("python",)):
     """
     Convert the python-ecdsa public key into concrete implementation of
     verifier.
@@ -252,8 +272,7 @@ def _create_public_eddsa_key(public_key,
     raise ValueError("No acceptable implementation")
 
 
-def _create_public_dsa_key(p, q, g, y,
-                           implementations=("python",)):
+def _create_public_dsa_key(p, q, g, y, implementations=("python",)):
     """
     Convert public key parameters into concrete implementation of verifier.
 

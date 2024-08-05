@@ -8,6 +8,7 @@ from .utils.tackwrapper import *
 from .utils.pem import *
 from .x509 import X509
 
+
 class X509CertChain(object):
     """This class represents a chain of X.509 certificates.
 
@@ -91,7 +92,7 @@ class X509CertChain(object):
             if tlsCert.matches(tack):
                 return True
         return False
-        
+
     def getTackExt(self):
         """Get the TACK and/or Break Sigs from a TACK Cert in the chain."""
         tackExt = None
@@ -104,4 +105,3 @@ class X509CertChain(object):
                 else:
                     tackExt = tlsCert.tackExt
         return tackExt
-                

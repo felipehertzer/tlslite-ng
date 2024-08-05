@@ -8,15 +8,22 @@ from poplib import POP3, POP3_SSL_PORT
 from tlslite.tlsconnection import TLSConnection
 from tlslite.integration.clienthelper import ClientHelper
 
+
 class POP3_TLS(POP3, ClientHelper):
     """This class extends :py:class:`poplib.POP3` with TLS support."""
 
-    def __init__(self, host, port = POP3_SSL_PORT,
-                 timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
-                 username=None, password=None,
-                 certChain=None, privateKey=None,
-                 checker=None,
-                 settings=None):
+    def __init__(
+        self,
+        host,
+        port=POP3_SSL_PORT,
+        timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
+        username=None,
+        password=None,
+        certChain=None,
+        privateKey=None,
+        checker=None,
+        settings=None,
+    ):
         """Create a new POP3_TLS.
 
         For client authentication, use one of these argument
@@ -74,14 +81,12 @@ class POP3_TLS(POP3, ClientHelper):
         self.host = host
         self.port = port
         sock = socket.create_connection((host, port), timeout)
-        ClientHelper.__init__(self,
-                 username, password,
-                 certChain, privateKey,
-                 checker,
-                 settings)
-        connection = TLSConnection(sock) 
+        ClientHelper.__init__(
+            self, username, password, certChain, privateKey, checker, settings
+        )
+        connection = TLSConnection(sock)
         ClientHelper._handshake(self, connection)
         self.sock = connection
-        self.file = self.sock.makefile('rb')
+        self.file = self.sock.makefile("rb")
         self._debugging = 0
         self.welcome = self._getresp()

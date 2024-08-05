@@ -5,23 +5,27 @@
 # compatibility with Python 2.6, for that we need unittest2 package,
 # which is not available on 3.3 or 3.4
 from __future__ import division
+
 try:
-        import unittest2 as unittest
+    import unittest2 as unittest
 except ImportError:
-        import unittest
+    import unittest
 
 import tlslite.utils.rijndael as rijndael
 
+
 class TestConstants(unittest.TestCase):
     def setUp(self):
-        A = [[1, 1, 1, 1, 1, 0, 0, 0],
-             [0, 1, 1, 1, 1, 1, 0, 0],
-             [0, 0, 1, 1, 1, 1, 1, 0],
-             [0, 0, 0, 1, 1, 1, 1, 1],
-             [1, 0, 0, 0, 1, 1, 1, 1],
-             [1, 1, 0, 0, 0, 1, 1, 1],
-             [1, 1, 1, 0, 0, 0, 1, 1],
-             [1, 1, 1, 1, 0, 0, 0, 1]]
+        A = [
+            [1, 1, 1, 1, 1, 0, 0, 0],
+            [0, 1, 1, 1, 1, 1, 0, 0],
+            [0, 0, 1, 1, 1, 1, 1, 0],
+            [0, 0, 0, 1, 1, 1, 1, 1],
+            [1, 0, 0, 0, 1, 1, 1, 1],
+            [1, 1, 0, 0, 0, 1, 1, 1],
+            [1, 1, 1, 0, 0, 0, 1, 1],
+            [1, 1, 1, 1, 0, 0, 0, 1],
+        ]
 
         # produce log and alog tables, needed for multiplying in the
         # field GF(2^m) (generator = 3)
@@ -61,26 +65,23 @@ class TestConstants(unittest.TestCase):
                     cox[i][t] ^= A[t][j] * box[i][j]
 
         # S-boxes and inverse S-boxes
-        S =  [0] * 256
+        S = [0] * 256
         Si = [0] * 256
         for i in range(256):
             S[i] = cox[i][0] << 7
             for t in range(1, 8):
-                S[i] ^= cox[i][t] << (7-t)
+                S[i] ^= cox[i][t] << (7 - t)
             Si[S[i] & 0xFF] = i
 
         # T-boxes
-        G = [[2, 1, 1, 3],
-            [3, 2, 1, 1],
-            [1, 3, 2, 1],
-            [1, 1, 3, 2]]
+        G = [[2, 1, 1, 3], [3, 2, 1, 1], [1, 3, 2, 1], [1, 1, 3, 2]]
 
         AA = [[0] * 8 for i in range(4)]
 
         for i in range(4):
             for j in range(4):
                 AA[i][j] = G[i][j]
-                AA[i][i+4] = 1
+                AA[i][i + 4] = 1
 
         for i in range(4):
             pivot = AA[i][i]
@@ -88,17 +89,18 @@ class TestConstants(unittest.TestCase):
                 t = i + 1
                 while AA[t][i] == 0 and t < 4:
                     t += 1
-                    assert t != 4, 'G matrix must be invertible'
+                    assert t != 4, "G matrix must be invertible"
                     for j in range(8):
                         AA[i][j], AA[t][j] = AA[t][j], AA[i][j]
                     pivot = AA[i][i]
             for j in range(8):
                 if AA[i][j] != 0:
-                    AA[i][j] = alog[(255 + log[AA[i][j] & 0xFF] -
-                                    log[pivot & 0xFF]) % 255]
+                    AA[i][j] = alog[
+                        (255 + log[AA[i][j] & 0xFF] - log[pivot & 0xFF]) % 255
+                    ]
             for t in range(4):
                 if i != t:
-                    for j in range(i+1, 8):
+                    for j in range(i + 1, 8):
                         AA[t][j] ^= mul(AA[i][j], AA[t][i])
                     AA[t][i] = 0
 
@@ -217,12 +219,12 @@ class TestConstants(unittest.TestCase):
     def test_rcon(self):
         self.assertEqual(rijndael.rcon, self.rcon)
 
+
 class TestSelfDecryptEncrypt(unittest.TestCase):
     def enc_dec(self, k_len, b_len):
-        plaintext = bytearray(b'b' * b_len)
-        cipher = rijndael.Rijndael(bytearray(b'a' * k_len), b_len)
-        self.assertEqual(plaintext,
-                         cipher.decrypt(cipher.encrypt(plaintext)))
+        plaintext = bytearray(b"b" * b_len)
+        cipher = rijndael.Rijndael(bytearray(b"a" * k_len), b_len)
+        self.assertEqual(plaintext, cipher.decrypt(cipher.encrypt(plaintext)))
 
     def test_16_16(self):
         self.enc_dec(16, 16)
@@ -250,4 +252,3 @@ class TestSelfDecryptEncrypt(unittest.TestCase):
 
     def test_32_32(self):
         self.enc_dec(32, 32)
-

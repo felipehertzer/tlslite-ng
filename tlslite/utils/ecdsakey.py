@@ -54,7 +54,7 @@ class ECDSAKey(object):
     def _verify(self, signature, hash_bytes):
         raise NotImplementedError()
 
-    def hashAndSign(self, bytes, rsaScheme=None, hAlg='sha1', sLen=None):
+    def hashAndSign(self, bytes, rsaScheme=None, hAlg="sha1", sLen=None):
         """Hash and sign the passed-in bytes.
 
         This requires the key to have a private component. It performs
@@ -77,11 +77,9 @@ class ECDSAKey(object):
         """
         hAlg = hAlg.lower()
         hashBytes = secureHash(bytearray(bytes), hAlg)
-        return self.sign(hashBytes, padding=rsaScheme, hashAlg=hAlg,
-                         saltLen=sLen)
+        return self.sign(hashBytes, padding=rsaScheme, hashAlg=hAlg, saltLen=sLen)
 
-    def hashAndVerify(self, sigBytes, bytes, rsaScheme=None, hAlg='sha1',
-                      sLen=None):
+    def hashAndVerify(self, sigBytes, bytes, rsaScheme=None, hAlg="sha1", sLen=None):
         """Hash and verify the passed-in bytes with the signature.
 
         This verifies an ECDSA signature on the passed-in data
@@ -135,8 +133,7 @@ class ECDSAKey(object):
         sigBytes = self._sign(bytes, hashAlg)
         return sigBytes
 
-    def verify(self, sigBytes, bytes, padding=None, hashAlg=None,
-               saltLen=None):
+    def verify(self, sigBytes, bytes, padding=None, hashAlg=None, saltLen=None):
         """Verify the passed-in bytes with the signature.
 
         This verifies a PKCS1 signature on the passed-in data.

@@ -6,23 +6,27 @@ from .x509 import X509
 from .signed import SignedObject
 from .errors import TLSIllegalParameterException
 
+
 class OCSPRespStatus(object):
-    """ OCSP response status codes (RFC 2560) """
+    """OCSP response status codes (RFC 2560)"""
+
     successful = 0
     malformedRequest = 1
     internalError = 2
-    tryLater = 3    # 4 is not used to match RFC2560 specification
+    tryLater = 3  # 4 is not used to match RFC2560 specification
     sigRequired = 5
     unauthorized = 6
 
 
 class CertStatus(object):
-    """ Certificate status in an OCSP response """
+    """Certificate status in an OCSP response"""
+
     good, revoked, unknown = range(3)
 
 
 class SingleResponse(object):
-    """ This class represents SingleResponse ASN1 type (defined in RFC2560) """
+    """This class represents SingleResponse ASN1 type (defined in RFC2560)"""
+
     def __init__(self, value):
         self.value = value
         self.cert_hash_alg = None
@@ -35,12 +39,12 @@ class SingleResponse(object):
         self.parse(value)
 
     _hash_algs_OIDs = {
-        tuple([0x2a, 0x86, 0x48, 0x86, 0xf7, 0xd, 0x2, 0x5]): 'md5',
-        tuple([0x2b, 0xe, 0x3, 0x2, 0x1a]): 'sha1',
-        tuple([0x60, 0x86, 0x48, 0x1, 0x65, 0x3, 0x4, 0x2, 0x4]): 'sha224',
-        tuple([0x60, 0x86, 0x48, 0x1, 0x65, 0x3, 0x4, 0x2, 0x1]): 'sha256',
-        tuple([0x60, 0x86, 0x48, 0x1, 0x65, 0x3, 0x4, 0x2, 0x2]): 'sha384',
-        tuple([0x60, 0x86, 0x48, 0x1, 0x65, 0x3, 0x4, 0x2, 0x3]): 'sha512'
+        tuple([0x2A, 0x86, 0x48, 0x86, 0xF7, 0xD, 0x2, 0x5]): "md5",
+        tuple([0x2B, 0xE, 0x3, 0x2, 0x1A]): "sha1",
+        tuple([0x60, 0x86, 0x48, 0x1, 0x65, 0x3, 0x4, 0x2, 0x4]): "sha224",
+        tuple([0x60, 0x86, 0x48, 0x1, 0x65, 0x3, 0x4, 0x2, 0x1]): "sha256",
+        tuple([0x60, 0x86, 0x48, 0x1, 0x65, 0x3, 0x4, 0x2, 0x2]): "sha384",
+        tuple([0x60, 0x86, 0x48, 0x1, 0x65, 0x3, 0x4, 0x2, 0x3]): "sha512",
     }
 
     def parse(self, value):
@@ -69,8 +73,9 @@ class SingleResponse(object):
         try:
             alg = self._hash_algs_OIDs[tuple(self.cert_hash_alg)]
         except KeyError as e:
-            raise TLSIllegalParameterException("Unknown hash algorithm: {0}".format(
-                            list(self.cert_hash_alg)))
+            raise TLSIllegalParameterException(
+                "Unknown hash algorithm: {0}".format(list(self.cert_hash_alg))
+            )
 
         # hash issuer key
         hashed_key = secureHash(issuer_key, alg)
@@ -89,7 +94,8 @@ class SingleResponse(object):
 
 
 class OCSPResponse(SignedObject):
-    """ This class represents an OCSP response. """
+    """This class represents an OCSP response."""
+
     def __init__(self, value):
         super(OCSPResponse, self).__init__()
         self.bytes = None
@@ -155,8 +161,8 @@ class OCSPResponse(SignedObject):
         else:
             self.version = 1
         self.resp_id = value.getChild(cnt).value
-        self.produced_at = value.getChild(cnt+1).value
-        responses = value.getChild(cnt+2)
+        self.produced_at = value.getChild(cnt + 1).value
+        responses = value.getChild(cnt + 2)
         resp_cnt = responses.getChildCount()
         for i in range(resp_cnt):
             resp = responses.getChild(i)

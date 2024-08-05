@@ -1,4 +1,4 @@
-# Authors: 
+# Authors:
 #   Trevor Perrin
 #   Dimitris Moraitis - Anon ciphersuites
 #
@@ -12,17 +12,22 @@ A helper class for using TLS Lite with stdlib clients
 from tlslite.checker import Checker
 from tlslite.utils.dns_utils import is_valid_hostname
 
+
 class ClientHelper(object):
     """This is a helper class used to integrate TLS Lite with various
     TLS clients (e.g. poplib, smtplib, httplib, etc.)"""
 
-    def __init__(self,
-                 username=None, password=None,
-                 certChain=None, privateKey=None,
-                 checker=None,
-                 settings=None,
-                 anon=False,
-                 host=None):
+    def __init__(
+        self,
+        username=None,
+        password=None,
+        certChain=None,
+        privateKey=None,
+        checker=None,
+        settings=None,
+        anon=False,
+        host=None,
+    ):
         """
         For client authentication, use one of these argument
         combinations:
@@ -88,21 +93,18 @@ class ClientHelper(object):
         self.checker = None
         self.anon = anon
 
-        #SRP Authentication
-        if username and password and not \
-                (certChain or privateKey):
+        # SRP Authentication
+        if username and password and not (certChain or privateKey):
             self.username = username
             self.password = password
 
-        #Certificate Chain Authentication
-        elif certChain and privateKey and not \
-                (username or password):
+        # Certificate Chain Authentication
+        elif certChain and privateKey and not (username or password):
             self.certChain = certChain
             self.privateKey = privateKey
 
-        #No Authentication
-        elif not password and not username and not \
-                certChain and not privateKey:
+        # No Authentication
+        elif not password and not username and not certChain and not privateKey:
             pass
 
         else:
@@ -115,7 +117,7 @@ class ClientHelper(object):
 
         if host is not None and not self._isIP(host):
             # name for SNI so port can't be sent
-            colon = host.find(':')
+            colon = host.find(":")
             if colon > 0:
                 host = host[:colon]
             self.serverName = host
@@ -129,7 +131,7 @@ class ClientHelper(object):
         """Return True if the address is an IPv4 address"""
         if not address:
             return False
-        vals = address.split('.')
+        vals = address.split(".")
         if len(vals) != 4:
             return False
         for i in vals:
@@ -142,22 +144,28 @@ class ClientHelper(object):
 
     def _handshake(self, tlsConnection):
         if self.username and self.password:
-            tlsConnection.handshakeClientSRP(username=self.username,
-                                             password=self.password,
-                                             checker=self.checker,
-                                             settings=self.settings,
-                                             session=self.tlsSession,
-                                             serverName=self.serverName)
+            tlsConnection.handshakeClientSRP(
+                username=self.username,
+                password=self.password,
+                checker=self.checker,
+                settings=self.settings,
+                session=self.tlsSession,
+                serverName=self.serverName,
+            )
         elif self.anon:
-            tlsConnection.handshakeClientAnonymous(session=self.tlsSession,
-                                                   settings=self.settings,
-                                                   checker=self.checker,
-                                                   serverName=self.serverName)
+            tlsConnection.handshakeClientAnonymous(
+                session=self.tlsSession,
+                settings=self.settings,
+                checker=self.checker,
+                serverName=self.serverName,
+            )
         else:
-            tlsConnection.handshakeClientCert(certChain=self.certChain,
-                                              privateKey=self.privateKey,
-                                              checker=self.checker,
-                                              settings=self.settings,
-                                              session=self.tlsSession,
-                                              serverName=self.serverName)
+            tlsConnection.handshakeClientCert(
+                certChain=self.certChain,
+                privateKey=self.privateKey,
+                checker=self.checker,
+                settings=self.settings,
+                session=self.tlsSession,
+                serverName=self.serverName,
+            )
         self.tlsSession = tlsConnection.session

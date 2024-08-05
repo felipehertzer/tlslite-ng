@@ -18,7 +18,6 @@ class MockECDSAKey(ECDSAKey):
 
 
 class TestECDSAKey(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.k = MockECDSAKey(None, None)
@@ -49,19 +48,19 @@ class TestECDSAKey(unittest.TestCase):
 
     def test_hashAndSign(self):
         with self.assertRaises(NotImplementedError):
-            self.k.hashAndSign(bytearray(b'text'))
+            self.k.hashAndSign(bytearray(b"text"))
 
     def test_hashAndVerify(self):
         with self.assertRaises(NotImplementedError):
-            self.k.hashAndVerify(bytearray(b'sig'), bytearray(b'text'))
+            self.k.hashAndVerify(bytearray(b"sig"), bytearray(b"text"))
 
     def test_sign(self):
         with self.assertRaises(NotImplementedError):
-            self.k.sign(bytearray(b'hash value'))
+            self.k.sign(bytearray(b"hash value"))
 
     def test_verify(self):
         with self.assertRaises(NotImplementedError):
-            self.k.verify(bytearray(b'sig'), bytearray(b'hash value'))
+            self.k.verify(bytearray(b"sig"), bytearray(b"hash value"))
 
     def test_acceptsPassword(self):
         with self.assertRaises(NotImplementedError):
@@ -73,4 +72,4 @@ class TestECDSAKey(unittest.TestCase):
 
     def test_generate(self):
         with self.assertRaises(NotImplementedError):
-            ECDSAKey.generate('NIST256p')
+            ECDSAKey.generate("NIST256p")

@@ -11,6 +11,8 @@ if pycryptoLoaded:
 
     def new(key):
         cipher = Crypto.Cipher.AES.new(bytes(key))
+
         def encrypt(plaintext):
             return bytearray(cipher.encrypt(bytes(plaintext)))
+
         return AESGCM(key, "pycrypto", encrypt)

@@ -5,6 +5,7 @@
 
 from tlslite.tlsconnection import TLSConnection
 
+
 class TLSSocketServerMixIn:
     """
     This class can be mixed in with any :py:class:`SocketServer.TCPServer` to
@@ -49,14 +50,13 @@ class TLSSocketServerMixIn:
         httpd.serve_forever()
     """
 
-
     def finish_request(self, sock, client_address):
         tlsConnection = TLSConnection(sock)
         if self.handshake(tlsConnection) == True:
             self.RequestHandlerClass(tlsConnection, client_address, self)
             tlsConnection.close()
 
-    #Implement this method to do some form of handshaking.  Return True
-    #if the handshake finishes properly and the request is authorized.
+    # Implement this method to do some form of handshaking.  Return True
+    # if the handshake finishes properly and the request is authorized.
     def handshake(self, tlsConnection):
         raise NotImplementedError()

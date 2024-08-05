@@ -18,20 +18,33 @@ except ImportError:
 import socket
 import errno
 from tlslite.tlsrecordlayer import TLSRecordLayer
-from tlslite.messages import Message, ClientHello, ServerHello, Certificate, \
-        ServerHelloDone, ClientKeyExchange, ChangeCipherSpec, Finished, \
-        RecordHeader3
-from tlslite.errors import TLSAbruptCloseError, TLSLocalAlert, \
-        TLSAbruptCloseError, TLSInternalError, TLSClosedConnectionError
+from tlslite.messages import (
+    Message,
+    ClientHello,
+    ServerHello,
+    Certificate,
+    ServerHelloDone,
+    ClientKeyExchange,
+    ChangeCipherSpec,
+    Finished,
+    RecordHeader3,
+)
+from tlslite.errors import (
+    TLSAbruptCloseError,
+    TLSLocalAlert,
+    TLSAbruptCloseError,
+    TLSInternalError,
+    TLSClosedConnectionError,
+)
 from tlslite.extensions import TLSExtension
-from tlslite.constants import ContentType, HandshakeType, CipherSuite, \
-        CertificateType
+from tlslite.constants import ContentType, HandshakeType, CipherSuite, CertificateType
 from tlslite.mathtls import PRF_1_2, calc_key
 from tlslite.x509 import X509
 from tlslite.x509certchain import X509CertChain
 from tlslite.utils.keyfactory import parsePEMKey
 from tlslite.utils.codec import Parser
 from unit_tests.mocksock import MockSocket
+
 
 class TestTLSRecordLayer(unittest.TestCase):
     def test___init__(self):
@@ -41,20 +54,23 @@ class TestTLSRecordLayer(unittest.TestCase):
         self.assertIsInstance(record_layer, TLSRecordLayer)
 
     def test__getNextRecord(self):
-        mockSock = MockSocket(bytearray(
-            b'\x16' +           # type - handshake
-            b'\x03\x03' +       # TLSv1.2
-            b'\x00\x04' +       # length
-            b'\x00'*4
-            ))
+        mockSock = MockSocket(
+            bytearray(
+                b"\x16"
+                + b"\x03\x03"  # type - handshake
+                + b"\x00\x04"  # TLSv1.2
+                + b"\x00" * 4  # length
+            )
+        )
         sock = TLSRecordLayer(mockSock)
-        sock.version = (3,3)
+        sock.version = (3, 3)
 
         # XXX using private method!
         for result in sock._getNextRecord():
             if result in (0, 1):
                 self.assertTrue(False, "blocking socket")
-            else: break
+            else:
+                break
 
         header, data = result
         data = data.bytes
@@ -65,12 +81,15 @@ class TestTLSRecordLayer(unittest.TestCase):
         self.assertEqual(header.length, 0)
 
     def test__getNextRecord_with_trickling_socket(self):
-        mockSock = MockSocket(bytearray(
-            b'\x16' +           # type - handshake
-            b'\x03\x03' +       # TLSv1.2
-            b'\x00\x04' +       # length
-            b'\x00'*4
-            ), maxRet=1)
+        mockSock = MockSocket(
+            bytearray(
+                b"\x16"
+                + b"\x03\x03"  # type - handshake
+                + b"\x00\x04"  # TLSv1.2
+                + b"\x00" * 4  # length
+            ),
+            maxRet=1,
+        )
 
         sock = TLSRecordLayer(mockSock)
 
@@ -78,7 +97,8 @@ class TestTLSRecordLayer(unittest.TestCase):
         for result in sock._getNextRecord():
             if result in (0, 1):
                 self.assertTrue(False, "blocking socket")
-            else: break
+            else:
+                break
 
         header, data = result
         data = data.bytes
@@ -121,12 +141,16 @@ class TestTLSRecordLayer(unittest.TestCase):
             next(gen)
 
     def test__getNextRecord_with_slow_socket(self):
-        mockSock = MockSocket(bytearray(
-            b'\x16' +           # type - handshake
-            b'\x03\x03' +       # TLSv1.2
-            b'\x00\x04' +       # length
-            b'\x00'*4
-            ), maxRet=1, blockEveryOther=True)
+        mockSock = MockSocket(
+            bytearray(
+                b"\x16"
+                + b"\x03\x03"  # type - handshake
+                + b"\x00\x04"  # TLSv1.2
+                + b"\x00" * 4  # length
+            ),
+            maxRet=1,
+            blockEveryOther=True,
+        )
 
         sock = TLSRecordLayer(mockSock)
 
@@ -135,7 +159,8 @@ class TestTLSRecordLayer(unittest.TestCase):
         for result in sock._getNextRecord():
             if result in (0, 1):
                 gotRetry = True
-            else: break
+            else:
+                break
 
         header, data = result
         data = data.bytes
@@ -144,11 +169,14 @@ class TestTLSRecordLayer(unittest.TestCase):
         self.assertEqual(bytearray(4), data)
 
     def test__getNextRecord_with_malformed_record(self):
-        mockSock = MockSocket(bytearray(
-            b'\x01' +           # wrong type
-            b'\x03\x03' +       # TLSv1.2
-            b'\x00\x01' +       # length
-            b'\x00'))
+        mockSock = MockSocket(
+            bytearray(
+                b"\x01"
+                + b"\x03\x03"  # wrong type
+                + b"\x00\x01"  # TLSv1.2
+                + b"\x00"  # length
+            )
+        )
 
         sock = TLSRecordLayer(mockSock)
 
@@ -161,11 +189,14 @@ class TestTLSRecordLayer(unittest.TestCase):
         self.assertEqual(str(context.exception), "illegal_parameter")
 
     def test__getNextRecord_with_too_big_record(self):
-        mockSock = MockSocket(bytearray(
-            b'\x16' +           # type - handshake
-            b'\x03\x03' +       # TLSv1.2
-            b'\xff\xff' +       # length
-            b'\x00'*65536))
+        mockSock = MockSocket(
+            bytearray(
+                b"\x16"
+                + b"\x03\x03"  # type - handshake
+                + b"\xff\xff"  # TLSv1.2
+                + b"\x00" * 65536  # length
+            )
+        )
 
         sock = TLSRecordLayer(mockSock)
 
@@ -178,10 +209,9 @@ class TestTLSRecordLayer(unittest.TestCase):
         self.assertEqual(str(context.exception), "record_overflow")
 
     def test__getNextRecord_with_SSL2_record(self):
-        mockSock = MockSocket(bytearray(
-            b'\x80' +           # tag
-            b'\x04' +           # length
-            b'\x00'*4))
+        mockSock = MockSocket(
+            bytearray(b"\x80" + b"\x04" + b"\x00" * 4)  # tag  # length
+        )
 
         sock = TLSRecordLayer(mockSock)
 
@@ -189,7 +219,8 @@ class TestTLSRecordLayer(unittest.TestCase):
         for result in sock._getNextRecord():
             if result in (0, 1):
                 self.assertTrue(False, "blocking socket")
-            else: break
+            else:
+                break
 
         header, data = result
         data = data.bytes
@@ -202,10 +233,9 @@ class TestTLSRecordLayer(unittest.TestCase):
         self.assertEqual(bytearray(4), data)
 
     def test__getNextRecord_with_not_complete_SSL2_record(self):
-        mockSock = MockSocket(bytearray(
-            b'\x80' +           # tag
-            b'\x04' +           # length
-            b'\x00'*3))
+        mockSock = MockSocket(
+            bytearray(b"\x80" + b"\x04" + b"\x00" * 3)  # tag  # length
+        )
 
         sock = TLSRecordLayer(mockSock)
 
@@ -216,9 +246,7 @@ class TestTLSRecordLayer(unittest.TestCase):
         self.assertEqual(0, result)
 
     def test__getNextRecord_with_SSL2_record_with_incomplete_header(self):
-        mockSock = MockSocket(bytearray(
-            b'\x80'             # tag
-            ))
+        mockSock = MockSocket(bytearray(b"\x80"))  # tag
 
         sock = TLSRecordLayer(mockSock)
 
@@ -229,50 +257,47 @@ class TestTLSRecordLayer(unittest.TestCase):
         self.assertEqual(0, result)
 
     def test__getNextRecord_with_empty_handshake(self):
-
-        mock_sock = MockSocket(bytearray(
-            b'\x16' +           # handshake
-            b'\x03\x03' +       # TLSv1.2
-            b'\x00\x00'         # length
-            ))
+        mock_sock = MockSocket(
+            bytearray(
+                b"\x16" + b"\x03\x03" + b"\x00\x00"  # handshake  # TLSv1.2  # length
+            )
+        )
 
         record_layer = TLSRecordLayer(mock_sock)
 
         with self.assertRaises(TLSLocalAlert):
             for result in record_layer._getNextRecord():
-                if result in (0,1):
+                if result in (0, 1):
                     raise Exception("blocking socket")
                 else:
                     break
 
     def test__getNextRecord_with_multiple_messages_in_single_record(self):
-
-        mock_sock = MockSocket(bytearray(
-            b'\x16' +           # handshake
-            b'\x03\x03' +       # TLSv1.2
-            b'\x00\x35' +       # length
-            # server hello
-            b'\x02' +           # type - server hello
-            b'\x00\x00\x26' +   # length
-            b'\x03\x03' +       # TLSv1.2
-            b'\x01'*32 +        # random
-            b'\x00' +           # session ID length
-            b'\x00\x2f' +       # cipher suite selected
-            b'\x00' +           # compression method
-            # certificate
-            b'\x0b' +           # type - certificate
-            b'\x00\x00\x03'     # length
-            b'\x00\x00\x00'     # length of certificates
-            # server hello done
-            b'\x0e' +           # type - server hello done
-            b'\x00\x00\x00'     # length
-            ))
+        mock_sock = MockSocket(
+            bytearray(
+                b"\x16" + b"\x03\x03" + b"\x00\x35" +  # handshake  # TLSv1.2  # length
+                # server hello
+                b"\x02"
+                + b"\x00\x00\x26"  # type - server hello
+                + b"\x03\x03"  # length
+                + b"\x01" * 32  # TLSv1.2
+                + b"\x00"  # random
+                + b"\x00\x2f"  # session ID length
+                + b"\x00"  # cipher suite selected
+                +  # compression method
+                # certificate
+                b"\x0b" + b"\x00\x00\x03"  # type - certificate  # length
+                b"\x00\x00\x00"  # length of certificates
+                # server hello done
+                b"\x0e" + b"\x00\x00\x00"  # type - server hello done  # length
+            )
+        )
 
         record_layer = TLSRecordLayer(mock_sock)
 
         results = []
         for result in record_layer._getNextRecord():
-            if result in (0,1):
+            if result in (0, 1):
                 raise Exception("blocking")
             else:
                 results.append(result)
@@ -287,8 +312,8 @@ class TestTLSRecordLayer(unittest.TestCase):
         self.assertEqual(HandshakeType.server_hello, p.bytes[0])
 
         # XXX generator stops as soon as a message was read
-        #self.assertEqual(1, len(results))
-        #return
+        # self.assertEqual(1, len(results))
+        # return
 
         header, p = results[1]
 
@@ -315,36 +340,47 @@ class TestTLSRecordLayer(unittest.TestCase):
         for result in sock._sendMsg(msg, False):
             if result in (0, 1):
                 self.assertTrue(False, "Blocking socket")
-            else: break
+            else:
+                break
 
         self.assertEqual(len(mockSock.sent), 1)
-        self.assertEqual(bytearray(
-            b'\x16' +           # handshake message
-            b'\x03\x03' +       # version
-            b'\x00\x0a' +       # payload length
-            b'\x00'*10          # payload
-            ), mockSock.sent[0])
+        self.assertEqual(
+            bytearray(
+                b"\x16"
+                + b"\x03\x03"  # handshake message
+                + b"\x00\x0a"  # version
+                + b"\x00" * 10  # payload length  # payload
+            ),
+            mockSock.sent[0],
+        )
 
     def test__sendMsg_with_very_slow_socket(self):
         mockSock = MockSocket(bytearray(0), maxWrite=1, blockEveryOther=True)
         sock = TLSRecordLayer(mockSock)
 
-        msg = Message(ContentType.handshake, bytearray(b'\x32'*2))
+        msg = Message(ContentType.handshake, bytearray(b"\x32" * 2))
 
         gotRetry = False
         # XXX using private method!
         for result in sock._sendMsg(msg, False):
             if result in (0, 1):
                 gotRetry = True
-            else: break
+            else:
+                break
 
         self.assertTrue(gotRetry)
-        self.assertEqual([
-            bytearray(b'\x16'),  # handshake message
-            bytearray(b'\x00'), bytearray(b'\x00'), # version (unset)
-            bytearray(b'\x00'), bytearray(b'\x02'), # payload length
-            bytearray(b'\x32'), bytearray(b'\x32')],
-            mockSock.sent)
+        self.assertEqual(
+            [
+                bytearray(b"\x16"),  # handshake message
+                bytearray(b"\x00"),
+                bytearray(b"\x00"),  # version (unset)
+                bytearray(b"\x00"),
+                bytearray(b"\x02"),  # payload length
+                bytearray(b"\x32"),
+                bytearray(b"\x32"),
+            ],
+            mockSock.sent,
+        )
 
     def test__sendMsg_with_errored_out_socket(self):
         mockSock = mock.MagicMock()
@@ -360,13 +396,13 @@ class TestTLSRecordLayer(unittest.TestCase):
             next(gen)
 
     def test__sendMsg_with_large_message(self):
-
         mock_sock = MockSocket(bytearray(0))
 
         record_layer = TLSRecordLayer(mock_sock)
 
-        client_hello = ClientHello().create((3,3), bytearray(32), bytearray(0),
-                [x for x in range(2**15-1)])
+        client_hello = ClientHello().create(
+            (3, 3), bytearray(32), bytearray(0), [x for x in range(2**15 - 1)]
+        )
 
         gen = record_layer._sendMsg(client_hello)
 
@@ -389,30 +425,37 @@ class TestTLSRecordLayer(unittest.TestCase):
         record_layer.version = (3, 1)
         record_layer.closed = False
         record_layer._recordLayer.calcPendingStates(
-                CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
-                bytearray(48),
-                bytearray(32),
-                bytearray(32),
-                None)
+            CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
+            bytearray(48),
+            bytearray(32),
+            bytearray(32),
+            None,
+        )
         record_layer._recordLayer.changeWriteState()
 
         record_layer.write(bytearray(32))
 
         self.assertEqual(len(mock_sock.sent), 2)
         msg1 = mock_sock.sent[0]
-        self.assertEqual(bytearray(
-            b'\x17'  +      # application data
-            b'\x03\x01' +   # TLSv1.0
-            b'\x00\x20'     # length 32 bytes = data(1) + MAC(20) + padding(11)
-            ), msg1[:5])
+        self.assertEqual(
+            bytearray(
+                b"\x17"
+                + b"\x03\x01"  # application data
+                + b"\x00\x20"  # TLSv1.0  # length 32 bytes = data(1) + MAC(20) + padding(11)
+            ),
+            msg1[:5],
+        )
         self.assertEqual(len(msg1[5:]), 32)
 
         msg2 = mock_sock.sent[1]
-        self.assertEqual(bytearray(
-            b'\x17'  +      # application data
-            b'\x03\x01' +   # TLSv1.0
-            b'\x00\x40'     # length 64 bytes = data(31) + MAC(20) + padding(13)
-            ), msg2[:5])
+        self.assertEqual(
+            bytearray(
+                b"\x17"
+                + b"\x03\x01"  # application data
+                + b"\x00\x40"  # TLSv1.0  # length 64 bytes = data(31) + MAC(20) + padding(13)
+            ),
+            msg2[:5],
+        )
         self.assertEqual(len(msg2[5:]), 64)
 
     def test_write_with_BEAST_record_splitting_and_small_write(self):
@@ -422,22 +465,26 @@ class TestTLSRecordLayer(unittest.TestCase):
         record_layer.version = (3, 1)
         record_layer.closed = False
         record_layer._recordLayer.calcPendingStates(
-                CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
-                bytearray(48),
-                bytearray(32),
-                bytearray(32),
-                None)
+            CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
+            bytearray(48),
+            bytearray(32),
+            bytearray(32),
+            None,
+        )
         record_layer._recordLayer.changeWriteState()
 
         record_layer.write(bytearray(1))
 
         self.assertEqual(len(mock_sock.sent), 1)
         msg1 = mock_sock.sent[0]
-        self.assertEqual(bytearray(
-            b'\x17'  +      # application data
-            b'\x03\x01' +   # TLSv1.0
-            b'\x00\x20'     # length 32 bytes = data(1) + MAC(20) + padding(11)
-            ), msg1[:5])
+        self.assertEqual(
+            bytearray(
+                b"\x17"
+                + b"\x03\x01"  # application data
+                + b"\x00\x20"  # TLSv1.0  # length 32 bytes = data(1) + MAC(20) + padding(11)
+            ),
+            msg1[:5],
+        )
         self.assertEqual(len(msg1[5:]), 32)
 
     def test_write_with_BEAST_record_splitting_and_empty_write(self):
@@ -447,125 +494,129 @@ class TestTLSRecordLayer(unittest.TestCase):
         record_layer.version = (3, 1)
         record_layer.closed = False
         record_layer._recordLayer.calcPendingStates(
-                CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
-                bytearray(48),
-                bytearray(32),
-                bytearray(32),
-                None)
+            CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
+            bytearray(48),
+            bytearray(32),
+            bytearray(32),
+            None,
+        )
         record_layer._recordLayer.changeWriteState()
 
         record_layer.write(bytearray(0))
 
         self.assertEqual(len(mock_sock.sent), 1)
         msg1 = mock_sock.sent[0]
-        self.assertEqual(bytearray(
-            b'\x17'  +      # application data
-            b'\x03\x01' +   # TLSv1.0
-            b'\x00\x20'     # length 32 bytes = data(0) + MAC(20) + padding(12)
-            ), msg1[:5])
+        self.assertEqual(
+            bytearray(
+                b"\x17"
+                + b"\x03\x01"  # application data
+                + b"\x00\x20"  # TLSv1.0  # length 32 bytes = data(0) + MAC(20) + padding(12)
+            ),
+            msg1[:5],
+        )
         self.assertEqual(len(msg1[5:]), 32)
 
     def test__getMsg(self):
-
         mock_sock = MockSocket(
-                bytearray(
-                b'\x16' +           # handshake
-                b'\x03\x03' +       # TLSv1.2
-                b'\x00\x3a' +       # payload length
-                b'\x02' +           # Server Hello
-                b'\x00\x00\x36' +   # hello length
-                b'\x03\x03' +       # TLSv1.2
-                b'\x00'*32 +        # random
-                b'\x00' +           # session ID length
-                b'\x00\x2f' +       # cipher suite selected (AES128-SHA)
-                b'\x00' +           # compression null
-                b'\x00\x0e' +       # extensions length
-                b'\xff\x01' +       # renegotiation_info
-                b'\x00\x01' +       # ext length
-                b'\x00' +           # renegotiation info ext length - 0
-                b'\x00\x23' +       # session_ticket
-                b'\x00\x00' +       # ext length
-                b'\x00\x0f' +       # heartbeat extension
-                b'\x00\x01' +       # ext length
-                b'\x01'))           # peer is allowed to send requests
+            bytearray(
+                b"\x16"
+                + b"\x03\x03"  # handshake
+                + b"\x00\x3a"  # TLSv1.2
+                + b"\x02"  # payload length
+                + b"\x00\x00\x36"  # Server Hello
+                + b"\x03\x03"  # hello length
+                + b"\x00" * 32  # TLSv1.2
+                + b"\x00"  # random
+                + b"\x00\x2f"  # session ID length
+                + b"\x00"  # cipher suite selected (AES128-SHA)
+                + b"\x00\x0e"  # compression null
+                + b"\xff\x01"  # extensions length
+                + b"\x00\x01"  # renegotiation_info
+                + b"\x00"  # ext length
+                + b"\x00\x23"  # renegotiation info ext length - 0
+                + b"\x00\x00"  # session_ticket
+                + b"\x00\x0f"  # ext length
+                + b"\x00\x01"  # heartbeat extension
+                + b"\x01"  # ext length
+            )
+        )  # peer is allowed to send requests
 
         record_layer = TLSRecordLayer(mock_sock)
 
-        gen = record_layer._getMsg(ContentType.handshake,
-                HandshakeType.server_hello)
+        gen = record_layer._getMsg(ContentType.handshake, HandshakeType.server_hello)
 
         message = next(gen)
 
         self.assertEqual(ServerHello, type(message))
-        self.assertEqual((3,3), message.server_version)
-        self.assertEqual(0x002f, message.cipher_suite)
+        self.assertEqual((3, 3), message.server_version)
+        self.assertEqual(0x002F, message.cipher_suite)
 
     def test__getMsg_with_fragmented_message(self):
-
         mock_sock = MockSocket(
-                bytearray(
-                b'\x16' +           # handshake
-                b'\x03\x03' +       # TLSv1.2
-                b'\x00\x06' +       # payload length
-                b'\x02' +           # Server Hello
-                b'\x00\x00\x36' +   # hello length
-                b'\x03\x03' +       # TLSv1.2
+            bytearray(
+                b"\x16"
+                + b"\x03\x03"  # handshake
+                + b"\x00\x06"  # TLSv1.2
+                + b"\x02"  # payload length
+                + b"\x00\x00\x36"  # Server Hello
+                + b"\x03\x03"  # hello length
+                +  # TLSv1.2
                 # fragment end
-                b'\x16' +           # type - handshake
-                b'\x03\x03' +       # TLSv1.2
-                b'\x00\x34' +       # payload length:
-                b'\x00'*32 +        # random
-                b'\x00' +           # session ID length
-                b'\x00\x2f' +       # cipher suite selected (AES128-SHA)
-                b'\x00' +           # compression null
-                b'\x00\x0e' +       # extensions length
-                b'\xff\x01' +       # renegotiation_info
-                b'\x00\x01' +       # ext length
-                b'\x00' +           # renegotiation info ext length - 0
-                b'\x00\x23' +       # session_ticket
-                b'\x00\x00' +       # ext length
-                b'\x00\x0f' +       # heartbeat extension
-                b'\x00\x01' +       # ext length
-                b'\x01'))           # peer is allowed to send requests
+                b"\x16"
+                + b"\x03\x03"  # type - handshake
+                + b"\x00\x34"  # TLSv1.2
+                + b"\x00" * 32  # payload length:
+                + b"\x00"  # random
+                + b"\x00\x2f"  # session ID length
+                + b"\x00"  # cipher suite selected (AES128-SHA)
+                + b"\x00\x0e"  # compression null
+                + b"\xff\x01"  # extensions length
+                + b"\x00\x01"  # renegotiation_info
+                + b"\x00"  # ext length
+                + b"\x00\x23"  # renegotiation info ext length - 0
+                + b"\x00\x00"  # session_ticket
+                + b"\x00\x0f"  # ext length
+                + b"\x00\x01"  # heartbeat extension
+                + b"\x01"  # ext length
+            )
+        )  # peer is allowed to send requests
 
         record_layer = TLSRecordLayer(mock_sock)
 
-        gen = record_layer._getMsg(ContentType.handshake,
-                HandshakeType.server_hello)
+        gen = record_layer._getMsg(ContentType.handshake, HandshakeType.server_hello)
 
         message = next(gen)
 
-        if message in (0,1):
+        if message in (0, 1):
             raise Exception("blocking")
 
         self.assertEqual(ServerHello, type(message))
-        self.assertEqual((3,3), message.server_version)
-        self.assertEqual(0x002f, message.cipher_suite)
+        self.assertEqual((3, 3), message.server_version)
+        self.assertEqual(0x002F, message.cipher_suite)
 
     def test__getMsg_with_oversized_message(self):
-
         mock_sock = MockSocket(
-                bytearray(
-                b'\x16' +           # handshake
-                b'\x03\x03' +       # TLSv1.2
-                b'\x40\x01' +       # payload length 2**14+1
-                b'\x02' +           # Server Hello
-                b'\x00\x3f\xfd' +   # hello length 2**14+1-1-3
-                b'\x03\x03' +       # TLSv1.2
-                b'\x00'*32 +        # random
-                b'\x00' +           # session ID length
-                b'\x00\x2f' +       # cipher suite selected (AES128-SHA)
-                b'\x00' +           # compression null
-                b'\x3f\xd5' +       # extensions length: 2**14+1-1-3-2-32-6
-                b'\xff\xff' +       # extension type (padding)
-                b'\x3f\xd1' +       # extension length: 2**14+1-1-3-2-32-6-4
-                b'\x00'*16337       # value
-                ))
+            bytearray(
+                b"\x16"
+                + b"\x03\x03"  # handshake
+                + b"\x40\x01"  # TLSv1.2
+                + b"\x02"  # payload length 2**14+1
+                + b"\x00\x3f\xfd"  # Server Hello
+                + b"\x03\x03"  # hello length 2**14+1-1-3
+                + b"\x00" * 32  # TLSv1.2
+                + b"\x00"  # random
+                + b"\x00\x2f"  # session ID length
+                + b"\x00"  # cipher suite selected (AES128-SHA)
+                + b"\x3f\xd5"  # compression null
+                + b"\xff\xff"  # extensions length: 2**14+1-1-3-2-32-6
+                + b"\x3f\xd1"  # extension type (padding)
+                + b"\x00" * 16337  # extension length: 2**14+1-1-3-2-32-6-4  # value
+            )
+        )
 
         record_layer = TLSRecordLayer(mock_sock)
 
-        gen = record_layer._getMsg(ContentType.handshake,
-                HandshakeType.server_hello)
+        gen = record_layer._getMsg(ContentType.handshake, HandshakeType.server_hello)
 
         with self.assertRaises(TLSLocalAlert):
             message = next(gen)
@@ -575,7 +626,6 @@ class TestTLSRecordLayer(unittest.TestCase):
     #
 
     def test_full_connection_with_RSA_kex(self):
-
         clnt_sock, srv_sock = socket.socketpair()
 
         #
@@ -584,15 +634,23 @@ class TestTLSRecordLayer(unittest.TestCase):
         record_layer = TLSRecordLayer(clnt_sock)
 
         record_layer._handshakeStart(client=True)
-        record_layer.version = (3,3)
+        record_layer.version = (3, 3)
 
         client_hello = ClientHello()
-        client_hello = client_hello.create((3,3), bytearray(32),
-                bytearray(0), [CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA],
-                None, None, False, False, None)
+        client_hello = client_hello.create(
+            (3, 3),
+            bytearray(32),
+            bytearray(0),
+            [CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA],
+            None,
+            None,
+            False,
+            False,
+            None,
+        )
 
         for result in record_layer._sendMsg(client_hello):
-            if result in (0,1):
+            if result in (0, 1):
                 raise Exception("blocking socket")
 
         #
@@ -602,49 +660,50 @@ class TestTLSRecordLayer(unittest.TestCase):
         srv_record_layer = TLSRecordLayer(srv_sock)
 
         srv_raw_certificate = str(
-            "-----BEGIN CERTIFICATE-----\n"\
-            "MIIB9jCCAV+gAwIBAgIJAMyn9DpsTG55MA0GCSqGSIb3DQEBCwUAMBQxEjAQBgNV\n"\
-            "BAMMCWxvY2FsaG9zdDAeFw0xNTAxMjExNDQzMDFaFw0xNTAyMjAxNDQzMDFaMBQx\n"\
-            "EjAQBgNVBAMMCWxvY2FsaG9zdDCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEA\n"\
-            "0QkEeakSyV/LMtTeARdRtX5pdbzVuUuqOIdz3lg7YOyRJ/oyLTPzWXpKxr//t4FP\n"\
-            "QvYsSJiVOlPk895FNu6sNF/uJQyQGfFWYKkE6fzFifQ6s9kssskFlL1DVI/dD/Zn\n"\
-            "7sgzua2P1SyLJHQTTs1MtMb170/fX2EBPkDz+2kYKN0CAwEAAaNQME4wHQYDVR0O\n"\
-            "BBYEFJtvXbRmxRFXYVMOPH/29pXCpGmLMB8GA1UdIwQYMBaAFJtvXbRmxRFXYVMO\n"\
-            "PH/29pXCpGmLMAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQELBQADgYEAkOgC7LP/\n"\
-            "Rd6uJXY28HlD2K+/hMh1C3SRT855ggiCMiwstTHACGgNM+AZNqt6k8nSfXc6k1gw\n"\
-            "5a7SGjzkWzMaZC3ChBeCzt/vIAGlMyXeqTRhjTCdc/ygRv3NPrhUKKsxUYyXRk5v\n"\
-            "g/g6MwxzXfQP3IyFu3a9Jia/P89Z1rQCNRY=\n"\
-            "-----END CERTIFICATE-----\n"\
-            )
+            "-----BEGIN CERTIFICATE-----\n"
+            "MIIB9jCCAV+gAwIBAgIJAMyn9DpsTG55MA0GCSqGSIb3DQEBCwUAMBQxEjAQBgNV\n"
+            "BAMMCWxvY2FsaG9zdDAeFw0xNTAxMjExNDQzMDFaFw0xNTAyMjAxNDQzMDFaMBQx\n"
+            "EjAQBgNVBAMMCWxvY2FsaG9zdDCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEA\n"
+            "0QkEeakSyV/LMtTeARdRtX5pdbzVuUuqOIdz3lg7YOyRJ/oyLTPzWXpKxr//t4FP\n"
+            "QvYsSJiVOlPk895FNu6sNF/uJQyQGfFWYKkE6fzFifQ6s9kssskFlL1DVI/dD/Zn\n"
+            "7sgzua2P1SyLJHQTTs1MtMb170/fX2EBPkDz+2kYKN0CAwEAAaNQME4wHQYDVR0O\n"
+            "BBYEFJtvXbRmxRFXYVMOPH/29pXCpGmLMB8GA1UdIwQYMBaAFJtvXbRmxRFXYVMO\n"
+            "PH/29pXCpGmLMAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQELBQADgYEAkOgC7LP/\n"
+            "Rd6uJXY28HlD2K+/hMh1C3SRT855ggiCMiwstTHACGgNM+AZNqt6k8nSfXc6k1gw\n"
+            "5a7SGjzkWzMaZC3ChBeCzt/vIAGlMyXeqTRhjTCdc/ygRv3NPrhUKKsxUYyXRk5v\n"
+            "g/g6MwxzXfQP3IyFu3a9Jia/P89Z1rQCNRY=\n"
+            "-----END CERTIFICATE-----\n"
+        )
 
         srv_raw_key = str(
-            "-----BEGIN RSA PRIVATE KEY-----\n"\
-            "MIICXQIBAAKBgQDRCQR5qRLJX8sy1N4BF1G1fml1vNW5S6o4h3PeWDtg7JEn+jIt\n"\
-            "M/NZekrGv/+3gU9C9ixImJU6U+Tz3kU27qw0X+4lDJAZ8VZgqQTp/MWJ9Dqz2Syy\n"\
-            "yQWUvUNUj90P9mfuyDO5rY/VLIskdBNOzUy0xvXvT99fYQE+QPP7aRgo3QIDAQAB\n"\
-            "AoGAVSLbE8HsyN+fHwDbuo4I1Wa7BRz33xQWLBfe9TvyUzOGm0WnkgmKn3LTacdh\n"\
-            "GxgrdBZXSun6PVtV8I0im5DxyVaNdi33sp+PIkZU386f1VUqcnYnmgsnsUQEBJQu\n"\
-            "fUZmgNM+bfR+Rfli4Mew8lQ0sorZ+d2/5fsM0g80Qhi5M3ECQQDvXeCyrcy0u/HZ\n"\
-            "FNjIloyXaAIvavZ6Lc6gfznCSfHc5YwplOY7dIWp8FRRJcyXkA370l5dJ0EXj5Gx\n"\
-            "udV9QQ43AkEA34+RxjRk4DT7Zo+tbM/Fkoi7jh1/0hFkU5NDHweJeH/mJseiHtsH\n"\
-            "KOcPGtEGBBqT2KNPWVz4Fj19LiUmmjWXiwJBAIBs49O5/+ywMdAAqVblv0S0nweF\n"\
-            "4fwne4cM+5ZMSiH0XsEojGY13EkTEon/N8fRmE8VzV85YmkbtFWgmPR85P0CQQCs\n"\
-            "elWbN10EZZv3+q1wH7RsYzVgZX3yEhz3JcxJKkVzRCnKjYaUi6MweWN76vvbOq4K\n"\
-            "G6Tiawm0Duh/K4ZmvyYVAkBppE5RRQqXiv1KF9bArcAJHvLm0vnHPpf1yIQr5bW6\n"\
-            "njBuL4qcxlaKJVGRXT7yFtj2fj0gv3914jY2suWqp8XJ\n"\
-            "-----END RSA PRIVATE KEY-----\n"\
-            )
+            "-----BEGIN RSA PRIVATE KEY-----\n"
+            "MIICXQIBAAKBgQDRCQR5qRLJX8sy1N4BF1G1fml1vNW5S6o4h3PeWDtg7JEn+jIt\n"
+            "M/NZekrGv/+3gU9C9ixImJU6U+Tz3kU27qw0X+4lDJAZ8VZgqQTp/MWJ9Dqz2Syy\n"
+            "yQWUvUNUj90P9mfuyDO5rY/VLIskdBNOzUy0xvXvT99fYQE+QPP7aRgo3QIDAQAB\n"
+            "AoGAVSLbE8HsyN+fHwDbuo4I1Wa7BRz33xQWLBfe9TvyUzOGm0WnkgmKn3LTacdh\n"
+            "GxgrdBZXSun6PVtV8I0im5DxyVaNdi33sp+PIkZU386f1VUqcnYnmgsnsUQEBJQu\n"
+            "fUZmgNM+bfR+Rfli4Mew8lQ0sorZ+d2/5fsM0g80Qhi5M3ECQQDvXeCyrcy0u/HZ\n"
+            "FNjIloyXaAIvavZ6Lc6gfznCSfHc5YwplOY7dIWp8FRRJcyXkA370l5dJ0EXj5Gx\n"
+            "udV9QQ43AkEA34+RxjRk4DT7Zo+tbM/Fkoi7jh1/0hFkU5NDHweJeH/mJseiHtsH\n"
+            "KOcPGtEGBBqT2KNPWVz4Fj19LiUmmjWXiwJBAIBs49O5/+ywMdAAqVblv0S0nweF\n"
+            "4fwne4cM+5ZMSiH0XsEojGY13EkTEon/N8fRmE8VzV85YmkbtFWgmPR85P0CQQCs\n"
+            "elWbN10EZZv3+q1wH7RsYzVgZX3yEhz3JcxJKkVzRCnKjYaUi6MweWN76vvbOq4K\n"
+            "G6Tiawm0Duh/K4ZmvyYVAkBppE5RRQqXiv1KF9bArcAJHvLm0vnHPpf1yIQr5bW6\n"
+            "njBuL4qcxlaKJVGRXT7yFtj2fj0gv3914jY2suWqp8XJ\n"
+            "-----END RSA PRIVATE KEY-----\n"
+        )
 
         srv_private_key = parsePEMKey(srv_raw_key, private=True)
         srv_cert_chain = X509CertChain([X509().parse(srv_raw_certificate)])
 
         srv_record_layer._handshakeStart(client=False)
 
-        srv_record_layer.version = (3,3)
+        srv_record_layer.version = (3, 3)
 
-        for result in srv_record_layer._getMsg(ContentType.handshake,
-                HandshakeType.client_hello):
-            if result in (0,1):
+        for result in srv_record_layer._getMsg(
+            ContentType.handshake, HandshakeType.client_hello
+        ):
+            if result in (0, 1):
                 raise Exception("blocking socket")
             else:
                 break
@@ -656,16 +715,21 @@ class TestTLSRecordLayer(unittest.TestCase):
         srv_session_id = bytearray(0)
 
         srv_server_hello = ServerHello().create(
-                (3,3), bytearray(32), srv_session_id, srv_cipher_suite,
-                CertificateType.x509, None, None)
+            (3, 3),
+            bytearray(32),
+            srv_session_id,
+            srv_cipher_suite,
+            CertificateType.x509,
+            None,
+            None,
+        )
 
         srv_msgs = []
         srv_msgs.append(srv_server_hello)
-        srv_msgs.append(Certificate(CertificateType.x509).
-                create(srv_cert_chain))
+        srv_msgs.append(Certificate(CertificateType.x509).create(srv_cert_chain))
         srv_msgs.append(ServerHelloDone())
         for result in srv_record_layer._sendMsgs(srv_msgs):
-            if result in (0,1):
+            if result in (0, 1):
                 raise Exception("blocking socket")
             else:
                 break
@@ -675,9 +739,10 @@ class TestTLSRecordLayer(unittest.TestCase):
         # client part
         #
 
-        for result in record_layer._getMsg(ContentType.handshake,
-                HandshakeType.server_hello):
-            if result in (0,1):
+        for result in record_layer._getMsg(
+            ContentType.handshake, HandshakeType.server_hello
+        ):
+            if result in (0, 1):
                 raise Exception("blocking socket")
             else:
                 break
@@ -685,9 +750,10 @@ class TestTLSRecordLayer(unittest.TestCase):
         server_hello = result
         self.assertEqual(ServerHello, type(server_hello))
 
-        for result in record_layer._getMsg(ContentType.handshake,
-                HandshakeType.certificate, CertificateType.x509):
-            if result in (0,1):
+        for result in record_layer._getMsg(
+            ContentType.handshake, HandshakeType.certificate, CertificateType.x509
+        ):
+            if result in (0, 1):
                 raise Exception("blocking socket")
             else:
                 break
@@ -695,9 +761,10 @@ class TestTLSRecordLayer(unittest.TestCase):
         server_certificate = result
         self.assertEqual(Certificate, type(server_certificate))
 
-        for result in record_layer._getMsg(ContentType.handshake,
-                HandshakeType.server_hello_done):
-            if result in (0,1):
+        for result in record_layer._getMsg(
+            ContentType.handshake, HandshakeType.server_hello_done
+        ):
+            if result in (0, 1):
                 raise Exception("blocking socket")
             else:
                 break
@@ -708,49 +775,54 @@ class TestTLSRecordLayer(unittest.TestCase):
         public_key = server_certificate.cert_chain.getEndEntityPublicKey()
 
         premasterSecret = bytearray(48)
-        premasterSecret[0] = 3 # 'cause we negotiatied TLSv1.2
+        premasterSecret[0] = 3  # 'cause we negotiatied TLSv1.2
         premasterSecret[1] = 3
 
         encryptedPreMasterSecret = public_key.encrypt(premasterSecret)
 
         client_key_exchange = ClientKeyExchange(
-                CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
-                (3,3))
+            CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA, (3, 3)
+        )
         client_key_exchange.createRSA(encryptedPreMasterSecret)
 
         for result in record_layer._sendMsg(client_key_exchange):
-            if result in (0,1):
+            if result in (0, 1):
                 raise Exception("blocking socket")
             else:
                 break
 
-        master_secret = calc_key((3, 3), premasterSecret,
-                                CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
-                                b"master secret",
-                                client_random=client_hello.random,
-                                server_random=server_hello.random,
-                                output_length=48)
+        master_secret = calc_key(
+            (3, 3),
+            premasterSecret,
+            CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
+            b"master secret",
+            client_random=client_hello.random,
+            server_random=server_hello.random,
+            output_length=48,
+        )
 
         record_layer._calcPendingStates(
-                CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
-                master_secret, client_hello.random, server_hello.random,
-                None)
+            CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
+            master_secret,
+            client_hello.random,
+            server_hello.random,
+            None,
+        )
 
         for result in record_layer._sendMsg(ChangeCipherSpec()):
-            if result in (0,1):
+            if result in (0, 1):
                 raise Exception("blocking socket")
             else:
                 break
 
         record_layer._changeWriteState()
 
-        handshake_hashes = record_layer._handshake_hash.digest('sha256')
-        verify_data = PRF_1_2(master_secret, b'client finished',
-                handshake_hashes, 12)
+        handshake_hashes = record_layer._handshake_hash.digest("sha256")
+        verify_data = PRF_1_2(master_secret, b"client finished", handshake_hashes, 12)
 
-        finished = Finished((3,3)).create(verify_data)
+        finished = Finished((3, 3)).create(verify_data)
         for result in record_layer._sendMsg(finished):
-            if result in (0,1):
+            if result in (0, 1):
                 raise Exception("blocking socket")
             else:
                 break
@@ -759,10 +831,10 @@ class TestTLSRecordLayer(unittest.TestCase):
         # server part
         #
 
-        for result in srv_record_layer._getMsg(ContentType.handshake,
-                HandshakeType.client_key_exchange,
-                srv_cipher_suite):
-            if result in (0,1):
+        for result in srv_record_layer._getMsg(
+            ContentType.handshake, HandshakeType.client_key_exchange, srv_cipher_suite
+        ):
+            if result in (0, 1):
                 raise Exception("blocking socket")
             else:
                 break
@@ -770,25 +842,31 @@ class TestTLSRecordLayer(unittest.TestCase):
         srv_client_key_exchange = result
 
         srv_premaster_secret = srv_private_key.decrypt(
-                srv_client_key_exchange.encryptedPreMasterSecret)
+            srv_client_key_exchange.encryptedPreMasterSecret
+        )
 
-        self.assertEqual(bytearray(b'\x03\x03' + b'\x00'*46),
-                srv_premaster_secret)
+        self.assertEqual(bytearray(b"\x03\x03" + b"\x00" * 46), srv_premaster_secret)
 
-        srv_master_secret = calc_key(srv_record_layer.version,
-                                    srv_premaster_secret,
-                                    CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
-                                    b"master secret",
-                                    client_random=srv_client_hello.random,
-                                    server_random=srv_server_hello.random,
-                                    output_length=48)
+        srv_master_secret = calc_key(
+            srv_record_layer.version,
+            srv_premaster_secret,
+            CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
+            b"master secret",
+            client_random=srv_client_hello.random,
+            server_random=srv_server_hello.random,
+            output_length=48,
+        )
 
-        srv_record_layer._calcPendingStates(srv_cipher_suite,
-                srv_master_secret, srv_client_hello.random,
-                srv_server_hello.random, None)
+        srv_record_layer._calcPendingStates(
+            srv_cipher_suite,
+            srv_master_secret,
+            srv_client_hello.random,
+            srv_server_hello.random,
+            None,
+        )
 
         for result in srv_record_layer._getMsg(ContentType.change_cipher_spec):
-            if result in (0,1):
+            if result in (0, 1):
                 raise Exception("blocking socket")
             else:
                 break
@@ -798,13 +876,15 @@ class TestTLSRecordLayer(unittest.TestCase):
 
         srv_record_layer._changeReadState()
 
-        srv_handshakeHashes = srv_record_layer._handshake_hash.digest('sha256')
-        srv_verify_data = PRF_1_2(srv_master_secret, b"client finished",
-                srv_handshakeHashes, 12)
+        srv_handshakeHashes = srv_record_layer._handshake_hash.digest("sha256")
+        srv_verify_data = PRF_1_2(
+            srv_master_secret, b"client finished", srv_handshakeHashes, 12
+        )
 
-        for result in srv_record_layer._getMsg(ContentType.handshake,
-                HandshakeType.finished):
-            if result in (0,1):
+        for result in srv_record_layer._getMsg(
+            ContentType.handshake, HandshakeType.finished
+        ):
+            if result in (0, 1):
                 raise Exception("blocking socket")
             else:
                 break
@@ -813,20 +893,22 @@ class TestTLSRecordLayer(unittest.TestCase):
         self.assertEqual(srv_verify_data, srv_finished.verify_data)
 
         for result in srv_record_layer._sendMsg(ChangeCipherSpec()):
-            if result in (0,1):
+            if result in (0, 1):
                 raise Exception("blocking socket")
             else:
                 break
 
         srv_record_layer._changeWriteState()
 
-        srv_handshakeHashes = srv_record_layer._handshake_hash.digest('sha256')
-        srv_verify_data = PRF_1_2(srv_master_secret, b"server finished",
-                srv_handshakeHashes, 12)
+        srv_handshakeHashes = srv_record_layer._handshake_hash.digest("sha256")
+        srv_verify_data = PRF_1_2(
+            srv_master_secret, b"server finished", srv_handshakeHashes, 12
+        )
 
-        for result in srv_record_layer._sendMsg(Finished((3,3)).create(
-                srv_verify_data)):
-            if result in (0,1):
+        for result in srv_record_layer._sendMsg(
+            Finished((3, 3)).create(srv_verify_data)
+        ):
+            if result in (0, 1):
                 raise Exception("blocking socket")
             else:
                 break
@@ -838,7 +920,7 @@ class TestTLSRecordLayer(unittest.TestCase):
         #
 
         for result in record_layer._getMsg(ContentType.change_cipher_spec):
-            if result in (0,1):
+            if result in (0, 1):
                 raise Exception("blocking socket")
             else:
                 break
@@ -848,13 +930,15 @@ class TestTLSRecordLayer(unittest.TestCase):
 
         record_layer._changeReadState()
 
-        handshake_hashes = record_layer._handshake_hash.digest('sha256')
-        server_verify_data = PRF_1_2(master_secret, b'server finished',
-                handshake_hashes, 12)
+        handshake_hashes = record_layer._handshake_hash.digest("sha256")
+        server_verify_data = PRF_1_2(
+            master_secret, b"server finished", handshake_hashes, 12
+        )
 
-        for result in record_layer._getMsg(ContentType.handshake,
-                HandshakeType.finished):
-            if result in (0,1):
+        for result in record_layer._getMsg(
+            ContentType.handshake, HandshakeType.finished
+        ):
+            if result in (0, 1):
                 raise Exception("blocking socket")
             else:
                 break
@@ -866,11 +950,11 @@ class TestTLSRecordLayer(unittest.TestCase):
         record_layer._handshakeDone(resumed=False)
 
         # try sending data
-        record_layer.write(bytearray(b'text\n'))
+        record_layer.write(bytearray(b"text\n"))
 
         # try recieving data
         data = srv_record_layer.read(10)
-        self.assertEqual(data, bytearray(b'text\n'))
+        self.assertEqual(data, bytearray(b"text\n"))
 
         record_layer.close()
         srv_record_layer.close()
@@ -882,7 +966,7 @@ class TestTLSRecordLayer(unittest.TestCase):
         record_layer.closed = True
 
         with self.assertRaises(TLSClosedConnectionError):
-            record_layer.send_heartbeat_request(b'0', 1)
+            record_layer.send_heartbeat_request(b"0", 1)
 
     def test_write_heartbeat_with_incorrect_settings(self):
         mock_sock = MockSocket(bytearray(0))
@@ -893,17 +977,16 @@ class TestTLSRecordLayer(unittest.TestCase):
         record_layer.heartbeat_can_send = True
 
         with self.assertRaises(TLSInternalError):
-            record_layer.send_heartbeat_request(b'0', 1)
+            record_layer.send_heartbeat_request(b"0", 1)
 
         record_layer.heartbeat_supported = True
         record_layer.heartbeat_can_send = False
 
         with self.assertRaises(TLSInternalError):
-             record_layer.send_heartbeat_request(b'0', 1)
+            record_layer.send_heartbeat_request(b"0", 1)
 
     @unittest.skip("needs external TLS server")
     def test_full_connection_with_external_server(self):
-
         # TODO test is slow (100ms) move to integration test suite
         #
         # start a regular TLS server locally before running this test
@@ -915,20 +998,29 @@ class TestTLSRecordLayer(unittest.TestCase):
         record_layer = TLSRecordLayer(sock)
 
         record_layer._handshakeStart(client=True)
-        record_layer.version = (3,3)
+        record_layer.version = (3, 3)
 
         client_hello = ClientHello()
-        client_hello = client_hello.create((3,3), bytearray(32),
-                bytearray(0), [CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA],
-                None, None, False, False, None)
+        client_hello = client_hello.create(
+            (3, 3),
+            bytearray(32),
+            bytearray(0),
+            [CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA],
+            None,
+            None,
+            False,
+            False,
+            None,
+        )
 
         for result in record_layer._sendMsg(client_hello):
-            if result in (0,1):
+            if result in (0, 1):
                 raise Exception("blocking socket")
 
-        for result in record_layer._getMsg(ContentType.handshake,
-                HandshakeType.server_hello):
-            if result in (0,1):
+        for result in record_layer._getMsg(
+            ContentType.handshake, HandshakeType.server_hello
+        ):
+            if result in (0, 1):
                 raise Exception("blocking socket")
             else:
                 break
@@ -936,9 +1028,10 @@ class TestTLSRecordLayer(unittest.TestCase):
         server_hello = result
         self.assertEqual(ServerHello, type(server_hello))
 
-        for result in record_layer._getMsg(ContentType.handshake,
-                HandshakeType.certificate, CertificateType.x509):
-            if result in (0,1):
+        for result in record_layer._getMsg(
+            ContentType.handshake, HandshakeType.certificate, CertificateType.x509
+        ):
+            if result in (0, 1):
                 raise Exception("blocking socket")
             else:
                 break
@@ -946,9 +1039,10 @@ class TestTLSRecordLayer(unittest.TestCase):
         server_certificate = result
         self.assertEqual(Certificate, type(server_certificate))
 
-        for result in record_layer._getMsg(ContentType.handshake,
-                HandshakeType.server_hello_done):
-            if result in (0,1):
+        for result in record_layer._getMsg(
+            ContentType.handshake, HandshakeType.server_hello_done
+        ):
+            if result in (0, 1):
                 raise Exception("blocking socket")
             else:
                 break
@@ -959,55 +1053,60 @@ class TestTLSRecordLayer(unittest.TestCase):
         public_key = server_certificate.cert_chain.getEndEntityPublicKey()
 
         premasterSecret = bytearray(48)
-        premasterSecret[0] = 3 # 'cause we negotiatied TLSv1.2
+        premasterSecret[0] = 3  # 'cause we negotiatied TLSv1.2
         premasterSecret[1] = 3
 
         encryptedPreMasterSecret = public_key.encrypt(premasterSecret)
 
         client_key_exchange = ClientKeyExchange(
-                CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
-                (3,3))
+            CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA, (3, 3)
+        )
         client_key_exchange.createRSA(encryptedPreMasterSecret)
 
         for result in record_layer._sendMsg(client_key_exchange):
-            if result in (0,1):
+            if result in (0, 1):
                 raise Exception("blocking socket")
             else:
                 break
 
-        master_secret = calc_key((3, 3), premasterSecret,
-                                CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
-                                b"master secret",
-                                client_random=client_hello.random,
-                                server_random=server_hello.random,
-                                output_length=48)
+        master_secret = calc_key(
+            (3, 3),
+            premasterSecret,
+            CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
+            b"master secret",
+            client_random=client_hello.random,
+            server_random=server_hello.random,
+            output_length=48,
+        )
 
         record_layer._calcPendingStates(
-                CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
-                master_secret, client_hello.random, server_hello.random,
-                None)
+            CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
+            master_secret,
+            client_hello.random,
+            server_hello.random,
+            None,
+        )
 
         for result in record_layer._sendMsg(ChangeCipherSpec()):
-            if result in (0,1):
+            if result in (0, 1):
                 raise Exception("blocking socket")
             else:
                 break
 
         record_layer._changeWriteState()
 
-        handshake_hashes = record_layer._handshake_hash.digest('sha256')
-        verify_data = PRF_1_2(master_secret, b'client finished',
-                handshake_hashes, 12)
+        handshake_hashes = record_layer._handshake_hash.digest("sha256")
+        verify_data = PRF_1_2(master_secret, b"client finished", handshake_hashes, 12)
 
-        finished = Finished((3,3)).create(verify_data)
+        finished = Finished((3, 3)).create(verify_data)
         for result in record_layer._sendMsg(finished):
-            if result in (0,1):
+            if result in (0, 1):
                 raise Exception("blocking socket")
             else:
                 break
 
         for result in record_layer._getMsg(ContentType.change_cipher_spec):
-            if result in (0,1):
+            if result in (0, 1):
                 raise Exception("blocking socket")
             else:
                 break
@@ -1017,13 +1116,15 @@ class TestTLSRecordLayer(unittest.TestCase):
 
         record_layer._changeReadState()
 
-        handshake_hashes = record_layer._handshake_hash.digest('sha256')
-        server_verify_data = PRF_1_2(master_secret, b'server finished',
-                handshake_hashes, 12)
+        handshake_hashes = record_layer._handshake_hash.digest("sha256")
+        server_verify_data = PRF_1_2(
+            master_secret, b"server finished", handshake_hashes, 12
+        )
 
-        for result in record_layer._getMsg(ContentType.handshake,
-                HandshakeType.finished):
-            if result in (0,1):
+        for result in record_layer._getMsg(
+            ContentType.handshake, HandshakeType.finished
+        ):
+            if result in (0, 1):
                 raise Exception("blocking socket")
             else:
                 break
@@ -1034,7 +1135,6 @@ class TestTLSRecordLayer(unittest.TestCase):
 
         record_layer._handshakeDone(resumed=False)
 
-        record_layer.write(bytearray(b'text\n'))
+        record_layer.write(bytearray(b"text\n"))
 
         record_layer.close()
-

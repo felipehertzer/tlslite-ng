@@ -11,6 +11,7 @@ except ImportError:
 
 from tlslite.utils.lists import getFirstMatching, to_str_delimiter
 
+
 class TestGetFirstMatching(unittest.TestCase):
     def test_empty_list(self):
         self.assertIsNone(getFirstMatching([], [1, 2, 3]))
@@ -49,5 +50,4 @@ class TestToStrDelimiter(unittest.TestCase):
         self.assertEqual("12, 13 or 14", to_str_delimiter([12, 13, 14]))
 
     def test_with_strings(self):
-        self.assertEqual("abc, def or ghi",
-                         to_str_delimiter(['abc', 'def', 'ghi']))
+        self.assertEqual("abc, def or ghi", to_str_delimiter(["abc", "def", "ghi"]))

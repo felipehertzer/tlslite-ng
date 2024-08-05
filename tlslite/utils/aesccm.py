@@ -29,9 +29,8 @@ class AESCCM(object):
             assert len(self.key) == 32 and self.tagLength == 16
             self.name = "aes256ccm"
 
-        self._ctr = python_aes.new(self.key, 6, bytearray(b'\x00' * 16))
-        self._cbc = python_aes.new(self.key, 2, bytearray(b'\x00' * 16))
-
+        self._ctr = python_aes.new(self.key, 6, bytearray(b"\x00" * 16))
+        self._cbc = python_aes.new(self.key, 2, bytearray(b"\x00" * 16))
 
     def _cbcmac_calc(self, nonce, aad, msg):
         L = 15 - len(nonce)
@@ -47,14 +46,14 @@ class AESCCM(object):
 
         aad_len_encoded = bytearray()
         if len(aad) > 0:
-            if len(aad) < (2 ** 16 - 2 ** 8):
+            if len(aad) < (2**16 - 2**8):
                 oct_size = 2
-            elif len(aad) < (2 ** 32):
+            elif len(aad) < (2**32):
                 oct_size = 4
-                aad_len_encoded = b'\xFF\xFE'
+                aad_len_encoded = b"\xFF\xFE"
             else:
                 oct_size = 8
-                aad_len_encoded = b'\xFF\xFF'
+                aad_len_encoded = b"\xFF\xFF"
 
             aad_len_encoded += numberToByteArray(len(aad), oct_size)
 
@@ -65,14 +64,14 @@ class AESCCM(object):
 
         # We need to pad with zeroes before and after msg blocks are added
         self._pad_with_zeroes(mac_data, 16)
-        if msg != b'':
+        if msg != b"":
             mac_data += msg
             self._pad_with_zeroes(mac_data, 16)
 
         # The mac data is now constructed and
         # we need to run in through AES-CBC with 0 IV
 
-        self._cbc.IV = bytearray(b'\x00' * 16)
+        self._cbc.IV = bytearray(b"\x00" * 16)
         cbcmac = self._cbc.encrypt(mac_data)
 
         # If the tagLength has default value 16, we return
@@ -81,11 +80,10 @@ class AESCCM(object):
         if self.tagLength == 16:
             t = cbcmac[-16:]
         else:
-            t = cbcmac[-16:-(16-self.tagLength)]
+            t = cbcmac[-16 : -(16 - self.tagLength)]
         return t
 
     def seal(self, nonce, msg, aad):
-
         if len(nonce) != 12:
             raise ValueError("Bad nonce length")
 
@@ -113,7 +111,6 @@ class AESCCM(object):
         return ciphertext
 
     def open(self, nonce, ciphertext, aad):
-
         if len(nonce) != 12:
             raise ValueError("Bad nonce length")
         if self.tagLength == 16 and len(ciphertext) < 16:
@@ -128,7 +125,7 @@ class AESCCM(object):
 
         s_0 = bytearray([flags]) + nonce + numberToByteArray(0, L)
 
-        auth_value = ciphertext[-self.tagLength:]
+        auth_value = ciphertext[-self.tagLength :]
 
         # We decrypt the auth value
         self._ctr.counter = s_0
@@ -139,9 +136,8 @@ class AESCCM(object):
             self._pad_with_zeroes(auth_value, 16)
             received_mac = self._ctr.decrypt(auth_value)[:8]
         msg = self._ctr.decrypt(ciphertext)
-        msg = msg[:-self.tagLength]
+        msg = msg[: -self.tagLength]
         computed_mac = self._cbcmac_calc(nonce, aad, msg)
-
 
         # Compare the mac vlaue is the same as the one we computed
         if received_mac != computed_mac:
@@ -152,4 +148,4 @@ class AESCCM(object):
     def _pad_with_zeroes(data, size):
         if len(data) % size != 0:
             zeroes_to_add = size - (len(data) % size)
-            data += b'\x00' * zeroes_to_add
+            data += b"\x00" * zeroes_to_add

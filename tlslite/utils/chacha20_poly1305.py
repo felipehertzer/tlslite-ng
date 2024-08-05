@@ -12,6 +12,7 @@ from .chacha import ChaCha
 from .poly1305 import Poly1305
 import struct
 
+
 class CHACHA20_POLY1305(object):
 
     """Pure python implementation of ChaCha20/Poly1305 AEAD cipher"""
@@ -43,7 +44,7 @@ class CHACHA20_POLY1305(object):
         if len(data) % 16 == 0:
             return bytearray(0)
         else:
-            return bytearray(16-(len(data)%16))
+            return bytearray(16 - (len(data) % 16))
 
     def seal(self, nonce, plaintext, data):
         """
@@ -59,8 +60,8 @@ class CHACHA20_POLY1305(object):
 
         mac_data = data + self.pad16(data)
         mac_data += ciphertext + self.pad16(ciphertext)
-        mac_data += struct.pack('<Q', len(data))
-        mac_data += struct.pack('<Q', len(ciphertext))
+        mac_data += struct.pack("<Q", len(data))
+        mac_data += struct.pack("<Q", len(ciphertext))
         tag = Poly1305(otk).create_tag(mac_data)
 
         return ciphertext + tag
@@ -84,8 +85,8 @@ class CHACHA20_POLY1305(object):
 
         mac_data = data + self.pad16(data)
         mac_data += ciphertext + self.pad16(ciphertext)
-        mac_data += struct.pack('<Q', len(data))
-        mac_data += struct.pack('<Q', len(ciphertext))
+        mac_data += struct.pack("<Q", len(data))
+        mac_data += struct.pack("<Q", len(ciphertext))
         tag = Poly1305(otk).create_tag(mac_data)
 
         if not ct_compare_digest(tag, expected_tag):

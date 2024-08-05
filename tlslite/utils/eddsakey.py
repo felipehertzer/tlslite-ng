@@ -16,6 +16,7 @@ class EdDSAKey(object):
     directly.  Instead, use the factory functions in
     :py:class:`~tlslite.utils.keyfactory`.
     """
+
     def __len__(self):
         """Return the size of the order of the curve of this key, in bits.
 
@@ -59,8 +60,7 @@ class EdDSAKey(object):
         """
         return self._hashAndSign(data)
 
-    def hashAndVerify(self, sig_bytes, data, rsaScheme=None, hAlg=None,
-                      sLen=None):
+    def hashAndVerify(self, sig_bytes, data, rsaScheme=None, hAlg=None, sLen=None):
         """Hash and verify the passed-in bytes with the signature.
 
         This verifies an EdDSA signature on the passed-in data
@@ -106,12 +106,12 @@ class EdDSAKey(object):
         :type saltLen: int
         :param saltLen: Ignored
         """
-        raise TypeError("Only Pure EdDSA signatures are supported, use "
-                        "hashAndSign() instead.")
+        raise TypeError(
+            "Only Pure EdDSA signatures are supported, use " "hashAndSign() instead."
+        )
 
     @staticmethod
-    def verify(self, sigBytes, bytes, padding=None, hashAlg=None,
-               saltLen=None):
+    def verify(self, sigBytes, bytes, padding=None, hashAlg=None, saltLen=None):
         """Verify the passed-in bytes with the signature.
 
         Note: this method is unsupported for EdDSA keys, as pre-hash
@@ -127,8 +127,9 @@ class EdDSAKey(object):
         :type padding: str
         :param padding: Ignored
         """
-        raise TypeError("Only Pure EdDSA signatures are supported, use "
-                        "hashAndVerify() instead.")
+        raise TypeError(
+            "Only Pure EdDSA signatures are supported, use " "hashAndVerify() instead."
+        )
 
     def acceptsPassword(self):
         """Return True if the write() method accepts a password for use

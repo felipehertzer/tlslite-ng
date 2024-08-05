@@ -1,4 +1,4 @@
-# Authors: 
+# Authors:
 #   Trevor Perrin
 #   Martin von Loewis - python 3 port
 #
@@ -14,6 +14,7 @@ except ImportError:
 import threading
 import time
 import logging
+
 
 class BaseDB(object):
     def __init__(self, filename, type):
@@ -34,16 +35,15 @@ class BaseDB(object):
         logger = logging.getLogger(__name__)
 
         if self.filename:
-            logger.debug('server %s - create - will open db', time.time())
-            self.db = anydbm.open(self.filename, "n") #raises anydbm.error
-            logger.debug('server %s - create - setting type', time.time())
+            logger.debug("server %s - create - will open db", time.time())
+            self.db = anydbm.open(self.filename, "n")  # raises anydbm.error
+            logger.debug("server %s - create - setting type", time.time())
             self.db["--Reserved--type"] = self.type
-            logger.debug('server %s - create - syncing', time.time())
+            logger.debug("server %s - create - syncing", time.time())
             self.db.sync()
-            logger.debug('server %s - create - fun exit', time.time())
+            logger.debug("server %s - create - fun exit", time.time())
         else:
-            logger.debug('server %s - create - using dict() as DB',
-                         time.time())
+            logger.debug("server %s - create - using dict() as DB", time.time())
             self.db = {}
 
     def open(self):
@@ -55,7 +55,7 @@ class BaseDB(object):
         """
         if not self.filename:
             raise ValueError("Can only open on-disk databases")
-        self.db = anydbm.open(self.filename, "w") #raises anydbm.error
+        self.db = anydbm.open(self.filename, "w")  # raises anydbm.error
         try:
             if self.db["--Reserved--type"] != self.type:
                 raise ValueError("Not a %s database" % self.type)
@@ -94,7 +94,7 @@ class BaseDB(object):
 
         self.lock.acquire()
         try:
-            del(self.db[username])
+            del self.db[username]
             if self.filename:
                 self.db.sync()
         finally:

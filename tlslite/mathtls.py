@@ -1,4 +1,4 @@
-# Authors: 
+# Authors:
 #   Trevor Perrin
 #   Dave Baggett (Arcode Corporation) - MD5 support for MAC_SSL
 #   Yngve Pettersen (ported by Paul Sokolovsky) - TLS 1.2
@@ -30,31 +30,45 @@ You should use RFC7919_GROUPS for well-known secure groups.
 # RFC 2409 section 6.1, First Oakley Group, 768 bit MODP
 RFC2409_GROUP1 = (
     2,
-    int(remove_whitespace("""
+    int(
+        remove_whitespace(
+            """
          FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1
          29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD
          EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245
-         E485B576 625E7EC6 F44C42E9 A63A3620 FFFFFFFF FFFFFFFF"""), 16))
+         E485B576 625E7EC6 F44C42E9 A63A3620 FFFFFFFF FFFFFFFF"""
+        ),
+        16,
+    ),
+)
 FFDHE_PARAMETERS["RFC2409 group 1"] = RFC2409_GROUP1
 
 
 # RFC 2409 section 6.2, Second Oakley Group, 1024 bit MODP
 RFC2409_GROUP2 = (
     2,
-    int(remove_whitespace("""
+    int(
+        remove_whitespace(
+            """
          FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1
          29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD
          EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245
          E485B576 625E7EC6 F44C42E9 A637ED6B 0BFF5CB6 F406B7ED
          EE386BFB 5A899FA5 AE9F2411 7C4B1FE6 49286651 ECE65381
-         FFFFFFFF FFFFFFFF"""), 16))
+         FFFFFFFF FFFFFFFF"""
+        ),
+        16,
+    ),
+)
 FFDHE_PARAMETERS["RFC2409 group 2"] = RFC2409_GROUP2
 
 
 # RFC 3526 section 2, 1536 bit MODP
 RFC3526_GROUP5 = (
     2,
-    int(remove_whitespace("""
+    int(
+        remove_whitespace(
+            """
       FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1
       29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD
       EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245
@@ -62,14 +76,20 @@ RFC3526_GROUP5 = (
       EE386BFB 5A899FA5 AE9F2411 7C4B1FE6 49286651 ECE45B3D
       C2007CB8 A163BF05 98DA4836 1C55D39A 69163FA8 FD24CF5F
       83655D23 DCA3AD96 1C62F356 208552BB 9ED52907 7096966D
-      670C354E 4ABC9804 F1746C08 CA237327 FFFFFFFF FFFFFFFF"""), 16))
+      670C354E 4ABC9804 F1746C08 CA237327 FFFFFFFF FFFFFFFF"""
+        ),
+        16,
+    ),
+)
 FFDHE_PARAMETERS["RFC3526 group 5"] = RFC3526_GROUP5
 
 
 # RFC 3526 section 3, 2048 bit MODP
 RFC3526_GROUP14 = (
     2,
-    int(remove_whitespace("""
+    int(
+        remove_whitespace(
+            """
       FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1
       29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD
       EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245
@@ -80,14 +100,20 @@ RFC3526_GROUP14 = (
       670C354E 4ABC9804 F1746C08 CA18217C 32905E46 2E36CE3B
       E39E772C 180E8603 9B2783A2 EC07A28F B5C55DF0 6F4C52C9
       DE2BCBF6 95581718 3995497C EA956AE5 15D22618 98FA0510
-      15728E5A 8AACAA68 FFFFFFFF FFFFFFFF"""), 16))
+      15728E5A 8AACAA68 FFFFFFFF FFFFFFFF"""
+        ),
+        16,
+    ),
+)
 FFDHE_PARAMETERS["RFC3526 group 14"] = RFC3526_GROUP14
 
 
 # RFC 3526 section 4, 3072 bit MODP
 RFC3526_GROUP15 = (
     2,
-    int(remove_whitespace("""
+    int(
+        remove_whitespace(
+            """
       FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1
       29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD
       EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245
@@ -103,14 +129,20 @@ RFC3526_GROUP15 = (
       ABF5AE8C DB0933D7 1E8C94E0 4A25619D CEE3D226 1AD2EE6B
       F12FFA06 D98A0864 D8760273 3EC86A64 521F2B18 177B200C
       BBE11757 7A615D6C 770988C0 BAD946E2 08E24FA0 74E5AB31
-      43DB5BFC E0FD108E 4B82D120 A93AD2CA FFFFFFFF FFFFFFFF"""), 16))
+      43DB5BFC E0FD108E 4B82D120 A93AD2CA FFFFFFFF FFFFFFFF"""
+        ),
+        16,
+    ),
+)
 FFDHE_PARAMETERS["RFC3526 group 15"] = RFC3526_GROUP15
 
 
 # RFC 3526 section 5, 4096 bit MODP
 RFC3526_GROUP16 = (
     2,
-    int(remove_whitespace("""
+    int(
+        remove_whitespace(
+            """
       FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1
       29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD
       EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245
@@ -132,14 +164,20 @@ RFC3526_GROUP16 = (
       287C5947 4E6BC05D 99B2964F A090C3A2 233BA186 515BE7ED
       1F612970 CEE2D7AF B81BDD76 2170481C D0069127 D5B05AA9
       93B4EA98 8D8FDDC1 86FFB7DC 90A6C08F 4DF435C9 34063199
-      FFFFFFFF FFFFFFFF"""), 16))
+      FFFFFFFF FFFFFFFF"""
+        ),
+        16,
+    ),
+)
 FFDHE_PARAMETERS["RFC3526 group 16"] = RFC3526_GROUP16
 
 
 # RFC 3526 section 6, 6144 bit MODP
 RFC3526_GROUP17 = (
     2,
-    int(remove_whitespace("""
+    int(
+        remove_whitespace(
+            """
    FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1 29024E08
    8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD EF9519B3 CD3A431B
    302B0A6D F25F1437 4FE1356D 6D51C245 E485B576 625E7EC6 F44C42E9
@@ -167,14 +205,20 @@ RFC3526_GROUP17 = (
    CC8F6D7E BF48E1D8 14CC5ED2 0F8037E0 A79715EE F29BE328 06A1D58B
    B7C5DA76 F550AA3D 8A1FBFF0 EB19CCB1 A313D55C DA56C9EC 2EF29632
    387FE8D7 6E3C0468 043E8F66 3F4860EE 12BF2D5B 0B7474D6 E694F91E
-   6DCC4024 FFFFFFFF FFFFFFFF"""), 16))
+   6DCC4024 FFFFFFFF FFFFFFFF"""
+        ),
+        16,
+    ),
+)
 FFDHE_PARAMETERS["RFC3526 group 17"] = RFC3526_GROUP17
 
 
 # RFC 3526 section 7, 8192 bit MODP
 RFC3526_GROUP18 = (
     2,
-    int(remove_whitespace("""
+    int(
+        remove_whitespace(
+            """
       FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1
       29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD
       EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245
@@ -217,7 +261,11 @@ RFC3526_GROUP18 = (
       B1D510BD 7EE74D73 FAF36BC3 1ECFA268 359046F4 EB879F92
       4009438B 481C6CD7 889A002E D5EE382B C9190DA6 FC026E47
       9558E447 5677E9AA 9E3050E2 765694DF C81F56E8 80B96E71
-      60C980DD 98EDD3DF FFFFFFFF FFFFFFFF"""), 16))
+      60C980DD 98EDD3DF FFFFFFFF FFFFFFFF"""
+        ),
+        16,
+    ),
+)
 FFDHE_PARAMETERS["RFC3526 group 18"] = RFC3526_GROUP18
 
 
@@ -225,26 +273,43 @@ FFDHE_PARAMETERS["RFC3526 group 18"] = RFC3526_GROUP18
 # Formatted as in the RFC
 goodGroupParameters = [
     # RFC 5054, 1, 1024-bit Group
-    (2, int(remove_whitespace(
-        """
+    (
+        2,
+        int(
+            remove_whitespace(
+                """
           EEAF0AB9 ADB38DD6 9C33F80A FA8FC5E8 60726187 75FF3C0B 9EA2314C
           9C256576 D674DF74 96EA81D3 383B4813 D692C6E0 E0D5D8E2 50B98BE4
           8E495C1D 6089DAD1 5DC7D7B4 6154D6B6 CE8EF4AD 69B15D49 82559B29
           7BCF1885 C529F566 660E57EC 68EDBC3C 05726CC0 2FD4CBF4 976EAA9A
-          FD5138FE 8376435B 9FC61D2F C0EB06E3"""), 16)),
+          FD5138FE 8376435B 9FC61D2F C0EB06E3"""
+            ),
+            16,
+        ),
+    ),
     # RFC 5054, 2, 1536-bit Group
-    (2, int(remove_whitespace(
-        """
+    (
+        2,
+        int(
+            remove_whitespace(
+                """
           9DEF3CAF B939277A B1F12A86 17A47BBB DBA51DF4 99AC4C80 BEEEA961
           4B19CC4D 5F4F5F55 6E27CBDE 51C6A94B E4607A29 1558903B A0D0F843
           80B655BB 9A22E8DC DF028A7C EC67F0D0 8134B1C8 B9798914 9B609E0B
           E3BAB63D 47548381 DBC5B1FC 764E3F4B 53DD9DA1 158BFD3E 2B9C8CF5
           6EDF0195 39349627 DB2FD53D 24B7C486 65772E43 7D6C7F8C E442734A
           F7CCB7AE 837C264A E3A9BEB8 7F8A2FE9 B8B5292E 5A021FFF 5E91479E
-          8CE7A28C 2442C6F3 15180F93 499A234D CF76E3FE D135F9BB"""), 16)),
+          8CE7A28C 2442C6F3 15180F93 499A234D CF76E3FE D135F9BB"""
+            ),
+            16,
+        ),
+    ),
     # RFC 5054, 3, 2048-bit Group
-    (2, int(remove_whitespace(
-        """
+    (
+        2,
+        int(
+            remove_whitespace(
+                """
           AC6BDB41 324A9A9B F166DE5E 1389582F AF72B665 1987EE07 FC319294
           3DB56050 A37329CB B4A099ED 8193E075 7767A13D D52312AB 4B03310D
           CD7F48A9 DA04FD50 E8083969 EDB767B0 CF609517 9A163AB3 661A05FB
@@ -254,10 +319,17 @@ goodGroupParameters = [
           5EA77A27 75D2ECFA 032CFBDB F52FB378 61602790 04E57AE6 AF874E73
           03CE5329 9CCC041C 7BC308D8 2A5698F3 A8D0C382 71AE35F8 E9DBFBB6
           94B5C803 D89F7AE4 35DE236D 525F5475 9B65E372 FCD68EF2 0FA7111F
-          9E4AFF73"""), 16)),
+          9E4AFF73"""
+            ),
+            16,
+        ),
+    ),
     # RFC 5054, 4, 3072-bit Group
-    (5, int(remove_whitespace(
-        """
+    (
+        5,
+        int(
+            remove_whitespace(
+                """
           FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1 29024E08
           8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD EF9519B3 CD3A431B
           302B0A6D F25F1437 4FE1356D 6D51C245 E485B576 625E7EC6 F44C42E9
@@ -271,10 +343,17 @@ goodGroupParameters = [
           B3970F85 A6E1E4C7 ABF5AE8C DB0933D7 1E8C94E0 4A25619D CEE3D226
           1AD2EE6B F12FFA06 D98A0864 D8760273 3EC86A64 521F2B18 177B200C
           BBE11757 7A615D6C 770988C0 BAD946E2 08E24FA0 74E5AB31 43DB5BFC
-          E0FD108E 4B82D120 A93AD2CA FFFFFFFF FFFFFFFF"""), 16)),
+          E0FD108E 4B82D120 A93AD2CA FFFFFFFF FFFFFFFF"""
+            ),
+            16,
+        ),
+    ),
     # RFC 5054, 5, 4096-bit Group
-    (5, int(remove_whitespace(
-        """
+    (
+        5,
+        int(
+            remove_whitespace(
+                """
           FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1 29024E08
           8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD EF9519B3 CD3A431B
           302B0A6D F25F1437 4FE1356D 6D51C245 E485B576 625E7EC6 F44C42E9
@@ -293,10 +372,17 @@ goodGroupParameters = [
           04DE8EF9 2E8EFC14 1FBECAA6 287C5947 4E6BC05D 99B2964F A090C3A2
           233BA186 515BE7ED 1F612970 CEE2D7AF B81BDD76 2170481C D0069127
           D5B05AA9 93B4EA98 8D8FDDC1 86FFB7DC 90A6C08F 4DF435C9 34063199
-          FFFFFFFF FFFFFFFF"""), 16)),
+          FFFFFFFF FFFFFFFF"""
+            ),
+            16,
+        ),
+    ),
     # RFC 5054, 6, 6144-bit Group
-    (5, int(remove_whitespace(
-        """
+    (
+        5,
+        int(
+            remove_whitespace(
+                """
           FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1 29024E08
           8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD EF9519B3 CD3A431B
           302B0A6D F25F1437 4FE1356D 6D51C245 E485B576 625E7EC6 F44C42E9
@@ -324,10 +410,17 @@ goodGroupParameters = [
           CC8F6D7E BF48E1D8 14CC5ED2 0F8037E0 A79715EE F29BE328 06A1D58B
           B7C5DA76 F550AA3D 8A1FBFF0 EB19CCB1 A313D55C DA56C9EC 2EF29632
           387FE8D7 6E3C0468 043E8F66 3F4860EE 12BF2D5B 0B7474D6 E694F91E
-          6DCC4024 FFFFFFFF FFFFFFFF"""), 16)),
+          6DCC4024 FFFFFFFF FFFFFFFF"""
+            ),
+            16,
+        ),
+    ),
     # RFC 5054, 7, 8192-bit Group
-    (19, int(remove_whitespace(
-        """
+    (
+        19,
+        int(
+            remove_whitespace(
+                """
           FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1 29024E08
           8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD EF9519B3 CD3A431B
           302B0A6D F25F1437 4FE1356D 6D51C245 E485B576 625E7EC6 F44C42E9
@@ -364,7 +457,12 @@ goodGroupParameters = [
           0846851D F9AB4819 5DED7EA1 B1D510BD 7EE74D73 FAF36BC3 1ECFA268
           359046F4 EB879F92 4009438B 481C6CD7 889A002E D5EE382B C9190DA6
           FC026E47 9558E447 5677E9AA 9E3050E2 765694DF C81F56E8 80B96E71
-          60C980DD 98EDD3DF FFFFFFFF FFFFFFFF"""), 16))]
+          60C980DD 98EDD3DF FFFFFFFF FFFFFFFF"""
+            ),
+            16,
+        ),
+    ),
+]
 
 
 for num, group in enumerate(goodGroupParameters, 1):
@@ -384,27 +482,40 @@ goodGroupParameters.append((5, goodGroupParameters[6][1]))
 # INSECURE groups from RFC 5114, do NOT use
 # RFC 5114, section 2.1, 1024 bit MODP with 160-bit Prime Order Subgroup
 RFC5114_GROUP22 = (
-    int(remove_whitespace("""
+    int(
+        remove_whitespace(
+            """
        A4D1CBD5 C3FD3412 6765A442 EFB99905 F8104DD2 58AC507F
        D6406CFF 14266D31 266FEA1E 5C41564B 777E690F 5504F213
        160217B4 B01B886A 5E91547F 9E2749F4 D7FBD7D3 B9A92EE1
        909D0D22 63F80A76 A6A24C08 7A091F53 1DBF0A01 69B6A28A
        D662A4D1 8E73AFA3 2D779D59 18D08BC8 858F4DCE F97C2A24
-       855E6EEB 22B3B2E5"""), 16),
-    int(remove_whitespace("""
+       855E6EEB 22B3B2E5"""
+        ),
+        16,
+    ),
+    int(
+        remove_whitespace(
+            """
        B10B8F96 A080E01D DE92DE5E AE5D54EC 52C99FBC FB06A3C6
        9A6A9DCA 52D23B61 6073E286 75A23D18 9838EF1E 2EE652C0
        13ECB4AE A9061123 24975C3C D49B83BF ACCBDD7D 90C4BD70
        98488E9C 219A7372 4EFFD6FA E5644738 FAA31A4F F55BCCC0
        A151AF5F 0DC8B4BD 45BF37DF 365C1A65 E68CFDA7 6D4DA708
-       DF1FB2BC 2E4A4371"""), 16))
+       DF1FB2BC 2E4A4371"""
+        ),
+        16,
+    ),
+)
 FFDHE_PARAMETERS["RFC5114 group 22"] = RFC5114_GROUP22
 
 
 # RFC 5114, section 2.2, 2048 bit MODP with 224-bit Prime Order Subgroup
 # INSECURE, do not use
 RFC5114_GROUP23 = (
-    int(remove_whitespace("""
+    int(
+        remove_whitespace(
+            """
         AC4032EF 4F2D9AE3 9DF30B5C 8FFDAC50 6CDEBE7B 89998CAF
         74866A08 CFE4FFE3 A6824A4E 10B9A6F0 DD921F01 A70C4AFA
         AB739D77 00C29F52 C57DB17C 620A8652 BE5E9001 A8D66AD7
@@ -415,8 +526,13 @@ RFC5114_GROUP23 = (
         10E183ED D19963DD D9E263E4 770589EF 6AA21E7F 5F2FF381
         B539CCE3 409D13CD 566AFBB4 8D6C0191 81E1BCFE 94B30269
         EDFE72FE 9B6AA4BD 7B5A0F1C 71CFFF4C 19C418E1 F6EC0179
-        81BC087F 2A7065B3 84B890D3 191F2BFA"""), 16),
-    int(remove_whitespace("""
+        81BC087F 2A7065B3 84B890D3 191F2BFA"""
+        ),
+        16,
+    ),
+    int(
+        remove_whitespace(
+            """
         AD107E1E 9123A9D0 D660FAA7 9559C51F A20D64E5 683B9FD1
         B54B1597 B61D0A75 E6FA141D F95A56DB AF9A3C40 7BA1DF15
         EB3D688A 309C180E 1DE6B85A 1274A0A6 6D3F8152 AD6AC212
@@ -427,14 +543,20 @@ RFC5114_GROUP23 = (
         CDF93ACC 44328387 315D75E1 98C641A4 80CD86A1 B9E587E8
         BE60E69C C928B2B9 C52172E4 13042E9B 23F10B0E 16E79763
         C9B53DCF 4BA80A29 E3FB73C1 6B8E75B9 7EF363E2 FFA31F71
-        CF9DE538 4E71B81C 0AC4DFFE 0C10E64F"""), 16))
+        CF9DE538 4E71B81C 0AC4DFFE 0C10E64F"""
+        ),
+        16,
+    ),
+)
 FFDHE_PARAMETERS["RFC5114 group 23"] = RFC5114_GROUP23
 
 
 # RFC 5114, section 2.3, 2048 bit MODP with 256-bit Prime Order Subgroup
 # INSECURE, do not use
 RFC5114_GROUP24 = (
-    int(remove_whitespace("""
+    int(
+        remove_whitespace(
+            """
        3FB32C9B 73134D0B 2E775066 60EDBD48 4CA7B18F 21EF2054
        07F4793A 1A0BA125 10DBC150 77BE463F FF4FED4A AC0BB555
        BE3A6C1B 0C6B47B1 BC3773BF 7E8C6F62 901228F8 C28CBB18
@@ -445,8 +567,13 @@ RFC5114_GROUP24 = (
        C8484B1E 052588B9 B7D2BBD2 DF016199 ECD06E15 57CD0915
        B3353BBB 64E0EC37 7FD02837 0DF92B52 C7891428 CDC67EB6
        184B523D 1DB246C3 2F630784 90F00EF8 D647D148 D4795451
-       5E2327CF EF98C582 664B4C0F 6CC41659"""), 16),
-    int(remove_whitespace("""
+       5E2327CF EF98C582 664B4C0F 6CC41659"""
+        ),
+        16,
+    ),
+    int(
+        remove_whitespace(
+            """
        87A8E61D B4B6663C FFBBD19C 65195999 8CEEF608 660DD0F2
        5D2CEED4 435E3B00 E00DF8F1 D61957D4 FAF7DF45 61B2AA30
        16C3D911 34096FAA 3BF4296D 830E9A7C 209E0C64 97517ABD
@@ -457,7 +584,11 @@ RFC5114_GROUP24 = (
        67E144E5 14056425 1CCACB83 E6B486F6 B3CA3F79 71506026
        C0B857F6 89962856 DED4010A BD0BE621 C3A3960A 54E710C3
        75F26375 D7014103 A4B54330 C198AF12 6116D227 6E11715F
-       693877FA D7EF09CA DB094AE9 1E1A1597"""), 16))
+       693877FA D7EF09CA DB094AE9 1E1A1597"""
+        ),
+        16,
+    ),
+)
 FFDHE_PARAMETERS["RFC5114 group 24"] = RFC5114_GROUP24
 
 
@@ -472,7 +603,9 @@ Those are the parameters recommended for use in TLS.
 # RFC 7919 ffdhe2048 bit group
 FFDHE2048 = (
     2,
-    int(remove_whitespace("""
+    int(
+        remove_whitespace(
+            """
     FFFFFFFF FFFFFFFF ADF85458 A2BB4A9A AFDC5620 273D3CF1
     D8B9C583 CE2D3695 A9E13641 146433FB CC939DCE 249B3EF9
     7D2FE363 630C75D8 F681B202 AEC4617A D3DF1ED5 D5FD6561
@@ -483,7 +616,11 @@ FFDHE2048 = (
     0B07A7C8 EE0A6D70 9E02FCE1 CDF7E2EC C03404CD 28342F61
     9172FE9C E98583FF 8E4F1232 EEF28183 C3FE3B1B 4C6FAD73
     3BB5FCBC 2EC22005 C58EF183 7D1683B2 C6F34A26 C1B2EFFA
-    886B4238 61285C97 FFFFFFFF FFFFFFFF"""), 16))
+    886B4238 61285C97 FFFFFFFF FFFFFFFF"""
+        ),
+        16,
+    ),
+)
 goodGroupParameters.append(FFDHE2048)
 RFC7919_GROUPS.append(FFDHE2048)
 FFDHE_PARAMETERS["RFC7919 ffdhe2048"] = FFDHE2048
@@ -492,7 +629,9 @@ FFDHE_PARAMETERS["RFC7919 ffdhe2048"] = FFDHE2048
 # RFC 7919 ffdhe3072 bit group
 FFDHE3072 = (
     2,
-    int(remove_whitespace("""
+    int(
+        remove_whitespace(
+            """
     FFFFFFFF FFFFFFFF ADF85458 A2BB4A9A AFDC5620 273D3CF1
     D8B9C583 CE2D3695 A9E13641 146433FB CC939DCE 249B3EF9
     7D2FE363 630C75D8 F681B202 AEC4617A D3DF1ED5 D5FD6561
@@ -508,7 +647,11 @@ FFDHE3072 = (
     AEFE1309 85139270 B4130C93 BC437944 F4FD4452 E2D74DD3
     64F2E21E 71F54BFF 5CAE82AB 9C9DF69E E86D2BC5 22363A0D
     ABC52197 9B0DEADA 1DBF9A42 D5C4484E 0ABCD06B FA53DDEF
-    3C1B20EE 3FD59D7C 25E41D2B 66C62E37 FFFFFFFF FFFFFFFF"""), 16))
+    3C1B20EE 3FD59D7C 25E41D2B 66C62E37 FFFFFFFF FFFFFFFF"""
+        ),
+        16,
+    ),
+)
 goodGroupParameters.append(FFDHE3072)
 RFC7919_GROUPS.append(FFDHE3072)
 FFDHE_PARAMETERS["RFC7919 ffdhe3072"] = FFDHE3072
@@ -517,7 +660,9 @@ FFDHE_PARAMETERS["RFC7919 ffdhe3072"] = FFDHE3072
 # RFC 7919 ffdhe4096 bit group
 FFDHE4096 = (
     2,
-    int(remove_whitespace("""
+    int(
+        remove_whitespace(
+            """
     FFFFFFFF FFFFFFFF ADF85458 A2BB4A9A AFDC5620 273D3CF1
     D8B9C583 CE2D3695 A9E13641 146433FB CC939DCE 249B3EF9
     7D2FE363 630C75D8 F681B202 AEC4617A D3DF1ED5 D5FD6561
@@ -539,7 +684,11 @@ FFDHE4096 = (
     A907600A 918130C4 6DC778F9 71AD0038 092999A3 33CB8B7A
     1A1DB93D 7140003C 2A4ECEA9 F98D0ACC 0A8291CD CEC97DCF
     8EC9B55A 7F88A46B 4DB5A851 F44182E1 C68A007E 5E655F6A
-    FFFFFFFF FFFFFFFF"""), 16))
+    FFFFFFFF FFFFFFFF"""
+        ),
+        16,
+    ),
+)
 goodGroupParameters.append(FFDHE4096)
 RFC7919_GROUPS.append(FFDHE4096)
 FFDHE_PARAMETERS["RFC7919 ffdhe4096"] = FFDHE4096
@@ -548,7 +697,9 @@ FFDHE_PARAMETERS["RFC7919 ffdhe4096"] = FFDHE4096
 # RFC 7919 ffdhe6144 bit group
 FFDHE6144 = (
     2,
-    int(remove_whitespace("""
+    int(
+        remove_whitespace(
+            """
     FFFFFFFF FFFFFFFF ADF85458 A2BB4A9A AFDC5620 273D3CF1
     D8B9C583 CE2D3695 A9E13641 146433FB CC939DCE 249B3EF9
     7D2FE363 630C75D8 F681B202 AEC4617A D3DF1ED5 D5FD6561
@@ -580,7 +731,11 @@ FFDHE6144 = (
     D72B0374 6AE77F5E 62292C31 1562A846 505DC82D B854338A
     E49F5235 C95B9117 8CCF2DD5 CACEF403 EC9D1810 C6272B04
     5B3B71F9 DC6B80D6 3FDD4A8E 9ADB1E69 62A69526 D43161C1
-    A41D570D 7938DAD4 A40E329C D0E40E65 FFFFFFFF FFFFFFFF"""), 16))
+    A41D570D 7938DAD4 A40E329C D0E40E65 FFFFFFFF FFFFFFFF"""
+        ),
+        16,
+    ),
+)
 goodGroupParameters.append(FFDHE6144)
 RFC7919_GROUPS.append(FFDHE6144)
 FFDHE_PARAMETERS["RFC7919 ffdhe6144"] = FFDHE6144
@@ -589,7 +744,9 @@ FFDHE_PARAMETERS["RFC7919 ffdhe6144"] = FFDHE6144
 # RFC 7919 ffdhe8192 bit group
 FFDHE8192 = (
     2,
-    int(remove_whitespace("""
+    int(
+        remove_whitespace(
+            """
     FFFFFFFF FFFFFFFF ADF85458 A2BB4A9A AFDC5620 273D3CF1
     D8B9C583 CE2D3695 A9E13641 146433FB CC939DCE 249B3EF9
     7D2FE363 630C75D8 F681B202 AEC4617A D3DF1ED5 D5FD6561
@@ -632,7 +789,11 @@ FFDHE8192 = (
     1EFC8CE0 BA8A4FE8 B6855DFE 72B0A66E DED2FBAB FBE58A30
     FAFABE1C 5D71A87E 2F741EF8 C1FE86FE A6BBFDE5 30677F0D
     97D11D49 F7A8443D 0822E506 A9F4614E 011E2A94 838FF88C
-    D68C8BB7 C5C6424C FFFFFFFF FFFFFFFF"""), 16))
+    D68C8BB7 C5C6424C FFFFFFFF FFFFFFFF"""
+        ),
+        16,
+    ),
+)
 goodGroupParameters.append(FFDHE8192)
 RFC7919_GROUPS.append(FFDHE8192)
 FFDHE_PARAMETERS["RFC7919 ffdhe8192"] = FFDHE8192
@@ -693,39 +854,42 @@ def P_hash(mac_name, secret, seed, length):
         output = out_fun.digest()
 
         how_many = min(length - index, len(output))
-        ret[index:index+how_many] = output[:how_many]
+        ret[index : index + how_many] = output[:how_many]
         index += how_many
     return ret
 
 
 def PRF(secret, label, seed, length):
-    #Split the secret into left and right halves
+    # Split the secret into left and right halves
     # which may share a byte if len is odd
-    S1 = secret[ : int(math.ceil(len(secret)/2.0))]
-    S2 = secret[ int(math.floor(len(secret)/2.0)) : ]
+    S1 = secret[: int(math.ceil(len(secret) / 2.0))]
+    S2 = secret[int(math.floor(len(secret) / 2.0)) :]
 
-    #Run the left half through P_MD5 and the right half through P_SHA1
+    # Run the left half through P_MD5 and the right half through P_SHA1
     p_md5 = P_hash("md5", S1, label + seed, length)
     p_sha1 = P_hash("sha1", S2, label + seed, length)
 
-    #XOR the output values and return the result
+    # XOR the output values and return the result
     for x in range(length):
         p_md5[x] ^= p_sha1[x]
     return p_md5
+
 
 def PRF_1_2(secret, label, seed, length):
     """Pseudo Random Function for TLS1.2 ciphers that use SHA256"""
     return P_hash("sha256", secret, label + seed, length)
 
+
 def PRF_1_2_SHA384(secret, label, seed, length):
     """Pseudo Random Function for TLS1.2 ciphers that use SHA384"""
     return P_hash("sha384", secret, label + seed, length)
+
 
 def PRF_SSL(secret, seed, length):
     bytes = bytearray(length)
     index = 0
     for x in range(26):
-        A = bytearray([ord('A')+x] * (x+1)) # 'A', 'BB', 'CCC', etc..
+        A = bytearray([ord("A") + x] * (x + 1))  # 'A', 'BB', 'CCC', etc..
         input = secret + SHA1(A + secret + seed)
         output = MD5(input)
         for c in output:
@@ -735,58 +899,61 @@ def PRF_SSL(secret, seed, length):
             index += 1
     return bytes
 
+
 @deprecated_method("Please use calc_key function instead.")
-def calcExtendedMasterSecret(version, cipherSuite, premasterSecret,
-                             handshakeHashes):
+def calcExtendedMasterSecret(version, cipherSuite, premasterSecret, handshakeHashes):
     """Derive Extended Master Secret from premaster and handshake msgs"""
     assert version in ((3, 1), (3, 2), (3, 3))
     if version in ((3, 1), (3, 2)):
-        masterSecret = PRF(premasterSecret, b"extended master secret",
-                           handshakeHashes.digest('md5') +
-                           handshakeHashes.digest('sha1'),
-                           48)
+        masterSecret = PRF(
+            premasterSecret,
+            b"extended master secret",
+            handshakeHashes.digest("md5") + handshakeHashes.digest("sha1"),
+            48,
+        )
     else:
         if cipherSuite in CipherSuite.sha384PrfSuites:
-            masterSecret = PRF_1_2_SHA384(premasterSecret,
-                                          b"extended master secret",
-                                          handshakeHashes.digest('sha384'),
-                                          48)
+            masterSecret = PRF_1_2_SHA384(
+                premasterSecret,
+                b"extended master secret",
+                handshakeHashes.digest("sha384"),
+                48,
+            )
         else:
-            masterSecret = PRF_1_2(premasterSecret,
-                                   b"extended master secret",
-                                   handshakeHashes.digest('sha256'),
-                                   48)
+            masterSecret = PRF_1_2(
+                premasterSecret,
+                b"extended master secret",
+                handshakeHashes.digest("sha256"),
+                48,
+            )
     return masterSecret
 
 
 @deprecated_method("Please use calc_key function instead.")
-def calcMasterSecret(version, cipherSuite, premasterSecret, clientRandom,
-                     serverRandom):
+def calcMasterSecret(version, cipherSuite, premasterSecret, clientRandom, serverRandom):
     """Derive Master Secret from premaster secret and random values"""
-    if version == (3,0):
-        masterSecret = PRF_SSL(premasterSecret,
-                            clientRandom + serverRandom, 48)
-    elif version in ((3,1), (3,2)):
-        masterSecret = PRF(premasterSecret, b"master secret",
-                            clientRandom + serverRandom, 48)
-    elif version == (3,3):
+    if version == (3, 0):
+        masterSecret = PRF_SSL(premasterSecret, clientRandom + serverRandom, 48)
+    elif version in ((3, 1), (3, 2)):
+        masterSecret = PRF(
+            premasterSecret, b"master secret", clientRandom + serverRandom, 48
+        )
+    elif version == (3, 3):
         if cipherSuite in CipherSuite.sha384PrfSuites:
-            masterSecret = PRF_1_2_SHA384(premasterSecret,
-                                          b"master secret",
-                                          clientRandom + serverRandom,
-                                          48)
+            masterSecret = PRF_1_2_SHA384(
+                premasterSecret, b"master secret", clientRandom + serverRandom, 48
+            )
         else:
-            masterSecret = PRF_1_2(premasterSecret,
-                                   b"master secret",
-                                   clientRandom + serverRandom,
-                                   48)
+            masterSecret = PRF_1_2(
+                premasterSecret, b"master secret", clientRandom + serverRandom, 48
+            )
     else:
         raise AssertionError()
     return masterSecret
 
+
 @deprecated_method("Please use calc_key function instead.")
-def calcFinished(version, masterSecret, cipherSuite, handshakeHashes,
-                 isClient):
+def calcFinished(version, masterSecret, cipherSuite, handshakeHashes, isClient):
     """Calculate the Handshake protocol Finished value
 
     :param version: TLS protocol version tuple
@@ -797,7 +964,7 @@ def calcFinished(version, masterSecret, cipherSuite, handshakeHashes,
         sent by client (True) or by server (False) side of connection
     """
     assert version in ((3, 0), (3, 1), (3, 2), (3, 3))
-    if version == (3,0):
+    if version == (3, 0):
         if isClient:
             senderStr = b"\x43\x4C\x4E\x54"
         else:
@@ -810,22 +977,30 @@ def calcFinished(version, masterSecret, cipherSuite, handshakeHashes,
         else:
             label = b"server finished"
 
-        if version in ((3,1), (3,2)):
+        if version in ((3, 1), (3, 2)):
             handshakeHash = handshakeHashes.digest()
             verifyData = PRF(masterSecret, label, handshakeHash, 12)
-        else: # version == (3,3):
+        else:  # version == (3,3):
             if cipherSuite in CipherSuite.sha384PrfSuites:
-                handshakeHash = handshakeHashes.digest('sha384')
-                verifyData = PRF_1_2_SHA384(masterSecret, label,
-                                            handshakeHash, 12)
+                handshakeHash = handshakeHashes.digest("sha384")
+                verifyData = PRF_1_2_SHA384(masterSecret, label, handshakeHash, 12)
             else:
-                handshakeHash = handshakeHashes.digest('sha256')
+                handshakeHash = handshakeHashes.digest("sha256")
                 verifyData = PRF_1_2(masterSecret, label, handshakeHash, 12)
 
     return verifyData
 
-def calc_key(version, secret, cipher_suite, label, handshake_hashes=None,
-            client_random=None, server_random=None, output_length=None):
+
+def calc_key(
+    version,
+    secret,
+    cipher_suite,
+    label,
+    handshake_hashes=None,
+    client_random=None,
+    server_random=None,
+    output_length=None,
+):
     """
     Method for calculating different keys depending on input.
     It can be used to calculate finished value, master secret,
@@ -848,7 +1023,6 @@ def calc_key(version, secret, cipher_suite, label, handshake_hashes=None,
     :param int output_length: Number of bytes to output.
     """
 
-
     # SSL3 calculations.
     if version == (3, 0):
         # Calculating Finished value, either for message sent
@@ -868,8 +1042,7 @@ def calc_key(version, secret, cipher_suite, label, handshake_hashes=None,
         func = PRF
         # Seed needed for calculating extended master secret
         if label == b"extended master secret":
-            seed = handshake_hashes.digest('md5') + \
-                   handshake_hashes.digest('sha1')
+            seed = handshake_hashes.digest("md5") + handshake_hashes.digest("sha1")
         # Seed needed for calculating Finished value
         elif label in [b"server finished", b"client finished"]:
             seed = handshake_hashes.digest()
@@ -883,17 +1056,23 @@ def calc_key(version, secret, cipher_suite, label, handshake_hashes=None,
             func = PRF_1_2_SHA384
             # Seed needed for calculating Finished value or extended master
             # secret
-            if label in [b"extended master secret", b"server finished",
-                    b"client finished"]:
-                seed = handshake_hashes.digest('sha384')
+            if label in [
+                b"extended master secret",
+                b"server finished",
+                b"client finished",
+            ]:
+                seed = handshake_hashes.digest("sha384")
             else:
                 assert label in [b"key expansion", b"master secret"]
         else:
             # Same as above, just using sha256
             func = PRF_1_2
-            if label in [b"extended master secret", b"server finished",
-                    b"client finished"]:
-                seed = handshake_hashes.digest('sha256')
+            if label in [
+                b"extended master secret",
+                b"server finished",
+                b"client finished",
+            ]:
+                seed = handshake_hashes.digest("sha256")
             else:
                 assert label in [b"key expansion", b"master secret"]
 
@@ -907,43 +1086,50 @@ def calc_key(version, secret, cipher_suite, label, handshake_hashes=None,
         return func(secret, seed, output_length)
     return func(secret, label, seed, output_length)
 
+
 def makeX(salt, username, password):
-    if len(username)>=256:
+    if len(username) >= 256:
         raise ValueError("username too long")
-    if len(salt)>=256:
+    if len(salt) >= 256:
         raise ValueError("salt too long")
     innerHashResult = SHA1(username + bytearray(b":") + password)
     outerHashResult = SHA1(salt + innerHashResult)
     return bytesToNumber(outerHashResult)
 
-#This function is used by VerifierDB.makeVerifier
+
+# This function is used by VerifierDB.makeVerifier
 def makeVerifier(username, password, bits):
-    bitsIndex = {1024:0, 1536:1, 2048:2, 3072:3, 4096:4, 6144:5, 8192:6}[bits]
-    g,N = goodGroupParameters[bitsIndex]
+    bitsIndex = {1024: 0, 1536: 1, 2048: 2, 3072: 3, 4096: 4, 6144: 5, 8192: 6}[bits]
+    g, N = goodGroupParameters[bitsIndex]
     salt = getRandomBytes(16)
     x = makeX(salt, username, password)
     verifier = powMod(g, x, N)
     return N, g, salt, verifier
 
+
 def PAD(n, x):
     nLength = len(numberToByteArray(n))
     b = numberToByteArray(x)
     if len(b) < nLength:
-        b = (b"\0" * (nLength-len(b))) + b
+        b = (b"\0" * (nLength - len(b))) + b
     return b
 
+
 def makeU(N, A, B):
-  return bytesToNumber(SHA1(PAD(N, A) + PAD(N, B)))
+    return bytesToNumber(SHA1(PAD(N, A) + PAD(N, B)))
+
 
 def makeK(N, g):
-  return bytesToNumber(SHA1(numberToByteArray(N) + PAD(N, g)))
+    return bytesToNumber(SHA1(numberToByteArray(N) + PAD(N, g)))
+
 
 def createHMAC(k, digestmod=hashlib.sha1):
     h = hmac.HMAC(k, digestmod=digestmod)
-    if not hasattr(h, 'block_size'):
+    if not hasattr(h, "block_size"):
         h.block_size = digestmod().block_size
     assert h.block_size == digestmod().block_size
     return h
+
 
 def createMAC_SSL(k, digestmod=None):
     mac = MAC_SSL()

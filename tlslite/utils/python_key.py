@@ -1,5 +1,3 @@
-
-
 from .python_rsakey import Python_RSAKey
 from .python_ecdsakey import Python_ECDSAKey
 from .python_dsakey import Python_DSAKey
@@ -10,6 +8,7 @@ from .cryptomath import bytesToNumber
 from .compat import compatHMAC
 from ecdsa.curves import NIST256p, NIST384p, NIST521p
 from ecdsa.keys import SigningKey, VerifyingKey
+
 
 class Python_Key(object):
     """
@@ -62,7 +61,8 @@ class Python_Key(object):
 
         if key_type == "rsa":
             subject_public_key = ASN1Parser(
-                ASN1Parser(spk_info.getChildBytes(1)).value[1:])
+                ASN1Parser(spk_info.getChildBytes(1)).value[1:]
+            )
 
             modulus = subject_public_key.getChild(0)
             exponent = subject_public_key.getChild(1)
@@ -75,7 +75,8 @@ class Python_Key(object):
         elif key_type == "dsa":
             # public key
             subject_public_key = ASN1Parser(
-                ASN1Parser(spk_info.getChildBytes(1)).value[1:])
+                ASN1Parser(spk_info.getChildBytes(1)).value[1:]
+            )
 
             public_key = bytesToNumber(subject_public_key.value)
 
@@ -116,8 +117,9 @@ class Python_Key(object):
         elif list(oid.value) == [43, 101, 113]:
             key_type = "Ed448"
         else:
-            raise SyntaxError("Unrecognized AlgorithmIdentifier: {0}"
-                              .format(list(oid.value)))
+            raise SyntaxError(
+                "Unrecognized AlgorithmIdentifier: {0}".format(list(oid.value))
+            )
         # second item of AlgorithmIdentifier are parameters (defined by
         # above algorithm)
         if key_type == "rsa":
@@ -150,22 +152,20 @@ class Python_Key(object):
         if seq_len > 2:
             raise SyntaxError("Invalid encoding of AlgorithmIdentifier")
 
-        #Get the privateKey
+        # Get the privateKey
         private_key_parser = parser.getChild(2)
 
-        #Adjust for OCTET STRING encapsulation
+        # Adjust for OCTET STRING encapsulation
         private_key_parser = ASN1Parser(private_key_parser.value)
 
         if key_type in ("Ed25519", "Ed448"):
             return Python_Key._parse_eddsa_private_key(bytes)
         if key_type == "ecdsa":
-            return Python_Key._parse_ecdsa_private_key(private_key_parser,
-                                                       curve)
+            return Python_Key._parse_ecdsa_private_key(private_key_parser, curve)
         elif key_type == "dsa":
             return Python_Key._parse_dsa_private_key(private_key_parser, parameters)
         else:
-            return Python_Key._parse_asn1_private_key(private_key_parser,
-                                                      key_type)
+            return Python_Key._parse_asn1_private_key(private_key_parser, key_type)
 
     @staticmethod
     def _parse_ssleay(data, key_type="rsa"):
@@ -197,13 +197,12 @@ class Python_Key(object):
         """
         private_key = SigningKey.from_der(compatHMAC(data))
         secret_mult = private_key.privkey.secret_multiplier
-        return Python_ECDSAKey(None, None, private_key.curve.name,
-                               secret_mult)
+        return Python_ECDSAKey(None, None, private_key.curve.name, secret_mult)
 
     @staticmethod
     def _parse_ecdsa_private_key(private, curve):
         ver = private.getChild(0)
-        if ver.value != b'\x01':
+        if ver.value != b"\x01":
             raise SyntaxError("Unexpected EC key version")
         private_key = private.getChild(1)
         public_key = private.getChild(2)
@@ -212,25 +211,23 @@ class Python_Key(object):
         # key encoding (uncompressed)
         # TODO: update ecdsa lib to be able to parse PKCS#8 files
         if curve is not NIST521p:
-            if list(public_key.value[:1]) != [3] or \
-                    list(public_key.value[2:4]) != [0, 4]:
+            if list(public_key.value[:1]) != [3] or list(public_key.value[2:4]) != [
+                0,
+                4,
+            ]:
                 raise SyntaxError("Invalid or unsupported encoding of public key")
 
-            pub_key = VerifyingKey.from_string(
-                    compatHMAC(public_key.value[4:]),
-                    curve)
+            pub_key = VerifyingKey.from_string(compatHMAC(public_key.value[4:]), curve)
         else:
-            if list(public_key.value[:3]) != [3, 129, 134] or \
-                    list(public_key.value[3:5]) != [0, 4]:
+            if list(public_key.value[:3]) != [3, 129, 134] or list(
+                public_key.value[3:5]
+            ) != [0, 4]:
                 raise SyntaxError("Invalid or unsupported encoding of public key")
 
-            pub_key = VerifyingKey.from_string(
-                    compatHMAC(public_key.value[5:]),
-                    curve)
+            pub_key = VerifyingKey.from_string(compatHMAC(public_key.value[5:]), curve)
         pub_x = pub_key.pubkey.point.x()
         pub_y = pub_key.pubkey.point.y()
-        priv_key = SigningKey.from_string(compatHMAC(private_key.value),
-                                          curve)
+        priv_key = SigningKey.from_string(compatHMAC(private_key.value), curve)
         mult = priv_key.privkey.secret_multiplier
         return Python_ECDSAKey(pub_x, pub_y, curve.name, mult)
 
@@ -254,7 +251,6 @@ class Python_Key(object):
         dQ = bytesToNumber(private_key_parser.getChild(7).value)
         qInv = bytesToNumber(private_key_parser.getChild(8).value)
         return Python_RSAKey(n, e, d, p, q, dP, dQ, qInv, key_type)
-
 
     @staticmethod
     def _parse_dsa_private_key(private_key_parser, domain_parameters=None):

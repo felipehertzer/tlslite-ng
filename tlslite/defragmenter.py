@@ -10,11 +10,15 @@ from .utils.codec import Parser
 from .utils.deprecations import deprecated_attrs, deprecated_params
 
 
-@deprecated_attrs({"add_static_size": "addStaticSize",
-                   "add_dynamic_size": "addDynamicSize",
-                   "add_data": "addData",
-                   "get_message": "getMessage",
-                   "clear_buffers": "clearBuffers"})
+@deprecated_attrs(
+    {
+        "add_static_size": "addStaticSize",
+        "add_dynamic_size": "addDynamicSize",
+        "add_data": "addData",
+        "get_message": "getMessage",
+        "clear_buffers": "clearBuffers",
+    }
+)
 class Defragmenter(object):
     """
     Class for demultiplexing TLS messages.
@@ -49,6 +53,7 @@ class Defragmenter(object):
         self.priorities += [msg_type]
 
         self.buffers[msg_type] = bytearray(0)
+
         def size_handler(data):
             """
             Size of message in parameter
@@ -60,11 +65,16 @@ class Defragmenter(object):
                 return None
             else:
                 return size
+
         self.decoders[msg_type] = size_handler
 
-    @deprecated_params({"msg_type": "msgType",
-                        "size_offset": "sizeOffset",
-                        "size_of_size": "sizeOfSize"})
+    @deprecated_params(
+        {
+            "msg_type": "msgType",
+            "size_offset": "sizeOffset",
+            "size_of_size": "sizeOfSize",
+        }
+    )
     def add_dynamic_size(self, msg_type, size_offset, size_of_size):
         """Add a message type which has a dynamic size set in a header"""
         if msg_type in self.priorities:
@@ -84,7 +94,7 @@ class Defragmenter(object):
             If complete message is present in parameter returns its size,
             None otherwise.
             """
-            if len(data) < size_offset+size_of_size:
+            if len(data) < size_offset + size_of_size:
                 return None
             else:
                 parser = Parser(data)

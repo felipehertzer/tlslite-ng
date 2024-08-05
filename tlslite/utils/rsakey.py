@@ -5,10 +5,20 @@
 
 from .cryptomath import *
 from . import tlshashlib as hashlib
-from ..errors import MaskTooLongError, MessageTooLongError, EncodingError, \
-    InvalidSignature, UnknownRSAType
-from .constanttime import ct_isnonzero_u32, ct_neq_u32, ct_lsb_prop_u8, \
-    ct_lsb_prop_u16, ct_lt_u32
+from ..errors import (
+    MaskTooLongError,
+    MessageTooLongError,
+    EncodingError,
+    InvalidSignature,
+    UnknownRSAType,
+)
+from .constanttime import (
+    ct_isnonzero_u32,
+    ct_neq_u32,
+    ct_lsb_prop_u8,
+    ct_lsb_prop_u16,
+    ct_lt_u32,
+)
 
 
 class RSAKey(object):
@@ -64,7 +74,7 @@ class RSAKey(object):
         """
         raise NotImplementedError()
 
-    def hashAndSign(self, bytes, rsaScheme='PKCS1', hAlg='sha1', sLen=0):
+    def hashAndSign(self, bytes, rsaScheme="PKCS1", hAlg="sha1", sLen=0):
         """Hash and sign the passed-in bytes.
 
         This requires the key to have a private component.  It performs
@@ -92,11 +102,9 @@ class RSAKey(object):
         rsaScheme = rsaScheme.lower()
         hAlg = hAlg.lower()
         hashBytes = secureHash(bytearray(bytes), hAlg)
-        return self.sign(hashBytes, padding=rsaScheme, hashAlg=hAlg,
-                         saltLen=sLen)
+        return self.sign(hashBytes, padding=rsaScheme, hashAlg=hAlg, saltLen=sLen)
 
-    def hashAndVerify(self, sigBytes, bytes, rsaScheme='PKCS1', hAlg='sha1',
-                      sLen=0):
+    def hashAndVerify(self, sigBytes, bytes, rsaScheme="PKCS1", hAlg="sha1", sLen=0):
         """Hash and verify the passed-in bytes with the signature.
 
         This verifies a PKCS1 or PSS signature on the passed-in data
@@ -144,7 +152,7 @@ class RSAKey(object):
         :returns: Mask
         """
         hashLen = getattr(hashlib, hAlg)().digest_size
-        if maskLen > (2 ** 32) * hashLen:
+        if maskLen > (2**32) * hashLen:
             raise MaskTooLongError("Incorrect parameter maskLen")
         T = bytearray()
         end = divceil(maskLen, hashLen)
@@ -172,23 +180,24 @@ class RSAKey(object):
         hashLen = getattr(hashlib, hAlg)().digest_size
         emLen = divceil(emBits, 8)
         if emLen < hashLen + sLen + 2:
-            raise EncodingError("The ending limit too short for " +
-                                "selected hash and salt length")
+            raise EncodingError(
+                "The ending limit too short for " + "selected hash and salt length"
+            )
         salt = getRandomBytes(sLen)
         M2 = bytearray(8) + mHash + salt
         H = secureHash(M2, hAlg)
         PS = bytearray(emLen - sLen - hashLen - 2)
-        DB = PS + bytearray(b'\x01') + salt
+        DB = PS + bytearray(b"\x01") + salt
         dbMask = self.MGF1(H, emLen - hashLen - 1, hAlg)
         maskedDB = bytearray(i ^ j for i, j in zip(DB, dbMask))
-        mLen = emLen*8 - emBits
+        mLen = emLen * 8 - emBits
         mask = (1 << 8 - mLen) - 1
         maskedDB[0] &= mask
-        EM = maskedDB + H + bytearray(b'\xbc')
+        EM = maskedDB + H + bytearray(b"\xbc")
         return EM
 
     def RSASSA_PSS_sign(self, mHash, hAlg, sLen=0):
-        """"Sign the passed in message
+        """ "Sign the passed in message
 
         This signs the message using selected hash algorithm
 
@@ -231,21 +240,21 @@ class RSAKey(object):
         emLen = divceil(emBits, 8)
         if emLen < hashLen + sLen + 2:
             raise InvalidSignature("Invalid signature")
-        if EM[-1] != 0xbc:
+        if EM[-1] != 0xBC:
             raise InvalidSignature("Invalid signature")
-        maskedDB = EM[0:emLen - hashLen - 1]
-        H = EM[emLen - hashLen - 1:emLen - hashLen - 1 + hashLen]
-        DBHelpMask = 1 << 8 - (8*emLen - emBits)
+        maskedDB = EM[0 : emLen - hashLen - 1]
+        H = EM[emLen - hashLen - 1 : emLen - hashLen - 1 + hashLen]
+        DBHelpMask = 1 << 8 - (8 * emLen - emBits)
         DBHelpMask -= 1
-        DBHelpMask = (~DBHelpMask) & 0xff
+        DBHelpMask = (~DBHelpMask) & 0xFF
         if maskedDB[0] & DBHelpMask != 0:
             raise InvalidSignature("Invalid signature")
         dbMask = self.MGF1(H, emLen - hashLen - 1, hAlg)
         DB = bytearray(i ^ j for i, j in zip(maskedDB, dbMask))
-        mLen = emLen*8 - emBits
+        mLen = emLen * 8 - emBits
         mask = (1 << 8 - mLen) - 1
         DB[0] &= mask
-        if any(x != 0 for x in DB[0:emLen - hashLen - sLen - 2]):
+        if any(x != 0 for x in DB[0 : emLen - hashLen - sLen - 2]):
             raise InvalidSignature("Invalid signature")
         if DB[emLen - hashLen - sLen - 2] != 0x01:
             raise InvalidSignature("Invalid signature")
@@ -281,8 +290,7 @@ class RSAKey(object):
             EM = self._raw_public_key_op_bytes(S)
         except ValueError:
             raise InvalidSignature("Invalid signature")
-        result = self.EMSA_PSS_verify(mHash, EM, numBits(self.n) - 1,
-                                      hAlg, sLen)
+        result = self.EMSA_PSS_verify(mHash, EM, numBits(self.n) - 1, hAlg, sLen)
         if result:
             return True
         else:
@@ -295,7 +303,7 @@ class RSAKey(object):
         paddedBytes = self._addPKCS1Padding(bytes, 1)
         return self._raw_private_key_op_bytes(paddedBytes)
 
-    def sign(self, bytes, padding='pkcs1', hashAlg=None, saltLen=None):
+    def sign(self, bytes, padding="pkcs1", hashAlg=None, saltLen=None):
         """Sign the passed-in bytes.
 
         This requires the key to have a private component.  It performs
@@ -321,7 +329,7 @@ class RSAKey(object):
         :returns: A PKCS1 signature on the passed-in data.
         """
         padding = padding.lower()
-        if padding == 'pkcs1':
+        if padding == "pkcs1":
             if hashAlg is not None:
                 bytes = self.addPKCS1Prefix(bytes, hashAlg)
             sigBytes = self._raw_pkcs1_sign(bytes)
@@ -340,8 +348,7 @@ class RSAKey(object):
         paddedBytes = self._addPKCS1Padding(bytes, 1)
         return checkBytes == paddedBytes
 
-    def verify(self, sigBytes, bytes, padding='pkcs1', hashAlg=None,
-               saltLen=None):
+    def verify(self, sigBytes, bytes, padding="pkcs1", hashAlg=None, saltLen=None):
         """Verify the passed-in bytes with the signature.
 
         This verifies a PKCS1 signature on the passed-in data.
@@ -357,14 +364,14 @@ class RSAKey(object):
         """
         if padding == "pkcs1" and self.key_type == "rsa-pss":
             return False
-        if padding == "pkcs1" and hashAlg == 'sha1':
+        if padding == "pkcs1" and hashAlg == "sha1":
             # Try it with/without the embedded NULL
             prefixedHashBytes1 = self.addPKCS1SHA1Prefix(bytes, False)
             prefixedHashBytes2 = self.addPKCS1SHA1Prefix(bytes, True)
             result1 = self._raw_pkcs1_verify(sigBytes, prefixedHashBytes1)
             result2 = self._raw_pkcs1_verify(sigBytes, prefixedHashBytes2)
-            return (result1 or result2)
-        elif padding == 'pkcs1':
+            return result1 or result2
+        elif padding == "pkcs1":
             if hashAlg is not None:
                 bytes = self.addPKCS1Prefix(bytes, hashAlg)
             res = self._raw_pkcs1_verify(sigBytes, bytes)
@@ -410,12 +417,12 @@ class RSAKey(object):
         while len(out) < out_len // 8:
             out += secureHMAC(
                 key,
-                numberToByteArray(iterator, 2) + label +
-                numberToByteArray(out_len, 2),
-                "sha256")
+                numberToByteArray(iterator, 2) + label + numberToByteArray(out_len, 2),
+                "sha256",
+            )
             iterator += 1
 
-        return out[:out_len//8]
+        return out[: out_len // 8]
 
     def decrypt(self, encBytes):
         """Decrypt the passed-in bytes.
@@ -441,8 +448,9 @@ class RSAKey(object):
         if not self.hasPrivateKey():
             raise AssertionError()
         if self.key_type != "rsa":
-            raise ValueError("Decryption requires RSA key, \"{0}\" present"
-                             .format(self.key_type))
+            raise ValueError(
+                'Decryption requires RSA key, "{0}" present'.format(self.key_type)
+            )
         try:
             dec_bytes = self._raw_private_key_op_bytes(encBytes)
         except ValueError:
@@ -469,9 +477,10 @@ class RSAKey(object):
 
         # the private exponent (d) doesn't change so `_key_hash` doesn't
         # change, calculate it only once
-        if not hasattr(self, '_key_hash') or not self._key_hash:
-            self._key_hash = secureHash(numberToByteArray(self.d, numBytes(n)),
-                                        "sha256")
+        if not hasattr(self, "_key_hash") or not self._key_hash:
+            self._key_hash = secureHash(
+                numberToByteArray(self.d, numBytes(n)), "sha256"
+            )
 
         kdk = secureHMAC(self._key_hash, encBytes, "sha256")
 
@@ -494,8 +503,7 @@ class RSAKey(object):
             #    synth_length = len_candidate
             mask = ct_lt_u32(len_candidate, max_sep_offset)
             mask = ct_lsb_prop_u16(mask)
-            synth_length = synth_length & (0xffff ^ mask) \
-                | len_candidate & mask
+            synth_length = synth_length & (0xFFFF ^ mask) | len_candidate & mask
 
         synth_msg_start = numBytes(n) - synth_length
 
@@ -525,10 +533,13 @@ class RSAKey(object):
             # equivalent to:
             # if pos >= 10 and not msg_start and not val:
             #     msg_start = pos+1
-            mask = (1 ^ ct_lt_u32(pos, 10)) & (1 ^ ct_isnonzero_u32(val)) \
+            mask = (
+                (1 ^ ct_lt_u32(pos, 10))
+                & (1 ^ ct_isnonzero_u32(val))
                 & (1 ^ ct_isnonzero_u32(msg_start))
+            )
             mask = ct_lsb_prop_u16(mask)
-            msg_start = msg_start & (0xffff ^ mask) | (pos+1) & mask
+            msg_start = msg_start & (0xFFFF ^ mask) | (pos + 1) & mask
 
         # if separator wasn't found, it's an error
         # equivalent to:
@@ -542,7 +553,7 @@ class RSAKey(object):
         # else:
         #     ret_msg_start = msg_start
         mask = ct_lsb_prop_u16(error_detected)
-        ret_msg_start = msg_start & (0xffff ^ mask) | synth_msg_start & mask
+        ret_msg_start = msg_start & (0xFFFF ^ mask) | synth_msg_start & mask
 
         # as at this point the length doesn't leak the information if the
         # padding was correct or not, we don't have to worry about the
@@ -557,10 +568,11 @@ class RSAKey(object):
         # else:
         #     return dec_bytes[ret_msg_start:]
         mask = ct_lsb_prop_u8(error_detected)
-        not_mask = 0xff ^ mask
+        not_mask = 0xFF ^ mask
         ret = bytearray(
-            x & not_mask | y & mask for x, y in
-            zip(dec_bytes[ret_msg_start:], message_random[ret_msg_start:]))
+            x & not_mask | y & mask
+            for x, y in zip(dec_bytes[ret_msg_start:], message_random[ret_msg_start:])
+        )
 
         return ret
 
@@ -615,7 +627,6 @@ class RSAKey(object):
         """
         raise NotImplementedError()
 
-
     # **************************************************************************
     # Helper Functions for RSA Keys
     # **************************************************************************
@@ -623,44 +634,172 @@ class RSAKey(object):
     @classmethod
     def addPKCS1SHA1Prefix(cls, hashBytes, withNULL=True):
         """Add PKCS#1 v1.5 algorithm identifier prefix to SHA1 hash bytes"""
-        # There is a long history of confusion over whether the SHA1 
-        # algorithmIdentifier should be encoded with a NULL parameter or 
-        # with the parameter omitted.  While the original intention was 
+        # There is a long history of confusion over whether the SHA1
+        # algorithmIdentifier should be encoded with a NULL parameter or
+        # with the parameter omitted.  While the original intention was
         # apparently to omit it, many toolkits went the other way.  TLS 1.2
         # specifies the NULL should be included, and this behavior is also
         # mandated in recent versions of PKCS #1, and is what tlslite has
-        # always implemented.  Anyways, verification code should probably 
+        # always implemented.  Anyways, verification code should probably
         # accept both.
         if not withNULL:
-            prefixBytes = bytearray([0x30, 0x1f, 0x30, 0x07, 0x06, 0x05, 0x2b,
-                                     0x0e, 0x03, 0x02, 0x1a, 0x04, 0x14])
+            prefixBytes = bytearray(
+                [
+                    0x30,
+                    0x1F,
+                    0x30,
+                    0x07,
+                    0x06,
+                    0x05,
+                    0x2B,
+                    0x0E,
+                    0x03,
+                    0x02,
+                    0x1A,
+                    0x04,
+                    0x14,
+                ]
+            )
         else:
-            prefixBytes = cls._pkcs1Prefixes['sha1']
+            prefixBytes = cls._pkcs1Prefixes["sha1"]
         prefixedBytes = prefixBytes + hashBytes
         return prefixedBytes
 
-    _pkcs1Prefixes = {'md5' : bytearray([0x30, 0x20, 0x30, 0x0c, 0x06, 0x08,
-                                         0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d,
-                                         0x02, 0x05, 0x05, 0x00, 0x04, 0x10]),
-                      'sha1' : bytearray([0x30, 0x21, 0x30, 0x09, 0x06, 0x05,
-                                          0x2b, 0x0e, 0x03, 0x02, 0x1a, 0x05,
-                                          0x00, 0x04, 0x14]),
-                      'sha224' : bytearray([0x30, 0x2d, 0x30, 0x0d, 0x06, 0x09,
-                                            0x60, 0x86, 0x48, 0x01, 0x65, 0x03,
-                                            0x04, 0x02, 0x04, 0x05, 0x00, 0x04,
-                                            0x1c]),
-                      'sha256' : bytearray([0x30, 0x31, 0x30, 0x0d, 0x06, 0x09,
-                                            0x60, 0x86, 0x48, 0x01, 0x65, 0x03,
-                                            0x04, 0x02, 0x01, 0x05, 0x00, 0x04,
-                                            0x20]),
-                      'sha384' : bytearray([0x30, 0x41, 0x30, 0x0d, 0x06, 0x09,
-                                            0x60, 0x86, 0x48, 0x01, 0x65, 0x03,
-                                            0x04, 0x02, 0x02, 0x05, 0x00, 0x04,
-                                            0x30]),
-                      'sha512' : bytearray([0x30, 0x51, 0x30, 0x0d, 0x06, 0x09,
-                                            0x60, 0x86, 0x48, 0x01, 0x65, 0x03,
-                                            0x04, 0x02, 0x03, 0x05, 0x00, 0x04,
-                                            0x40])}
+    _pkcs1Prefixes = {
+        "md5": bytearray(
+            [
+                0x30,
+                0x20,
+                0x30,
+                0x0C,
+                0x06,
+                0x08,
+                0x2A,
+                0x86,
+                0x48,
+                0x86,
+                0xF7,
+                0x0D,
+                0x02,
+                0x05,
+                0x05,
+                0x00,
+                0x04,
+                0x10,
+            ]
+        ),
+        "sha1": bytearray(
+            [
+                0x30,
+                0x21,
+                0x30,
+                0x09,
+                0x06,
+                0x05,
+                0x2B,
+                0x0E,
+                0x03,
+                0x02,
+                0x1A,
+                0x05,
+                0x00,
+                0x04,
+                0x14,
+            ]
+        ),
+        "sha224": bytearray(
+            [
+                0x30,
+                0x2D,
+                0x30,
+                0x0D,
+                0x06,
+                0x09,
+                0x60,
+                0x86,
+                0x48,
+                0x01,
+                0x65,
+                0x03,
+                0x04,
+                0x02,
+                0x04,
+                0x05,
+                0x00,
+                0x04,
+                0x1C,
+            ]
+        ),
+        "sha256": bytearray(
+            [
+                0x30,
+                0x31,
+                0x30,
+                0x0D,
+                0x06,
+                0x09,
+                0x60,
+                0x86,
+                0x48,
+                0x01,
+                0x65,
+                0x03,
+                0x04,
+                0x02,
+                0x01,
+                0x05,
+                0x00,
+                0x04,
+                0x20,
+            ]
+        ),
+        "sha384": bytearray(
+            [
+                0x30,
+                0x41,
+                0x30,
+                0x0D,
+                0x06,
+                0x09,
+                0x60,
+                0x86,
+                0x48,
+                0x01,
+                0x65,
+                0x03,
+                0x04,
+                0x02,
+                0x02,
+                0x05,
+                0x00,
+                0x04,
+                0x30,
+            ]
+        ),
+        "sha512": bytearray(
+            [
+                0x30,
+                0x51,
+                0x30,
+                0x0D,
+                0x06,
+                0x09,
+                0x60,
+                0x86,
+                0x48,
+                0x01,
+                0x65,
+                0x03,
+                0x04,
+                0x02,
+                0x03,
+                0x05,
+                0x00,
+                0x04,
+                0x40,
+            ]
+        ),
+    }
 
     @classmethod
     def addPKCS1Prefix(cls, data, hashName):
@@ -671,10 +810,10 @@ class RSAKey(object):
         return prefixBytes + data
 
     def _addPKCS1Padding(self, bytes, blockType):
-        padLength = (numBytes(self.n) - (len(bytes)+3))
-        if blockType == 1: #Signature padding
+        padLength = numBytes(self.n) - (len(bytes) + 3)
+        if blockType == 1:  # Signature padding
             pad = [0xFF] * padLength
-        elif blockType == 2: #Encryption padding
+        elif blockType == 2:  # Encryption padding
             pad = bytearray(0)
             while len(pad) < padLength:
                 padBytes = getRandomBytes(padLength * 2)
@@ -683,5 +822,5 @@ class RSAKey(object):
         else:
             raise AssertionError()
 
-        padding = bytearray([0,blockType] + pad + [0])
+        padding = bytearray([0, blockType] + pad + [0])
         return padding + bytes

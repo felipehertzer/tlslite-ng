@@ -26,9 +26,7 @@ if m2cryptoLoaded:
         else:
             raise NotImplementedError()
 
-
     class OpenSSL_AES(AES):
-
         def __init__(self, key, mode, IV):
             # IV argument/field names are a part of the interface
             # pylint: disable=invalid-name
@@ -56,8 +54,7 @@ if m2cryptoLoaded:
             if len(self._key) == 32:
                 cipherType = m2.aes_256_cbc()
             self._context = m2.cipher_ctx_new()
-            m2.cipher_init(self._context, cipherType, self._key, self._IV,
-                           int(encrypt))
+            m2.cipher_init(self._context, cipherType, self._key, self._IV, int(encrypt))
             m2.cipher_set_padding(self._context, 0)
             self._encrypt = encrypt
 
@@ -65,7 +62,7 @@ if m2cryptoLoaded:
             if self._context is None:
                 self._init_context(encrypt=True)
             else:
-                assert self._encrypt, '.encrypt() not allowed after .decrypt()'
+                assert self._encrypt, ".encrypt() not allowed after .decrypt()"
             AES.encrypt(self, plaintext)
             ciphertext = m2.cipher_update(self._context, plaintext)
             return bytearray(ciphertext)
@@ -74,8 +71,7 @@ if m2cryptoLoaded:
             if self._context is None:
                 self._init_context(encrypt=False)
             else:
-                assert not self._encrypt, \
-                       '.decrypt() not allowed after .encrypt()'
+                assert not self._encrypt, ".decrypt() not allowed after .encrypt()"
             AES.decrypt(self, ciphertext)
             plaintext = m2.cipher_update(self._context, ciphertext)
             return bytearray(plaintext)
@@ -84,9 +80,7 @@ if m2cryptoLoaded:
             if self._context is not None:
                 m2.cipher_ctx_free(self._context)
 
-
     class OpenSSL_CTR(AES):
-
         def __init__(self, key, mode, IV):
             # IV argument/field names are a part of the interface
             # pylint: disable=invalid-name
@@ -117,8 +111,7 @@ if m2cryptoLoaded:
             if len(self.key) == 32:
                 cipherType = m2.aes_256_ctr()
             self._context = m2.cipher_ctx_new()
-            m2.cipher_init(self._context, cipherType, self.key, self._IV,
-                           int(encrypt))
+            m2.cipher_init(self._context, cipherType, self.key, self._IV, int(encrypt))
             m2.cipher_set_padding(self._context, 0)
             self._encrypt = encrypt
 

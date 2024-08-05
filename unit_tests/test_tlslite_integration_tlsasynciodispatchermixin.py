@@ -6,16 +6,15 @@ import sys
 # which is not available in Python 2- asyncio is used
 # in the implementation of TLSAsyncioDispatcherMixIn
 try:
-    from tlslite.integration.tlsasynciodispatchermixin \
-        import TLSAsyncioDispatcherMixIn
+    from tlslite.integration.tlsasynciodispatchermixin import TLSAsyncioDispatcherMixIn
     import asyncio
 except ImportError:
     pass
 
 try:
-   import unittest2 as unittest
+    import unittest2 as unittest
 except ImportError:
-   import unittest
+    import unittest
 
 try:
     from unittest.mock import Mock
@@ -25,10 +24,10 @@ except ImportError:
 PY_VER = sys.version_info
 
 
-@unittest.skipIf(PY_VER < (3,),
-                 "asyncio is not available in Python 2")
+@unittest.skipIf(PY_VER < (3,), "asyncio is not available in Python 2")
 class TestTLSAsyncioDispatcherMixIn(unittest.TestCase):
     if PY_VER >= (3,):
+
         class MockProtocol(asyncio.Protocol):
             def connection_lost(self, exc):
                 self.in_write_event()
@@ -44,32 +43,32 @@ class TestTLSAsyncioDispatcherMixIn(unittest.TestCase):
 
     def setUp(self):
         self.protocol = TLSAsyncioDispatcherMixIn()
-        self.protocol.__class__ = type('TestProtocol',
-                                       (self.MockProtocol,
-                                        TLSAsyncioDispatcherMixIn), {})
+        self.protocol.__class__ = type(
+            "TestProtocol", (self.MockProtocol, TLSAsyncioDispatcherMixIn), {}
+        )
         self.protocol.transport = Mock()
         self.protocol.tls_connection = Mock()
 
     def test_readable(self):
         self.protocol.wants_read_event = Mock(return_value=None)
-        self.protocol._get_sibling_class = Mock(return_value=
-                                                Mock(readable=
-                                                     Mock(return_value=True)))
+        self.protocol._get_sibling_class = Mock(
+            return_value=Mock(readable=Mock(return_value=True))
+        )
         self.assertTrue(self.protocol.readable())
 
     def test_writable(self):
         self.protocol.wants_write_event = Mock(return_value=None)
-        self.protocol._get_sibling_class = Mock(return_value=
-                                                Mock(writable=
-                                                     Mock(return_value=True)))
+        self.protocol._get_sibling_class = Mock(
+            return_value=Mock(writable=Mock(return_value=True))
+        )
         self.assertTrue(self.protocol.writable())
 
     def test_data_received(self):
         self.protocol.transport = Mock()
         self.protocol.sibling_class.data_received = Mock()
-        self.protocol.data_received(b'test')
+        self.protocol.data_received(b"test")
         self.protocol.sibling_class.data_received.assert_called_once_with(
-            self.protocol, b'test'
+            self.protocol, b"test"
         )
 
     def test_connection_lost(self):

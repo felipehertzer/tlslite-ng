@@ -1,4 +1,4 @@
-# Authors: 
+# Authors:
 #   Trevor Perrin
 #   Kees Bos - Fixes for compatibility with different Python versions
 #   Martin von Loewis - python 3 port
@@ -25,15 +25,20 @@ class XMLRPCTransport(xmlrpclib.Transport, ClientHelper):
 
     # Pre python 2.7, the make_connection returns a HTTP class
     transport = xmlrpclib.Transport()
-    conn_class_is_http = not hasattr(transport, '_connection')
-    del(transport)
+    conn_class_is_http = not hasattr(transport, "_connection")
+    del transport
 
-    def __init__(self, use_datetime=0,
-                 username=None, password=None,
-                 certChain=None, privateKey=None,
-                 checker=None,
-                 settings=None,
-                 ignoreAbruptClose=False):
+    def __init__(
+        self,
+        use_datetime=0,
+        username=None,
+        password=None,
+        certChain=None,
+        privateKey=None,
+        checker=None,
+        settings=None,
+        ignoreAbruptClose=False,
+    ):
         """
         Create a new XMLRPCTransport.
 
@@ -107,11 +112,9 @@ class XMLRPCTransport(xmlrpclib.Transport, ClientHelper):
         self._connection = (None, None)
         xmlrpclib.Transport.__init__(self, use_datetime)
         self.ignoreAbruptClose = ignoreAbruptClose
-        ClientHelper.__init__(self,
-                 username, password, 
-                 certChain, privateKey,
-                 checker,
-                 settings)
+        ClientHelper.__init__(
+            self, username, password, certChain, privateKey, checker, settings
+        )
 
     def make_connection(self, host):
         """Make a connection to `host`. Reuse keepalive connections."""
@@ -124,11 +127,16 @@ class XMLRPCTransport(xmlrpclib.Transport, ClientHelper):
             chost, extra_headers, x509 = self.get_host_info(host)
 
             http = HTTPTLSConnection(
-                chost, None, username=self.username, password=self.password,
-                certChain=self.certChain, privateKey=self.privateKey,
+                chost,
+                None,
+                username=self.username,
+                password=self.password,
+                certChain=self.certChain,
+                privateKey=self.privateKey,
                 checker=self.checker,
                 settings=self.settings,
-                ignoreAbruptClose=self.ignoreAbruptClose)
+                ignoreAbruptClose=self.ignoreAbruptClose,
+            )
             # store the host argument along with the connection object
             self._connection = host, http
         if not self.conn_class_is_http:

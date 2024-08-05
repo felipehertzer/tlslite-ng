@@ -4,6 +4,8 @@
 
 import socket
 import errno
+
+
 class MockSocket(socket.socket):
     def __init__(self, buf, maxRet=None, maxWrite=None, blockEveryOther=False):
         # current position in read buffer (buf)
@@ -26,7 +28,8 @@ class MockSocket(socket.socket):
 
     def __repr__(self):
         return "MockSocket(index={0}, buf={1!r}, sent={2!r})".format(
-                self.index, self.buf, self.sent)
+            self.index, self.buf, self.sent
+        )
 
     def recv(self, size):
         if self.closed:
@@ -52,18 +55,18 @@ class MockSocket(socket.socket):
             size = self.maxRet
 
         # don't allow reading past array end
-        if len(self.buf[self.index:]) == 0:
+        if len(self.buf[self.index :]) == 0:
             raise socket.error(errno.EWOULDBLOCK)
         # if asked for more than we have prepared, return just as much as we
         # have
-        elif len(self.buf[self.index:]) < size:
-            ret = self.buf[self.index:]
+        elif len(self.buf[self.index :]) < size:
+            ret = self.buf[self.index :]
             self.index = len(self.buf)
             return ret
         # regular call, return as much as was asked for
         else:
-            ret = self.buf[self.index:self.index+size]
-            self.index+=size
+            ret = self.buf[self.index : self.index + size]
+            self.index += size
             return ret
 
     def send(self, data):
@@ -86,7 +89,7 @@ class MockSocket(socket.socket):
 
         # simulate a socket that won't write more data that it can
         # (e.g. because the simulated buffers are mostly full)
-        self.sent.append(data[:self.maxWrite])
+        self.sent.append(data[: self.maxWrite])
         return self.maxWrite
 
     def close(self):

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Authors: 
+# Authors:
 #   Trevor Perrin
 #   Marcelo Fernandez - bugfix and NPN support
 #   Martin von Loewis - python 3 port
@@ -14,6 +14,7 @@ import socket
 import struct
 import getopt
 import binascii
+
 try:
     import httplib
     from SocketServer import *
@@ -30,8 +31,13 @@ if __name__ != "__main__":
     raise Exception("This must be run as a command, not used as a module!")
 
 from tlslite.api import *
-from tlslite.constants import CipherSuite, HashAlgorithm, SignatureAlgorithm, \
-        GroupName, SignatureScheme
+from tlslite.constants import (
+    CipherSuite,
+    HashAlgorithm,
+    SignatureAlgorithm,
+    GroupName,
+    SignatureScheme,
+)
 from tlslite.handshakesettings import Keypair, VirtualHost
 from tlslite import __version__
 from tlslite.utils.compat import b2a_hex, a2b_hex, time_stamp
@@ -44,6 +50,7 @@ try:
 
 except ImportError:
     pass
+
 
 def printUsage(s=None):
     if s:
@@ -58,7 +65,7 @@ def printUsage(s=None):
     if tackpyLoaded:
         print("  tackpy      : Loaded")
     else:
-        print("  tackpy      : Not Loaded")            
+        print("  tackpy      : Not Loaded")
     if m2cryptoLoaded:
         print("  M2Crypto    : Loaded")
     else:
@@ -77,7 +84,8 @@ def printUsage(s=None):
         print("  GMPY2       : Not Loaded")
 
     print("")
-    print("""Commands:
+    print(
+        """Commands:
 
   server  
     [-c CERT] [-k KEY] [-t TACK] [-v VERIFIERDB] [-d DIR] [-l LABEL] [-L LENGTH]
@@ -115,16 +123,19 @@ def printUsage(s=None):
         server. The server can accept multiple pairs of `-c` and `-k` options
         to configure different certificates (like RSA and ECDSA)
 
-""")
+"""
+    )
     sys.exit(-1)
 
 
 def ver_to_tuple(name):
-    vers = {"ssl3": (3, 0),
-            "tls1.0": (3, 1),
-            "tls1.1": (3, 2),
-            "tls1.2": (3, 3),
-            "tls1.3": (3, 4)}
+    vers = {
+        "ssl3": (3, 0),
+        "tls1.0": (3, 1),
+        "tls1.1": (3, 2),
+        "tls1.2": (3, 3),
+        "tls1.3": (3, 4),
+    }
     try:
         return vers[name]
     except KeyError:
@@ -144,8 +155,8 @@ def handleArgs(argv, argString, flagsList=[]):
     try:
         opts, argv = getopt.getopt(argv, getOptArgString, flagsList)
     except getopt.GetoptError as e:
-        printError(e) 
-    # Default values if arg not present  
+        printError(e)
+    # Default values if arg not present
     privateKey = None
     cert_chain = None
     virtual_hosts = []
@@ -162,7 +173,7 @@ def handleArgs(argv, argString, flagsList=[]):
     dhparam = None
     psk = None
     psk_ident = None
-    psk_hash = 'sha256'
+    psk_hash = "sha256"
     resumption = False
     ssl3 = False
     max_ver = None
@@ -176,26 +187,25 @@ def handleArgs(argv, argString, flagsList=[]):
         if opt == "-k":
             s = open(arg, "rb").read()
             if sys.version_info[0] >= 3:
-                s = str(s, 'utf-8')
+                s = str(s, "utf-8")
             # OpenSSL/m2crypto does not support RSASSA-PSS certificates
             if not privateKey:
-                privateKey = parsePEMKey(s, private=True,
-                                         implementations=["python"])
+                privateKey = parsePEMKey(s, private=True, implementations=["python"])
             else:
                 if not v_host_cert:
-                    raise ValueError("Virtual host certificate missing "
-                                     "(must be listed before key)")
-                p_key = parsePEMKey(s, private=True,
-                                    implementations=["python"])
+                    raise ValueError(
+                        "Virtual host certificate missing "
+                        "(must be listed before key)"
+                    )
+                p_key = parsePEMKey(s, private=True, implementations=["python"])
                 if not virtual_hosts:
                     virtual_hosts.append(VirtualHost())
-                virtual_hosts[0].keys.append(
-                    Keypair(p_key, v_host_cert.x509List))
+                virtual_hosts[0].keys.append(Keypair(p_key, v_host_cert.x509List))
                 v_host_cert = None
         elif opt == "-c":
             s = open(arg, "rb").read()
             if sys.version_info[0] >= 3:
-                s = str(s, 'utf-8')
+                s = str(s, "utf-8")
             if not cert_chain:
                 cert_chain = X509CertChain()
                 cert_chain.parsePemList(s)
@@ -222,18 +232,18 @@ def handleArgs(argv, argString, flagsList=[]):
         elif opt == "-L":
             expLength = int(arg)
         elif opt == "-a":
-            alpn.append(bytearray(arg, 'utf-8'))
+            alpn.append(bytearray(arg, "utf-8"))
         elif opt == "--param":
             s = open(arg, "rb").read()
             if sys.version_info[0] >= 3:
-                s = str(s, 'utf-8')
+                s = str(s, "utf-8")
             dhparam = parseDH(s)
         elif opt == "--psk":
             psk = a2b_hex(arg)
         elif opt == "--psk-ident":
-            psk_ident = bytearray(arg, 'utf-8')
+            psk_ident = bytearray(arg, "utf-8")
         elif opt == "--psk-sha384":
-            psk_hash = 'sha384'
+            psk_hash = "sha384"
         elif opt == "--resumption":
             resumption = True
         elif opt == "--ssl3":
@@ -251,7 +261,7 @@ def handleArgs(argv, argString, flagsList=[]):
         elif opt == "--echo":
             echo = True
         else:
-            assert(False)
+            assert False
 
     # when no names provided, don't return array
     if not alpn:
@@ -260,14 +270,14 @@ def handleArgs(argv, argString, flagsList=[]):
         printError("PSK and IDENTITY must be set together")
     if not argv:
         printError("Missing address")
-    if len(argv)>1:
+    if len(argv) > 1:
         printError("Too many arguments")
-    #Split address into hostname/port tuple
+    # Split address into hostname/port tuple
     address = argv[0]
     address = address.split(":")
     if len(address) != 2:
         raise SyntaxError("Must specify <host>:<port>")
-    address = ( address[0], int(address[1]) )
+    address = (address[0], int(address[1]))
 
     # Populate the return list
     retList = [address]
@@ -324,30 +334,43 @@ def handleArgs(argv, argString, flagsList=[]):
 def printGoodConnection(connection, seconds):
     print("  Handshake time: %.3f seconds" % seconds)
     print("  Version: %s" % connection.getVersionName())
-    print("  Cipher: %s %s" % (connection.getCipherName(),
-        connection.getCipherImplementation()))
-    print("  Ciphersuite: {0}".\
-            format(CipherSuite.ietfNames[connection.session.cipherSuite]))
+    print(
+        "  Cipher: %s %s"
+        % (connection.getCipherName(), connection.getCipherImplementation())
+    )
+    print(
+        "  Ciphersuite: {0}".format(
+            CipherSuite.ietfNames[connection.session.cipherSuite]
+        )
+    )
     if connection.session.srpUsername:
         print("  Client SRP username: %s" % connection.session.srpUsername)
     if connection.session.clientCertChain:
-        print("  Client X.509 SHA1 fingerprint: %s" %
-            connection.session.clientCertChain.getFingerprint())
+        print(
+            "  Client X.509 SHA1 fingerprint: %s"
+            % connection.session.clientCertChain.getFingerprint()
+        )
     else:
         print("  No client certificate provided by peer")
     if connection.session.serverCertChain:
-        print("  Server X.509 SHA1 fingerprint: %s" %
-            connection.session.serverCertChain.getFingerprint())
+        print(
+            "  Server X.509 SHA1 fingerprint: %s"
+            % connection.session.serverCertChain.getFingerprint()
+        )
     if connection.version >= (3, 3) and connection.serverSigAlg is not None:
         scheme = SignatureScheme.toRepr(connection.serverSigAlg)
         if scheme is None:
             scheme = "{1}+{0}".format(
                 HashAlgorithm.toStr(connection.serverSigAlg[0]),
-                SignatureAlgorithm.toStr(connection.serverSigAlg[1]))
+                SignatureAlgorithm.toStr(connection.serverSigAlg[1]),
+            )
         print("  Key exchange signature: {0}".format(scheme))
     if connection.ecdhCurve is not None:
-        print("  Group used for key exchange: {0}".format(\
-                GroupName.toStr(connection.ecdhCurve)))
+        print(
+            "  Group used for key exchange: {0}".format(
+                GroupName.toStr(connection.ecdhCurve)
+            )
+        )
     if connection.dhGroupSize is not None:
         print("  DH group size: {0} bits".format(connection.dhGroupSize))
     if connection.session.serverName:
@@ -360,13 +383,16 @@ def printGoodConnection(connection, seconds):
         print("  TACK: %s" % emptyStr)
         print(str(connection.session.tackExt))
     if connection.session.appProto:
-        print("  Application Layer Protocol negotiated: {0}".format(
-            connection.session.appProto.decode('utf-8')))
+        print(
+            "  Application Layer Protocol negotiated: {0}".format(
+                connection.session.appProto.decode("utf-8")
+            )
+        )
     print("  Next-Protocol Negotiated: %s" % connection.next_proto)
     print("  Encrypt-then-MAC: {0}".format(connection.encryptThenMAC))
-    print("  Extended Master Secret: {0}".format(
-                                               connection.extendedMasterSecret))
+    print("  Extended Master Secret: {0}".format(connection.extendedMasterSecret))
     print("  Session Resumed: {0}".format(connection.resumed))
+
 
 def printExporter(connection, expLabel, expLength):
     if expLabel is None:
@@ -378,16 +404,39 @@ def printExporter(connection, expLabel, expLength):
     print("  Exporter length: {0}".format(expLength))
     print("  Keying material: {0}".format(exp))
 
-    
+
 def clientCmd(argv):
-    (address, privateKey, cert_chain, virtual_hosts, username, password,
-            expLabel,
-            expLength, alpn, psk, psk_ident, psk_hash, resumption, ssl3,
-            max_ver, cipherlist) = \
-        handleArgs(argv, "kcuplLa", ["psk=", "psk-ident=", "psk-sha384",
-                                     "resumption", "ssl3", "max-ver=",
-                                     "cipherlist="])
-        
+    (
+        address,
+        privateKey,
+        cert_chain,
+        virtual_hosts,
+        username,
+        password,
+        expLabel,
+        expLength,
+        alpn,
+        psk,
+        psk_ident,
+        psk_hash,
+        resumption,
+        ssl3,
+        max_ver,
+        cipherlist,
+    ) = handleArgs(
+        argv,
+        "kcuplLa",
+        [
+            "psk=",
+            "psk-ident=",
+            "psk-sha384",
+            "resumption",
+            "ssl3",
+            "max-ver=",
+            "cipherlist=",
+        ],
+    )
+
     if (cert_chain and not privateKey) or (not cert_chain and privateKey):
         raise SyntaxError("Must specify CERT and KEY together")
     if (username and not password) or (not username and password):
@@ -397,13 +446,13 @@ def clientCmd(argv):
     if expLabel is not None and not expLabel:
         raise ValueError("Label must be non-empty")
 
-    #Connect to server
+    # Connect to server
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.settimeout(5)
     sock.connect(address)
     sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
     connection = TLSConnection(sock)
-    
+
     settings = HandshakeSettings()
     if psk:
         settings.pskConfigs = [(psk_ident, psk, psk_hash)]
@@ -413,75 +462,23 @@ def clientCmd(argv):
     if max_ver:
         settings.maxVersion = max_ver
     if cipherlist:
-        settings.cipherNames = [item for cipher in cipherlist
-                                for item in cipher.split(',')]
+        settings.cipherNames = [
+            item for cipher in cipherlist for item in cipher.split(",")
+        ]
     try:
         start = time_stamp()
         if username and password:
-            connection.handshakeClientSRP(username, password, 
-                settings=settings, serverName=address[0])
+            connection.handshakeClientSRP(
+                username, password, settings=settings, serverName=address[0]
+            )
         else:
-            connection.handshakeClientCert(cert_chain, privateKey,
-                settings=settings, serverName=address[0], alpn=alpn)
-        stop = time_stamp()
-        print("Handshake success")        
-    except TLSLocalAlert as a:
-        if a.description == AlertDescription.user_canceled:
-            print(str(a))
-        else:
-            raise
-        sys.exit(-1)
-    except TLSRemoteAlert as a:
-        if a.description == AlertDescription.unknown_psk_identity:
-            if username:
-                print("Unknown username")
-            else:
-                raise
-        elif a.description == AlertDescription.bad_record_mac:
-            if username:
-                print("Bad username or password")
-            else:
-                raise
-        elif a.description == AlertDescription.handshake_failure:
-            print("Unable to negotiate mutually acceptable parameters")
-        else:
-            raise
-        sys.exit(-1)
-    printGoodConnection(connection, stop-start)
-    printExporter(connection, expLabel, expLength)
-    session = connection.session
-    connection.send(b"GET / HTTP/1.0\r\n\r\n")
-    while True:
-        try:
-            r = connection.recv(10240)
-            if not r:
-                break
-        except socket.timeout:
-            break
-        except TLSAbruptCloseError:
-            break
-    connection.close()
-    # we're expecting an abrupt close error which marks the session as
-    # unreasumable, override it
-    session.resumable = True
-
-    print("Received {0} ticket[s]".format(len(connection.tickets) + len(connection.tls_1_0_tickets)))
-    assert connection.tickets is session.tickets
-
-    if not resumption:
-        return
-
-    print("Trying resumption handshake")
-
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.settimeout(5)
-    sock.connect(address)
-    sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-    connection = TLSConnection(sock)
-    try:
-        start = time_stamp()
-        connection.handshakeClientCert(serverName=address[0], alpn=alpn,
-            session=session, settings=settings)
+            connection.handshakeClientCert(
+                cert_chain,
+                privateKey,
+                settings=settings,
+                serverName=address[0],
+                alpn=alpn,
+            )
         stop = time_stamp()
         print("Handshake success")
     except TLSLocalAlert as a:
@@ -506,30 +503,127 @@ def clientCmd(argv):
         else:
             raise
         sys.exit(-1)
-    printGoodConnection(connection, stop-start)
+    printGoodConnection(connection, stop - start)
+    printExporter(connection, expLabel, expLength)
+    session = connection.session
+    connection.send(b"GET / HTTP/1.0\r\n\r\n")
+    while True:
+        try:
+            r = connection.recv(10240)
+            if not r:
+                break
+        except socket.timeout:
+            break
+        except TLSAbruptCloseError:
+            break
+    connection.close()
+    # we're expecting an abrupt close error which marks the session as
+    # unreasumable, override it
+    session.resumable = True
+
+    print(
+        "Received {0} ticket[s]".format(
+            len(connection.tickets) + len(connection.tls_1_0_tickets)
+        )
+    )
+    assert connection.tickets is session.tickets
+
+    if not resumption:
+        return
+
+    print("Trying resumption handshake")
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.settimeout(5)
+    sock.connect(address)
+    sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    connection = TLSConnection(sock)
+    try:
+        start = time_stamp()
+        connection.handshakeClientCert(
+            serverName=address[0], alpn=alpn, session=session, settings=settings
+        )
+        stop = time_stamp()
+        print("Handshake success")
+    except TLSLocalAlert as a:
+        if a.description == AlertDescription.user_canceled:
+            print(str(a))
+        else:
+            raise
+        sys.exit(-1)
+    except TLSRemoteAlert as a:
+        if a.description == AlertDescription.unknown_psk_identity:
+            if username:
+                print("Unknown username")
+            else:
+                raise
+        elif a.description == AlertDescription.bad_record_mac:
+            if username:
+                print("Bad username or password")
+            else:
+                raise
+        elif a.description == AlertDescription.handshake_failure:
+            print("Unable to negotiate mutually acceptable parameters")
+        else:
+            raise
+        sys.exit(-1)
+    printGoodConnection(connection, stop - start)
     printExporter(connection, expLabel, expLength)
     connection.close()
 
 
 def serverCmd(argv):
-    (address, privateKey, cert_chain, virtual_hosts, tacks, verifierDB,
-            directory, reqCert,
-            expLabel, expLength, dhparam, psk, psk_ident, psk_hash, ssl3,
-            max_ver, tickets, cipherlist, request_pha, require_pha, echo) = \
-        handleArgs(argv, "kctbvdlL",
-                   ["reqcert", "param=", "psk=",
-                    "psk-ident=", "psk-sha384", "ssl3", "max-ver=",
-                    "tickets=", "cipherlist=", "request-pha", "require-pha",
-                    "echo"])
-
+    (
+        address,
+        privateKey,
+        cert_chain,
+        virtual_hosts,
+        tacks,
+        verifierDB,
+        directory,
+        reqCert,
+        expLabel,
+        expLength,
+        dhparam,
+        psk,
+        psk_ident,
+        psk_hash,
+        ssl3,
+        max_ver,
+        tickets,
+        cipherlist,
+        request_pha,
+        require_pha,
+        echo,
+    ) = handleArgs(
+        argv,
+        "kctbvdlL",
+        [
+            "reqcert",
+            "param=",
+            "psk=",
+            "psk-ident=",
+            "psk-sha384",
+            "ssl3",
+            "max-ver=",
+            "tickets=",
+            "cipherlist=",
+            "request-pha",
+            "require-pha",
+            "echo",
+        ],
+    )
 
     if (cert_chain and not privateKey) or (not cert_chain and privateKey):
         raise SyntaxError("Must specify CERT and KEY together")
     if tacks and not cert_chain:
         raise SyntaxError("Must specify CERT with Tacks")
 
-    print("I am an {2} test server, I will listen on {0}:{1}".format(
-        address[0], address[1], "echo" if echo else "HTTP"))
+    print(
+        "I am an {2} test server, I will listen on {0}:{1}".format(
+            address[0], address[1], "echo" if echo else "HTTP"
+        )
+    )
 
     if directory:
         os.chdir(directory)
@@ -544,7 +638,7 @@ def serverCmd(argv):
         print("Using Tacks...")
     if reqCert:
         print("Asking for client certificates...")
-        
+
     #############
     sessionCache = SessionCache()
     username = None
@@ -552,7 +646,7 @@ def serverCmd(argv):
     if is_valid_hostname(address[0]):
         sni = address[0]
     settings = HandshakeSettings()
-    settings.useExperimentalTackExtension=True
+    settings.useExperimentalTackExtension = True
     settings.dhParams = dhparam
     if tickets is not None:
         settings.ticket_count = tickets
@@ -565,8 +659,9 @@ def serverCmd(argv):
         settings.maxVersion = max_ver
     settings.virtual_hosts = virtual_hosts
     if cipherlist:
-        settings.cipherNames = [item for cipher in cipherlist
-                                for item in cipher.split(',')]
+        settings.cipherNames = [
+            item for cipher in cipherlist for item in cipher.split(",")
+        ]
 
     class MySimpleEchoHandler(BaseRequestHandler):
         def handle(self):
@@ -578,39 +673,47 @@ def serverCmd(argv):
 
     class MySimpleHTTPHandler(SimpleHTTPRequestHandler, object):
         """Buffer the header and body of HTTP message."""
+
         wbufsize = -1
 
         def do_GET(self):
             """Simple override to send KeyUpdate to client."""
-            if self.path.startswith('/keyupdate'):
+            if self.path.startswith("/keyupdate"):
                 for i in self.connection.send_keyupdate_request(
-                        KeyUpdateMessageType.update_requested):
+                    KeyUpdateMessageType.update_requested
+                ):
                     if i in (0, 1):
                         continue
                     else:
-                        raise ValueError("Invalid return from "
-                                         "send_keyupdate_request")
-            if self.path.startswith('/secret') and not request_pha:
+                        raise ValueError(
+                            "Invalid return from " "send_keyupdate_request"
+                        )
+            if self.path.startswith("/secret") and not request_pha:
                 try:
                     for i in self.connection.request_post_handshake_auth():
                         pass
                 except ValueError:
-                    self.wfile.write(b'HTTP/1.0 401 Certificate authentication'
-                                     b' required\r\n')
-                    self.wfile.write(b'Connection: close\r\n')
-                    self.wfile.write(b'Content-Length: 0\r\n\r\n')
+                    self.wfile.write(
+                        b"HTTP/1.0 401 Certificate authentication" b" required\r\n"
+                    )
+                    self.wfile.write(b"Connection: close\r\n")
+                    self.wfile.write(b"Content-Length: 0\r\n\r\n")
                     return
                 self.connection.read(0, 0)
                 if self.connection.session.clientCertChain:
-                    print("   Got client certificate in post-handshake auth: "
-                          "{0}".format(self.connection.session
-                                       .clientCertChain.getFingerprint()))
+                    print(
+                        "   Got client certificate in post-handshake auth: "
+                        "{0}".format(
+                            self.connection.session.clientCertChain.getFingerprint()
+                        )
+                    )
                 else:
                     print("   No certificate from client received")
-                    self.wfile.write(b'HTTP/1.0 401 Certificate authentication'
-                                     b' required\r\n')
-                    self.wfile.write(b'Connection: close\r\n')
-                    self.wfile.write(b'Content-Length: 0\r\n\r\n')
+                    self.wfile.write(
+                        b"HTTP/1.0 401 Certificate authentication" b" required\r\n"
+                    )
+                    self.wfile.write(b"Connection: close\r\n")
+                    self.wfile.write(b"Content-Length: 0\r\n\r\n")
                     return
             return super(MySimpleHTTPHandler, self).do_GET()
 
@@ -633,24 +736,26 @@ def serverCmd(argv):
 
             try:
                 start = time_stamp()
-                connection.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY,
-                                      1)
-                connection.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER,
-                                      struct.pack('ii', 1, 5))
+                connection.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+                connection.setsockopt(
+                    socket.SOL_SOCKET, socket.SO_LINGER, struct.pack("ii", 1, 5)
+                )
                 connection.client_cert_required = require_pha
-                connection.handshakeServer(certChain=cert_chain,
-                                              privateKey=privateKey,
-                                              verifierDB=verifierDB,
-                                              tacks=tacks,
-                                              activationFlags=activationFlags,
-                                              sessionCache=sessionCache,
-                                              settings=settings,
-                                              nextProtos=[b"http/1.1"],
-                                              alpn=[bytearray(b'http/1.1')],
-                                              reqCert=reqCert,
-                                              sni=sni)
-                                              # As an example (does not work here):
-                                              #nextProtos=[b"spdy/3", b"spdy/2", b"http/1.1"])
+                connection.handshakeServer(
+                    certChain=cert_chain,
+                    privateKey=privateKey,
+                    verifierDB=verifierDB,
+                    tacks=tacks,
+                    activationFlags=activationFlags,
+                    sessionCache=sessionCache,
+                    settings=settings,
+                    nextProtos=[b"http/1.1"],
+                    alpn=[bytearray(b"http/1.1")],
+                    reqCert=reqCert,
+                    sni=sni,
+                )
+                # As an example (does not work here):
+                # nextProtos=[b"spdy/3", b"spdy/2", b"http/1.1"])
                 try:
                     if request_pha:
                         for i in connection.request_post_handshake_auth():
@@ -685,7 +790,7 @@ def serverCmd(argv):
                     raise
 
             connection.ignoreAbruptClose = True
-            printGoodConnection(connection, stop-start)
+            printGoodConnection(connection, stop - start)
             printExporter(connection, expLabel, expLength)
             return True
 
@@ -693,13 +798,12 @@ def serverCmd(argv):
     server.serve_forever()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     if len(sys.argv) < 2:
         printUsage("Missing command")
-    elif sys.argv[1] == "client"[:len(sys.argv[1])]:
+    elif sys.argv[1] == "client"[: len(sys.argv[1])]:
         clientCmd(sys.argv[2:])
-    elif sys.argv[1] == "server"[:len(sys.argv[1])]:
+    elif sys.argv[1] == "server"[: len(sys.argv[1])]:
         serverCmd(sys.argv[2:])
     else:
         printUsage("Unknown command: %s" % sys.argv[1])
-

@@ -13,11 +13,13 @@ from .compat import bytes_to_int
 
 class DecodeError(SyntaxError):
     """Exception raised in case of decoding errors."""
+
     pass
 
 
 class BadCertificateError(SyntaxError):
     """Exception raised in case of bad certificate."""
+
     pass
 
 
@@ -37,40 +39,42 @@ class Writer(object):
         # is larger than can fit inside the specified size
         def addTwo(self, val):
             """Add a double-byte wide element to buffer, see add()."""
-            if not 0 <= val <= 0xffff:
+            if not 0 <= val <= 0xFFFF:
                 raise ValueError("Can't represent value in specified length")
-            self.bytes += pack('>H', val)
+            self.bytes += pack(">H", val)
 
         def addThree(self, val):
             """Add a three-byte wide element to buffer, see add()."""
-            if not 0 <= val <= 0xffffff:
+            if not 0 <= val <= 0xFFFFFF:
                 raise ValueError("Can't represent value in specified length")
-            self.bytes += pack('>BH', val >> 16, val & 0xffff)
+            self.bytes += pack(">BH", val >> 16, val & 0xFFFF)
 
         def addFour(self, val):
             """Add a four-byte wide element to buffer, see add()."""
-            if not 0 <= val <= 0xffffffff:
+            if not 0 <= val <= 0xFFFFFFFF:
                 raise ValueError("Can't represent value in specified length")
-            self.bytes += pack('>I', val)
+            self.bytes += pack(">I", val)
+
     else:
+
         def addTwo(self, val):
             """Add a double-byte wide element to buffer, see add()."""
             try:
-                self.bytes += pack('>H', val)
+                self.bytes += pack(">H", val)
             except struct.error:
                 raise ValueError("Can't represent value in specified length")
 
         def addThree(self, val):
             """Add a three-byte wide element to buffer, see add()."""
             try:
-                self.bytes += pack('>BH', val >> 16, val & 0xffff)
+                self.bytes += pack(">BH", val >> 16, val & 0xFFFF)
             except struct.error:
                 raise ValueError("Can't represent value in specified length")
 
         def addFour(self, val):
             """Add a four-byte wide element to buffer, see add()."""
             try:
-                self.bytes += pack('>I', val)
+                self.bytes += pack(">I", val)
             except struct.error:
                 raise ValueError("Can't represent value in specified length")
 
@@ -91,9 +95,10 @@ class Writer(object):
             :param length: number of bytes to use for encoding the value
             """
             try:
-                self.bytes += x.to_bytes(length, 'big')
+                self.bytes += x.to_bytes(length, "big")
             except OverflowError:
                 raise ValueError("Can't represent value in specified length")
+
     else:
         _addMethods = {1: addOne, 2: addTwo, 3: addThree, 4: addFour}
 
@@ -119,8 +124,7 @@ class Writer(object):
                     self.bytes[i] = x & 0xFF
                     x >>= 8
                 if x != 0:
-                    raise ValueError("Can't represent value in specified "
-                                     "length")
+                    raise ValueError("Can't represent value in specified " "length")
 
     def addFixSeq(self, seq, length):
         """
@@ -143,10 +147,9 @@ class Writer(object):
         # is larger than can fit inside the specified size
         def _addVarSeqTwo(self, seq):
             """Helper method for addVarSeq"""
-            if not all(0 <= i <= 0xffff for i in seq):
-                raise ValueError("Can't represent value in specified "
-                                 "length")
-            self.bytes += pack('>' + 'H' * len(seq), *seq)
+            if not all(0 <= i <= 0xFFFF for i in seq):
+                raise ValueError("Can't represent value in specified " "length")
+            self.bytes += pack(">" + "H" * len(seq), *seq)
 
         def addVarSeq(self, seq, length, lengthLength):
             """
@@ -165,7 +168,7 @@ class Writer(object):
             :param lengthLength: amount of bytes in which to encode the overall
                 length of the array
             """
-            self.add(len(seq)*length, lengthLength)
+            self.add(len(seq) * length, lengthLength)
             if length == 1:
                 self.bytes.extend(seq)
             elif length == 2:
@@ -173,7 +176,9 @@ class Writer(object):
             else:
                 for i in seq:
                     self.add(i, length)
+
     else:
+
         def addVarSeq(self, seq, length, lengthLength):
             """
             Add a bounded list of same-sized values
@@ -192,15 +197,14 @@ class Writer(object):
                 length of the array
             """
             seqLen = len(seq)
-            self.add(seqLen*length, lengthLength)
+            self.add(seqLen * length, lengthLength)
             if length == 1:
                 self.bytes.extend(seq)
             elif length == 2:
                 try:
-                    self.bytes += pack('>' + 'H' * seqLen, *seq)
+                    self.bytes += pack(">" + "H" * seqLen, *seq)
                 except struct.error:
-                    raise ValueError("Can't represent value in specified "
-                                     "length")
+                    raise ValueError("Can't represent value in specified " "length")
             else:
                 for i in seq:
                     self.add(i, length)
@@ -307,7 +311,7 @@ class Parser(object):
         :rtype: int
         """
         ret = self.getFixBytes(length)
-        return bytes_to_int(ret, 'big')
+        return bytes_to_int(ret, "big")
 
     def getFixBytes(self, lengthBytes):
         """
@@ -377,8 +381,7 @@ class Parser(object):
         """
         lengthList = self.get(lengthLength)
         if lengthList % length != 0:
-            raise DecodeError("Encoded length not a multiple of element "
-                              "length")
+            raise DecodeError("Encoded length not a multiple of element " "length")
         lengthList = lengthList // length
         l = [0] * lengthList
         for x in range(lengthList):
@@ -402,8 +405,7 @@ class Parser(object):
         """
         lengthList = self.get(lengthLength)
         if lengthList % (elemLength * elemNum) != 0:
-            raise DecodeError("Encoded length not a multiple of element "
-                              "length")
+            raise DecodeError("Encoded length not a multiple of element " "length")
         tupleCount = lengthList // (elemLength * elemNum)
         tupleList = []
         for _ in range(tupleCount):

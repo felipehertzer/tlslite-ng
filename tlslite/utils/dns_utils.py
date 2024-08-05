@@ -17,7 +17,7 @@ def is_valid_hostname(hostname):
     """
     try:
         if not isinstance(hostname, str):
-            hostname = hostname.decode('ascii', 'strict')
+            hostname = hostname.decode("ascii", "strict")
     except UnicodeDecodeError:
         return False
     if hostname[-1] == ".":

@@ -7,6 +7,7 @@ from .utils.compat import compat26Str, compatHMAC
 from .utils.cryptomath import MD5, SHA1
 from .utils import tlshashlib as hashlib
 
+
 class HandshakeHashes(object):
 
     """
@@ -51,17 +52,17 @@ class HandshakeHashes(object):
         """
         if digest is None:
             return self._handshakeMD5.digest() + self._handshakeSHA.digest()
-        elif digest == 'md5':
+        elif digest == "md5":
             return self._handshakeMD5.digest()
-        elif digest == 'sha1':
+        elif digest == "sha1":
             return self._handshakeSHA.digest()
-        elif digest == 'sha224':
+        elif digest == "sha224":
             return self._handshakeSHA224.digest()
-        elif digest == 'sha256':
+        elif digest == "sha256":
             return self._handshakeSHA256.digest()
-        elif digest == 'sha384':
+        elif digest == "sha384":
             return self._handshakeSHA384.digest()
-        elif digest == 'sha512':
+        elif digest == "sha512":
             return self._handshakeSHA512.digest()
         elif digest == "intrinsic":
             return self._handshake_buffer
@@ -77,24 +78,26 @@ class HandshakeHashes(object):
         :param bytearray masterSecret: value of the master secret
         :param bytearray label: label to include in the calculation
         """
-        #pylint: disable=maybe-no-member
+        # pylint: disable=maybe-no-member
         imacMD5 = self._handshakeMD5.copy()
         imacSHA = self._handshakeSHA.copy()
-        #pylint: enable=maybe-no-member
+        # pylint: enable=maybe-no-member
 
         # the below difference in input for MD5 and SHA-1 is why we can't reuse
         # digest() method
-        imacMD5.update(compatHMAC(label + masterSecret + bytearray([0x36]*48)))
-        imacSHA.update(compatHMAC(label + masterSecret + bytearray([0x36]*40)))
+        imacMD5.update(compatHMAC(label + masterSecret + bytearray([0x36] * 48)))
+        imacSHA.update(compatHMAC(label + masterSecret + bytearray([0x36] * 40)))
 
-        md5Bytes = MD5(masterSecret + bytearray([0x5c]*48) + \
-                         bytearray(imacMD5.digest()))
-        shaBytes = SHA1(masterSecret + bytearray([0x5c]*40) + \
-                         bytearray(imacSHA.digest()))
+        md5Bytes = MD5(
+            masterSecret + bytearray([0x5C] * 48) + bytearray(imacMD5.digest())
+        )
+        shaBytes = SHA1(
+            masterSecret + bytearray([0x5C] * 40) + bytearray(imacSHA.digest())
+        )
 
         return md5Bytes + shaBytes
 
-    #pylint: disable=protected-access, maybe-no-member
+    # pylint: disable=protected-access, maybe-no-member
     def copy(self):
         """
         Copy object

@@ -9,17 +9,20 @@ from .rsakey import *
 from .python_rsakey import Python_RSAKey
 from .compat import compatAscii2Bytes, compat_b2a
 
-#copied from M2Crypto.util.py, so when we load the local copy of m2
-#we can still use it
-def password_callback(v, prompt1='Enter private key passphrase:',
-                           prompt2='Verify passphrase:'):
+
+# copied from M2Crypto.util.py, so when we load the local copy of m2
+# we can still use it
+def password_callback(
+    v, prompt1="Enter private key passphrase:", prompt2="Verify passphrase:"
+):
     from getpass import getpass
+
     while 1:
         try:
-            p1=getpass(prompt1)
+            p1 = getpass(prompt1)
             if v:
-                p2=getpass(prompt2)
-                if p1==p2:
+                p2 = getpass(prompt2)
+                if p1 == p2:
                     break
             else:
                 break
@@ -49,11 +52,11 @@ if m2cryptoLoaded:
                 m2.rsa_free(self.rsa)
 
         def __getattr__(self, name):
-            if name == 'e':
+            if name == "e":
                 if not self.rsa:
                     return 0
                 return mpiToNumber(m2.rsa_get_e(self.rsa))
-            elif name == 'n':
+            elif name == "n":
                 if not self.rsa:
                     return 0
                 return mpiToNumber(m2.rsa_get_n(self.rsa))
@@ -65,20 +68,20 @@ if m2cryptoLoaded:
 
         def _rawPrivateKeyOp(self, message):
             data = numberToByteArray(message, numBytes(self.n))
-            string = m2.rsa_private_encrypt(self.rsa, bytes(data),
-                                            m2.no_padding)
+            string = m2.rsa_private_encrypt(self.rsa, bytes(data), m2.no_padding)
             ciphertext = bytesToNumber(bytearray(string))
             return ciphertext
 
         def _raw_private_key_op_bytes(self, message):
             return self._call_m2crypto(
-                m2.rsa_private_encrypt, message,
-                "Bad parameters to private key operation")
+                m2.rsa_private_encrypt,
+                message,
+                "Bad parameters to private key operation",
+            )
 
         def _rawPublicKeyOp(self, ciphertext):
             data = numberToByteArray(ciphertext, numBytes(self.n))
-            string = m2.rsa_public_decrypt(self.rsa, bytes(data),
-                                           m2.no_padding)
+            string = m2.rsa_public_decrypt(self.rsa, bytes(data), m2.no_padding)
             message = bytesToNumber(bytearray(string))
             return message
 
@@ -90,19 +93,28 @@ if m2cryptoLoaded:
 
         def _raw_public_key_op_bytes(self, ciphertext):
             return self._call_m2crypto(
-                m2.rsa_public_decrypt, ciphertext,
-                "Bad parameters to public key operation")
+                m2.rsa_public_decrypt,
+                ciphertext,
+                "Bad parameters to public key operation",
+            )
 
-        def acceptsPassword(self): return True
+        def acceptsPassword(self):
+            return True
 
         def write(self, password=None):
             bio = m2.bio_new(m2.bio_s_mem())
             if self._hasPrivateKey:
                 if password:
-                    def f(v): return password
+
+                    def f(v):
+                        return password
+
                     m2.rsa_write_key(self.rsa, bio, m2.des_ede_cbc(), f)
                 else:
-                    def f(): pass
+
+                    def f():
+                        pass
+
                     m2.rsa_write_key_no_cipher(self.rsa, bio, f)
             else:
                 if password:
@@ -115,7 +127,10 @@ if m2cryptoLoaded:
         @staticmethod
         def generate(bits, key_type="rsa"):
             key = OpenSSL_RSAKey()
-            def f():pass
+
+            def f():
+                pass
+
             # pylint: disable=no-member
             key.rsa = m2.rsa_generate_key(bits, 65537, f)
             # pylint: enable=no-member
@@ -132,13 +147,15 @@ if m2cryptoLoaded:
             start = s.find("-----BEGIN ")
             if start == -1:
                 raise SyntaxError()
-            s = s[start:]            
+            s = s[start:]
             if s.startswith("-----BEGIN "):
-                if passwordCallback==None:
+                if passwordCallback == None:
                     callback = password_callback
                 else:
+
                     def f(v, prompt1=None, prompt2=None):
                         return passwordCallback()
+
                     callback = f
                 bio = m2.bio_new(m2.bio_s_mem())
                 try:
@@ -146,14 +163,20 @@ if m2cryptoLoaded:
                     key = OpenSSL_RSAKey()
                     # parse SSLay format PEM file
                     if s.startswith("-----BEGIN RSA PRIVATE KEY-----"):
-                        def f():pass
+
+                        def f():
+                            pass
+
                         key.rsa = m2.rsa_read_key(bio, callback)
                         if key.rsa == None:
                             raise SyntaxError()
                         key._hasPrivateKey = True
                     # parse a standard PKCS#8 PEM file
                     elif s.startswith("-----BEGIN PRIVATE KEY-----"):
-                        def f():pass
+
+                        def f():
+                            pass
+
                         key.rsa = m2.pkey_read_pem(bio, callback)
                         # the below code assumes RSA key while PKCS#8 files
                         # (and by extension the EVP_PKEY structure) can be

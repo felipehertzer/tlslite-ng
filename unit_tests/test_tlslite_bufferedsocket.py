@@ -16,6 +16,7 @@ except ImportError:
 
 from tlslite.bufferedsocket import BufferedSocket
 
+
 class TestBufferedSocket(unittest.TestCase):
     def setUp(self):
         self.raw_sock = mock.MagicMock()
@@ -65,28 +66,28 @@ class TestBufferedSocket(unittest.TestCase):
     def test_flush_with_data(self):
         self.sock.buffer_writes = True
 
-        ret = self.sock.send(bytearray(b'abc'))
+        ret = self.sock.send(bytearray(b"abc"))
 
         self.assertEqual(ret, 3)
         self.raw_sock.sendall.assert_not_called()
 
         self.sock.flush()
-        self.raw_sock.sendall.assert_called_once_with(bytearray(b'abc'))
+        self.raw_sock.sendall.assert_called_once_with(bytearray(b"abc"))
 
     def test_flush_with_data_and_multiple_messages(self):
         self.sock.buffer_writes = True
 
-        ret = self.sock.send(bytearray(b'abc'))
+        ret = self.sock.send(bytearray(b"abc"))
         self.assertEqual(ret, 3)
 
-        ret = self.sock.send(bytearray(b'defg'))
+        ret = self.sock.send(bytearray(b"defg"))
         self.assertEqual(ret, 4)
 
         self.sock.flush()
-        self.raw_sock.sendall.assert_called_once_with(bytearray(b'abcdefg'))
+        self.raw_sock.sendall.assert_called_once_with(bytearray(b"abcdefg"))
 
         self.sock.flush()
-        self.raw_sock.sendall.assert_called_once_with(bytearray(b'abcdefg'))
+        self.raw_sock.sendall.assert_called_once_with(bytearray(b"abcdefg"))
 
     def test_recv(self):
         ret = self.sock.recv(10)
@@ -131,19 +132,19 @@ class TestBufferedSocket(unittest.TestCase):
     def test_shutdown(self):
         self.sock.buffer_writes = True
 
-        self.sock.send(bytearray(b'ghi'))
+        self.sock.send(bytearray(b"ghi"))
         how = mock.Mock()
 
         self.sock.shutdown(how)
 
-        self.raw_sock.sendall.assert_called_once_with(bytearray(b'ghi'))
+        self.raw_sock.sendall.assert_called_once_with(bytearray(b"ghi"))
         self.raw_sock.shutdown.assert_called_once_with(how)
 
     def test_close(self):
         self.sock.buffer_writes = True
 
-        self.sock.send(bytearray(b'jkl'))
+        self.sock.send(bytearray(b"jkl"))
 
         self.sock.close()
-        self.raw_sock.sendall.assert_called_once_with(bytearray(b'jkl'))
+        self.raw_sock.sendall.assert_called_once_with(bytearray(b"jkl"))
         self.raw_sock.close.assert_called_once_with()

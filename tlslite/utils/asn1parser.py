@@ -55,10 +55,10 @@ class ASN1Parser(object):
         # Get Type
         self.type = self._parse_type(p)
 
-        #Get Length
+        # Get Length
         self.length = self._getASN1Length(p)
 
-        #Get Value
+        # Get Value
         self.value = p.getFixBytes(self.length)
 
     def getChild(self, which):
@@ -102,7 +102,7 @@ class ASN1Parser(object):
         :returns: raw child object
         """
         p = Parser(self.value)
-        for _ in range(which+1):
+        for _ in range(which + 1):
             markIndex = p.index
             p.skip_bytes(1)  # skip Type
             length = self._getASN1Length(p)
@@ -123,15 +123,15 @@ class ASN1Parser(object):
     def _parse_type(parser):
         """Decode the ASN.1 DER type field"""
         header = parser.get(1)
-        tag_class = (header & 0xc0) >> 6
+        tag_class = (header & 0xC0) >> 6
         tag_is_primitive = (header & 0x20) >> 5
-        tag_id = header & 0x1f
+        tag_id = header & 0x1F
 
-        if tag_id == 0x1f:
+        if tag_id == 0x1F:
             tag_id = 0
             while True:
                 value = parser.get(1)
-                tag_id += value & 0x7f
+                tag_id += value & 0x7F
                 if not value & 0x80:
                     break
                 tag_id <<= 7

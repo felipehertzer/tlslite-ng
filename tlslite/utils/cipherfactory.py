@@ -34,6 +34,7 @@ if cryptomath.pycryptoLoaded:
 # Factory Functions for AES
 # **************************************************************************
 
+
 def createAES(key, IV, implList=None):
     """Create a new AES object.
 
@@ -55,8 +56,9 @@ def createAES(key, IV, implList=None):
         elif impl == "pycrypto" and cryptomath.pycryptoLoaded:
             return pycrypto_aes.new(key, 2, IV)
         elif impl == "python":
-                return python_aes.new(key, 2, IV)
+            return python_aes.new(key, 2, IV)
     raise NotImplementedError()
+
 
 def createAESCTR(key, IV, implList=None):
     """Create a new AESCTR object.
@@ -77,6 +79,7 @@ def createAESCTR(key, IV, implList=None):
         if impl == "python":
             return python_aes.new(key, 6, IV)
     raise NotImplementedError()
+
 
 def createAESGCM(key, implList=None):
     """Create a new AESGCM object.
@@ -99,8 +102,9 @@ def createAESGCM(key, implList=None):
             return python_aesgcm.new(key)
     raise NotImplementedError()
 
+
 def createAESCCM(key, implList=None):
-    """ Create a new AESCCM object.
+    """Create a new AESCCM object.
 
     :type key: bytearray
     :param key: A 16 or 32 byte byte array to serve as key.
@@ -120,8 +124,9 @@ def createAESCCM(key, implList=None):
 
     raise NotImplementedError()
 
+
 def createAESCCM_8(key, implList=None):
-    """ Create a new AESCCM object with truncated tag.
+    """Create a new AESCCM object with truncated tag.
 
     :type key: bytearray
     :param key: A 16 or 32 byte byte array to serve as key.
@@ -141,6 +146,7 @@ def createAESCCM_8(key, implList=None):
 
     raise NotImplementedError()
 
+
 def createCHACHA20(key, implList=None):
     """Create a new CHACHA20_POLY1305 object.
 
@@ -157,6 +163,7 @@ def createCHACHA20(key, implList=None):
         if impl == "python":
             return python_chacha20_poly1305.new(key)
     raise NotImplementedError()
+
 
 def createRC4(key, IV, implList=None):
     """Create a new RC4 object.
@@ -184,7 +191,8 @@ def createRC4(key, IV, implList=None):
             return python_rc4.new(key)
     raise NotImplementedError()
 
-#Create a new TripleDES instance
+
+# Create a new TripleDES instance
 def createTripleDES(key, IV, implList=None):
     """Create a new 3DES object.
 

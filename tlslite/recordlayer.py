@@ -7,6 +7,7 @@
 import socket
 import errno
 import copy
+
 try:
     # in python 3 the native zip() returns iterator
     from itertools import izip
@@ -21,16 +22,29 @@ except NameError:
 from .utils import tlshashlib as hashlib
 from .constants import ContentType, CipherSuite
 from .messages import RecordHeader3, RecordHeader2, Message
-from .utils.cipherfactory import createAESCCM, createAESCCM_8, createAESGCM,\
-        createAES, createRC4, createTripleDES, createCHACHA20
+from .utils.cipherfactory import (
+    createAESCCM,
+    createAESCCM_8,
+    createAESGCM,
+    createAES,
+    createRC4,
+    createTripleDES,
+    createCHACHA20,
+)
 from .utils.codec import Parser, Writer
 from .utils.compat import compatHMAC
 from .utils.cryptomath import getRandomBytes, MD5, HKDF_expand_label
 from .utils.constanttime import ct_compare_digest, ct_check_cbc_mac_and_pad
-from .errors import TLSRecordOverflow, TLSIllegalParameterException,\
-        TLSAbruptCloseError, TLSDecryptionFailed, TLSBadRecordMAC, \
-        TLSUnexpectedMessage
+from .errors import (
+    TLSRecordOverflow,
+    TLSIllegalParameterException,
+    TLSAbruptCloseError,
+    TLSDecryptionFailed,
+    TLSBadRecordMAC,
+    TLSUnexpectedMessage,
+)
 from .mathtls import createMAC_SSL, createHMAC, calc_key
+
 
 class RecordSocket(object):
     """
@@ -90,12 +104,9 @@ class RecordSocket(object):
         data = msg.write()
 
         if self.version in ((2, 0), (0, 2)):
-            header = RecordHeader2().create(len(data),
-                                            padding)
+            header = RecordHeader2().create(len(data), padding)
         else:
-            header = RecordHeader3().create(self.version,
-                                            msg.contentType,
-                                            len(data))
+            header = RecordHeader3().create(self.version, msg.contentType, len(data))
 
         data = header.write() + data
 
@@ -126,7 +137,7 @@ class RecordSocket(object):
                 else:
                     raise
 
-            #if the connection closed, raise socket error
+            # if the connection closed, raise socket error
             if len(socketBytes) == 0:
                 raise TLSAbruptCloseError()
 
@@ -136,7 +147,7 @@ class RecordSocket(object):
 
     def _recvHeader(self):
         """Read a single record header from socket"""
-        #Read the next record header
+        # Read the next record header
         buf = bytearray(0)
         ssl2 = False
 
@@ -144,7 +155,8 @@ class RecordSocket(object):
         for result in self._sockRecvAll(1):
             if result in (0, 1):
                 yield result
-            else: break
+            else:
+                break
         assert result is not None
 
         buf += result
@@ -156,7 +168,8 @@ class RecordSocket(object):
             for result in self._sockRecvAll(4):
                 if result in (0, 1):
                     yield result
-                else: break
+                else:
+                    break
             assert result is not None
             buf += result
         else:
@@ -171,20 +184,20 @@ class RecordSocket(object):
             for result in self._sockRecvAll(readLen):
                 if result in (0, 1):
                     yield result
-                else: break
+                else:
+                    break
             assert result is not None
             buf += result
 
-
-        #Parse the record header
+        # Parse the record header
         if ssl2:
             record = RecordHeader2().parse(Parser(buf))
             # padding can't be longer than overall length and if it is present
             # the overall size must be a multiple of cipher block size
-            if ((record.padding > record.length) or
-                    (record.padding and record.length % 8)):
-                raise TLSIllegalParameterException(\
-                        "Malformed record layer header")
+            if (record.padding > record.length) or (
+                record.padding and record.length % 8
+            ):
+                raise TLSIllegalParameterException("Malformed record layer header")
         else:
             record = RecordHeader3().parse(Parser(buf))
 
@@ -210,10 +223,11 @@ class RecordSocket(object):
         for record in self._recvHeader():
             if record in (0, 1):
                 yield record
-            else: break
+            else:
+                break
         assert record is not None
 
-        #Check the record header fields
+        # Check the record header fields
         # 18432 = 2**14 (default record size limit) + 1024 (maximum compression
         # overhead) + 1024 (maximum encryption overhead)
         if record.length > self.recv_record_limit + 1024 + 1024:
@@ -221,14 +235,15 @@ class RecordSocket(object):
         if self.tls13record and record.length > self.recv_record_limit + 256:
             raise TLSRecordOverflow()
 
-        #Read the record contents
+        # Read the record contents
         buf = bytearray(0)
 
         result = None
         for result in self._sockRecvAll(record.length):
             if result in (0, 1):
                 yield result
-            else: break
+            else:
+                break
         assert result is not None
 
         buf += result
@@ -441,11 +456,15 @@ class RecordLayer(object):
 
     def isCBCMode(self):
         """Returns true if cipher uses CBC mode"""
-        if self._writeState and self._writeState.encContext and \
-                self._writeState.encContext.isBlockCipher:
+        if (
+            self._writeState
+            and self._writeState.encContext
+            and self._writeState.encContext.isBlockCipher
+        ):
             return True
         else:
             return False
+
     #
     # sending messages
     #
@@ -456,7 +475,7 @@ class RecordLayer(object):
         blockLength = self.blockSize
         paddingLength = blockLength - 1 - (currentLength % blockLength)
 
-        paddingBytes = bytearray([paddingLength] * (paddingLength+1))
+        paddingBytes = bytearray([paddingLength] * (paddingLength + 1))
         data += paddingBytes
         return data
 
@@ -468,8 +487,8 @@ class RecordLayer(object):
         if self.version != (3, 0):
             mac.update(compatHMAC(bytearray([self.version[0]])))
             mac.update(compatHMAC(bytearray([self.version[1]])))
-        mac.update(compatHMAC(bytearray([len(data)//256])))
-        mac.update(compatHMAC(bytearray([len(data)%256])))
+        mac.update(compatHMAC(bytearray([len(data) // 256])))
+        mac.update(compatHMAC(bytearray([len(data) % 256])))
         mac.update(compatHMAC(data))
         return bytearray(mac.digest())
 
@@ -481,18 +500,17 @@ class RecordLayer(object):
             macBytes = self.calculateMAC(mac, seqnumBytes, contentType, data)
             data += macBytes
 
-        #Encrypt for Block or Stream Cipher
+        # Encrypt for Block or Stream Cipher
         if self._writeState.encContext:
-            #Add padding (for Block Cipher):
+            # Add padding (for Block Cipher):
             if self._writeState.encContext.isBlockCipher:
-
-                #Add TLS 1.1 fixed block
+                # Add TLS 1.1 fixed block
                 if self.version >= (3, 2):
                     data = self.fixedIVBlock + data
 
                 data = self.addPadding(data)
 
-            #Encrypt
+            # Encrypt
             data = self._writeState.encContext.encrypt(data)
 
         return data
@@ -522,34 +540,42 @@ class RecordLayer(object):
     def _getNonce(self, state, seqnum):
         """Calculate a nonce for a given enc/dec context"""
         # ChaCha is using the draft-TLS1.3-like nonce derivation
-        if (state.encContext.name == "chacha20-poly1305" and
-                len(state.fixedNonce) == 12) or self._is_tls13_plus():
+        if (
+            state.encContext.name == "chacha20-poly1305" and len(state.fixedNonce) == 12
+        ) or self._is_tls13_plus():
             # 4 byte nonce is used by the draft cipher
             pad = bytearray(len(state.fixedNonce) - len(seqnum))
-            nonce = bytearray(i ^ j for i, j in zip(pad + seqnum,
-                                                    state.fixedNonce))
+            nonce = bytearray(i ^ j for i, j in zip(pad + seqnum, state.fixedNonce))
         else:
             nonce = state.fixedNonce + seqnum
         return nonce
 
-
     def _encryptThenSeal(self, buf, contentType):
         """Encrypt with AEAD cipher"""
-        #Assemble the authenticated data.
+        # Assemble the authenticated data.
         seqNumBytes = self._writeState.getSeqNumBytes()
         if not self._is_tls13_plus():
-            authData = seqNumBytes + bytearray([contentType,
-                                                self.version[0],
-                                                self.version[1],
-                                                len(buf)//256,
-                                                len(buf)%256])
+            authData = seqNumBytes + bytearray(
+                [
+                    contentType,
+                    self.version[0],
+                    self.version[1],
+                    len(buf) // 256,
+                    len(buf) % 256,
+                ]
+            )
         else:  # TLS 1.3
             out_len = len(buf) + self._writeState.encContext.tagLength
             # this is just recreated Record Layer header
-            authData = bytearray([contentType,
-                                  self._recordSocket.version[0],
-                                  self._recordSocket.version[1],
-                                  out_len // 256, out_len % 256])
+            authData = bytearray(
+                [
+                    contentType,
+                    self._recordSocket.version[0],
+                    self._recordSocket.version[1],
+                    out_len // 256,
+                    out_len % 256,
+                ]
+            )
 
         nonce = self._getNonce(self._writeState, seqNumBytes)
 
@@ -557,9 +583,8 @@ class RecordLayer(object):
 
         buf = self._writeState.encContext.seal(nonce, buf, authData)
 
-        #AES-GCM, has an explicit variable nonce.
-        if "aes" in self._writeState.encContext.name and \
-                not self._is_tls13_plus():
+        # AES-GCM, has an explicit variable nonce.
+        if "aes" in self._writeState.encContext.name and not self._is_tls13_plus():
             buf = seqNumBytes + buf
 
         return buf
@@ -569,8 +594,7 @@ class RecordLayer(object):
         # in SSLv2 sequence numbers are incremented for plaintext records too
         seqnumBytes = self._writeState.getSeqNumBytes()
 
-        if (self._writeState.encContext and
-                self._writeState.encContext.isBlockCipher):
+        if self._writeState.encContext and self._writeState.encContext.isBlockCipher:
             plaintext_len = len(data)
             data = self.addPadding(data)
             padding = len(data) - plaintext_len
@@ -604,27 +628,26 @@ class RecordLayer(object):
 
         # TLS 1.3 hides the content type of messages
         # but CCS is always not encrypted
-        if self._is_tls13_plus() and self._writeState.encContext and \
-                contentType != ContentType.change_cipher_spec:
+        if (
+            self._is_tls13_plus()
+            and self._writeState.encContext
+            and contentType != ContentType.change_cipher_spec
+        ):
             data += bytearray([contentType])
             if self.padding_cb:
                 max_padding = self.send_record_limit - len(data) - 1
                 # add number of zero bytes specified by padding_cb()
-                data += bytearray(self.padding_cb(len(data),
-                                                  contentType,
-                                                  max_padding))
+                data += bytearray(self.padding_cb(len(data), contentType, max_padding))
             # in TLS 1.3 contentType is ignored by _encryptThenSeal
             contentType = ContentType.application_data
 
         padding = 0
         if self.version in ((0, 2), (2, 0)):
             data, padding = self._ssl2Encrypt(data)
-        elif self.version > (3, 3) and \
-                contentType == ContentType.change_cipher_spec:
+        elif self.version > (3, 3) and contentType == ContentType.change_cipher_spec:
             # TLS 1.3 does not encrypt CCS messages
             pass
-        elif self._writeState.encContext and \
-                self._writeState.encContext.isAEAD:
+        elif self._writeState.encContext and self._writeState.encContext.isAEAD:
             data = self._encryptThenSeal(data, contentType)
         elif self._writeState.encryptThenMAC:
             data = self._encryptThenMAC(data, contentType)
@@ -648,26 +671,25 @@ class RecordLayer(object):
             data = self._readState.encContext.decrypt(data)
 
         if self._readState.macContext:
-            #Check MAC
+            # Check MAC
             macGood = True
             macLength = self._readState.macContext.digest_size
             endLength = macLength
             if endLength > len(data):
                 macGood = False
             else:
-                #Read MAC
+                # Read MAC
                 startIndex = len(data) - endLength
                 endIndex = startIndex + macLength
-                checkBytes = data[startIndex : endIndex]
+                checkBytes = data[startIndex:endIndex]
 
-                #Calculate MAC
+                # Calculate MAC
                 seqnumBytes = self._readState.getSeqNumBytes()
                 data = data[:-endLength]
                 mac = self._readState.macContext.copy()
-                macBytes = self.calculateMAC(mac, seqnumBytes, recordType,
-                                             data)
+                macBytes = self.calculateMAC(mac, seqnumBytes, recordType, data)
 
-                #Compare MACs
+                # Compare MACs
                 if not ct_compare_digest(macBytes, checkBytes):
                     macGood = False
 
@@ -675,7 +697,6 @@ class RecordLayer(object):
                 raise TLSBadRecordMAC()
 
         return data
-
 
     def _decryptThenMAC(self, recordType, data):
         """Decrypt data, check padding and MAC"""
@@ -691,8 +712,8 @@ class RecordLayer(object):
             if len(data) % blockLength != 0:
                 raise TLSDecryptionFailed()
             data = self._readState.encContext.decrypt(data)
-            if self.version >= (3, 2): #For TLS 1.1, remove explicit IV
-                data = data[self._readState.encContext.block_size : ]
+            if self.version >= (3, 2):  # For TLS 1.1, remove explicit IV
+                data = data[self._readState.encContext.block_size :]
 
             #
             # check padding and MAC
@@ -700,12 +721,13 @@ class RecordLayer(object):
             seqnumBytes = self._readState.getSeqNumBytes()
 
             if not ct_check_cbc_mac_and_pad(
-                    data,
-                    self._readState.macContext,
-                    seqnumBytes,
-                    recordType,
-                    self.version,
-                    self._readState.encContext.block_size):
+                data,
+                self._readState.macContext,
+                seqnumBytes,
+                recordType,
+                self.version,
+                self._readState.encContext.block_size,
+            ):
                 raise TLSBadRecordMAC()
 
             #
@@ -744,8 +766,7 @@ class RecordLayer(object):
         if self._readState.encContext:
             blockLength = self._readState.encContext.block_size
             if len(buf) % blockLength != 0:
-                raise TLSDecryptionFailed("data length not multiple of "\
-                                          "block size")
+                raise TLSDecryptionFailed("data length not multiple of " "block size")
 
             buf = self._readState.encContext.decrypt(buf)
 
@@ -762,7 +783,7 @@ class RecordLayer(object):
                 raise TLSBadRecordMAC("Invalid padding length")
 
             paddingGood = True
-            totalPaddingLength = paddingLength+1
+            totalPaddingLength = paddingLength + 1
             if self.version != (3, 0):
                 paddingBytes = buf[-totalPaddingLength:-1]
                 for byte in paddingBytes:
@@ -781,11 +802,10 @@ class RecordLayer(object):
         """Decrypt AEAD encrypted data"""
         seqnumBytes = self._readState.getSeqNumBytes()
         # AES-GCM has an explicit variable nonce in TLS 1.2
-        if "aes" in self._readState.encContext.name and \
-                not self._is_tls13_plus():
+        if "aes" in self._readState.encContext.name and not self._is_tls13_plus():
             explicitNonceLength = 8
             if explicitNonceLength > len(buf):
-                #Publicly invalid.
+                # Publicly invalid.
                 raise TLSBadRecordMAC("Truncated nonce")
             nonce = self._readState.fixedNonce + buf[:explicitNonceLength]
             buf = buf[8:]
@@ -795,25 +815,32 @@ class RecordLayer(object):
             nonce = self._getNonce(self._readState, seqnumBytes)
 
         if self._readState.encContext.tagLength > len(buf):
-            #Publicly invalid.
+            # Publicly invalid.
             raise TLSBadRecordMAC("Truncated tag")
 
         if not self._is_tls13_plus():
             plaintextLen = len(buf) - self._readState.encContext.tagLength
-            authData = seqnumBytes + bytearray([header.type, self.version[0],
-                                                self.version[1],
-                                                plaintextLen//256,
-                                                plaintextLen%256])
+            authData = seqnumBytes + bytearray(
+                [
+                    header.type,
+                    self.version[0],
+                    self.version[1],
+                    plaintextLen // 256,
+                    plaintextLen % 256,
+                ]
+            )
         else:  # TLS 1.3
             # enforce the checks for encrypted records
             if header.type != ContentType.application_data:
                 raise TLSUnexpectedMessage(
-                    "Invalid ContentType for encrypted record: {0}"
-                    .format(ContentType.toStr(header.type)))
+                    "Invalid ContentType for encrypted record: {0}".format(
+                        ContentType.toStr(header.type)
+                    )
+                )
             if header.version != (3, 3):
                 raise TLSIllegalParameterException(
-                    "Unexpected version in encrypted record: {0}"
-                    .format(header.version))
+                    "Unexpected version in encrypted record: {0}".format(header.version)
+                )
             if header.length != len(buf):
                 raise TLSBadRecordMAC("Length mismatch")
             authData = header.write()
@@ -878,8 +905,9 @@ class RecordLayer(object):
             if value != 0:
                 break
         else:
-            raise TLSUnexpectedMessage("Malformed record layer inner plaintext"
-                                       " - content type missing")
+            raise TLSUnexpectedMessage(
+                "Malformed record layer inner plaintext" " - content type missing"
+            )
 
         return data[:pos], value
 
@@ -900,7 +928,8 @@ class RecordLayer(object):
             for result in self._recordSocket.recv():
                 if result in (0, 1):
                     yield result
-                else: break
+                else:
+                    break
             assert result is not None
 
             (header, data) = result
@@ -919,27 +948,35 @@ class RecordLayer(object):
                         header.type = ContentType.application_data
                 # in TLS 1.3, the other party may send an unprotected CCS
                 # message at any point in connection
-                elif self._is_tls13_plus() and \
-                        header.type == ContentType.change_cipher_spec:
+                elif (
+                    self._is_tls13_plus()
+                    and header.type == ContentType.change_cipher_spec
+                ):
                     pass
                 # when we're in the early handshake, then unencrypted alerts
                 # are fine too
-                elif self._is_tls13_plus() and \
-                        header.type == ContentType.alert and \
-                        len(data) < 3 and \
-                        self._readState and \
-                        self._readState.encContext and \
-                        self._readState.seqnum == 0:
+                elif (
+                    self._is_tls13_plus()
+                    and header.type == ContentType.alert
+                    and len(data) < 3
+                    and self._readState
+                    and self._readState.encContext
+                    and self._readState.seqnum == 0
+                ):
                     pass
-                elif self._readState and \
-                    self._readState.encContext and \
-                    self._readState.encContext.isAEAD:
+                elif (
+                    self._readState
+                    and self._readState.encContext
+                    and self._readState.encContext.isAEAD
+                ):
                     data = self._decryptAndUnseal(header, data)
                 elif self._readState and self._readState.encryptThenMAC:
                     data = self._macThenDecrypt(header.type, data)
-                elif self._readState and \
-                        self._readState.encContext and \
-                        self._readState.encContext.isBlockCipher:
+                elif (
+                    self._readState
+                    and self._readState.encContext
+                    and self._readState.encContext.isBlockCipher
+                ):
                     data = self._decryptThenMAC(header.type, data)
                 else:
                     data = self._decryptStreamThenMAC(header.type, data)
@@ -947,15 +984,17 @@ class RecordLayer(object):
                 # and early data is ok, that means we have received
                 # encrypted record in case the type of record is
                 # application_data (from TLS 1.3)
-                if not self._readState.encContext \
-                        and not self._readState.macContext \
-                        and self.early_data_ok and \
-                        header.type == ContentType.application_data:
+                if (
+                    not self._readState.encContext
+                    and not self._readState.macContext
+                    and self.early_data_ok
+                    and header.type == ContentType.application_data
+                ):
                     raise TLSBadRecordMAC("early data received")
             except TLSBadRecordMAC:
                 if self.early_data_ok and (
-                        self._early_data_processed + len(data)
-                        < self.max_early_data):
+                    self._early_data_processed + len(data) < self.max_early_data
+                ):
                     # ignore exception, retry reading
                     self._early_data_processed += len(data)
                     # reload state for decryption
@@ -967,9 +1006,12 @@ class RecordLayer(object):
             self.early_data_ok = False
 
             # TLS 1.3 encrypts the type, CCS and Alerts are not encrypted
-            if self._is_tls13_plus() and self._readState and \
-                    self._readState.encContext and\
-                    header.type == ContentType.application_data:
+            if (
+                self._is_tls13_plus()
+                and self._readState
+                and self._readState.encContext
+                and header.type == ContentType.application_data
+            ):
                 # check if plaintext is not too big, RFC 8446, section 5.4
                 if len(data) > self.recv_record_limit + 1:
                     raise TLSRecordOverflow()
@@ -1112,8 +1154,9 @@ class RecordLayer(object):
 
         return createMACFunc
 
-    def calcSSL2PendingStates(self, cipherSuite, masterSecret, clientRandom,
-                              serverRandom, implementations):
+    def calcSSL2PendingStates(
+        self, cipherSuite, masterSecret, clientRandom, serverRandom, implementations
+    ):
         """
         Create the keys for encryption and decryption in SSLv2
 
@@ -1133,17 +1176,16 @@ class RecordLayer(object):
         key_material = bytearray(key_length * 2)
         md5_output_size = 16
         for i, pos in enumerate(range(0, key_length * 2, md5_output_size)):
-            key_material[pos:pos+md5_output_size] = MD5(\
-                    masterSecret +
-                    bytearray(str(i), "ascii") +
-                    clientRandom + serverRandom)
+            key_material[pos : pos + md5_output_size] = MD5(
+                masterSecret + bytearray(str(i), "ascii") + clientRandom + serverRandom
+            )
 
         serverWriteKey = key_material[:key_length]
         clientWriteKey = key_material[key_length:]
 
         # specification draft says that DES key should not use the
         # incrementing label but all implementations use it anyway
-        #elif cipherSuite in CipherSuite.ssl2_64Key:
+        # elif cipherSuite in CipherSuite.ssl2_64Key:
         #    key_material = MD5(masterSecret + clientRandom + serverRandom)
         #    serverWriteKey = key_material[0:8]
         #    clientWriteKey = key_material[8:16]
@@ -1171,10 +1213,12 @@ class RecordLayer(object):
         else:
             raise NotImplementedError("Unknown cipher")
 
-        clientPendingState.encContext = cipherMethod(clientWriteKey, iv,
-                                                     implementations)
-        serverPendingState.encContext = cipherMethod(serverWriteKey, iv,
-                                                     implementations)
+        clientPendingState.encContext = cipherMethod(
+            clientWriteKey, iv, implementations
+        )
+        serverPendingState.encContext = cipherMethod(
+            serverWriteKey, iv, implementations
+        )
 
         # Assign new connection states to pending states
         if self.client:
@@ -1186,11 +1230,11 @@ class RecordLayer(object):
 
         return iv
 
-    def calcPendingStates(self, cipherSuite, masterSecret, clientRandom,
-                          serverRandom, implementations):
+    def calcPendingStates(
+        self, cipherSuite, masterSecret, clientRandom, serverRandom, implementations
+    ):
         """Create pending states for encryption and decryption."""
-        keyLength, ivLength, createCipherFunc = \
-                self._getCipherSettings(cipherSuite)
+        keyLength, ivLength, createCipherFunc = self._getCipherSettings(cipherSuite)
 
         macLength, digestmod = self._getMacSettings(cipherSuite)
 
@@ -1199,15 +1243,20 @@ class RecordLayer(object):
         else:
             createMACFunc = self._getHMACMethod(self.version)
 
-        outputLength = (macLength*2) + (keyLength*2) + (ivLength*2)
+        outputLength = (macLength * 2) + (keyLength * 2) + (ivLength * 2)
 
-        #Calculate Keying Material from Master Secret
-        keyBlock = calc_key(self.version, masterSecret, cipherSuite,
-                            b"key expansion", client_random=clientRandom,
-                            server_random=serverRandom,
-                            output_length=outputLength)
+        # Calculate Keying Material from Master Secret
+        keyBlock = calc_key(
+            self.version,
+            masterSecret,
+            cipherSuite,
+            b"key expansion",
+            client_random=clientRandom,
+            server_random=serverRandom,
+            output_length=outputLength,
+        )
 
-        #Slice up Keying Material
+        # Slice up Keying Material
         clientPendingState = ConnectionState()
         serverPendingState = ConnectionState()
         parser = Parser(keyBlock)
@@ -1221,53 +1270,51 @@ class RecordLayer(object):
         if digestmod:
             # Legacy cipher
             clientPendingState.macContext = createMACFunc(
-                compatHMAC(clientMACBlock), digestmod=digestmod)
+                compatHMAC(clientMACBlock), digestmod=digestmod
+            )
             serverPendingState.macContext = createMACFunc(
-                compatHMAC(serverMACBlock), digestmod=digestmod)
+                compatHMAC(serverMACBlock), digestmod=digestmod
+            )
             if createCipherFunc is not None:
-                clientPendingState.encContext = \
-                                            createCipherFunc(clientKeyBlock,
-                                                             clientIVBlock,
-                                                             implementations)
-                serverPendingState.encContext = \
-                                            createCipherFunc(serverKeyBlock,
-                                                             serverIVBlock,
-                                                             implementations)
+                clientPendingState.encContext = createCipherFunc(
+                    clientKeyBlock, clientIVBlock, implementations
+                )
+                serverPendingState.encContext = createCipherFunc(
+                    serverKeyBlock, serverIVBlock, implementations
+                )
         else:
             # AEAD
             clientPendingState.macContext = None
             serverPendingState.macContext = None
-            clientPendingState.encContext = createCipherFunc(clientKeyBlock,
-                                                             implementations)
-            serverPendingState.encContext = createCipherFunc(serverKeyBlock,
-                                                             implementations)
+            clientPendingState.encContext = createCipherFunc(
+                clientKeyBlock, implementations
+            )
+            serverPendingState.encContext = createCipherFunc(
+                serverKeyBlock, implementations
+            )
             clientPendingState.fixedNonce = clientIVBlock
             serverPendingState.fixedNonce = serverIVBlock
 
-        #Assign new connection states to pending states
+        # Assign new connection states to pending states
         if self.client:
-            clientPendingState.encryptThenMAC = \
-                    self._pendingWriteState.encryptThenMAC
+            clientPendingState.encryptThenMAC = self._pendingWriteState.encryptThenMAC
             self._pendingWriteState = clientPendingState
-            serverPendingState.encryptThenMAC = \
-                    self._pendingReadState.encryptThenMAC
+            serverPendingState.encryptThenMAC = self._pendingReadState.encryptThenMAC
             self._pendingReadState = serverPendingState
         else:
-            serverPendingState.encryptThenMAC = \
-                    self._pendingWriteState.encryptThenMAC
+            serverPendingState.encryptThenMAC = self._pendingWriteState.encryptThenMAC
             self._pendingWriteState = serverPendingState
-            clientPendingState.encryptThenMAC = \
-                    self._pendingReadState.encryptThenMAC
+            clientPendingState.encryptThenMAC = self._pendingReadState.encryptThenMAC
             self._pendingReadState = clientPendingState
 
         if self.version >= (3, 2) and ivLength:
-            #Choose fixedIVBlock for TLS 1.1 (this is encrypted with the CBC
-            #residue to create the IV for each sent block)
+            # Choose fixedIVBlock for TLS 1.1 (this is encrypted with the CBC
+            # residue to create the IV for each sent block)
             self.fixedIVBlock = getRandomBytes(ivLength)
 
-    def calcTLS1_3PendingState(self, cipherSuite, cl_traffic_secret,
-                               sr_traffic_secret,
-                               implementations):
+    def calcTLS1_3PendingState(
+        self, cipherSuite, cl_traffic_secret, sr_traffic_secret, implementations
+    ):
         """
         Create pending state for encryption in TLS 1.3.
 
@@ -1280,40 +1327,31 @@ class RecordLayer(object):
         :param list implementations: list of names of implementations that
             are permitted for the connection
         """
-        prf_name = 'sha384' if cipherSuite \
-                   in CipherSuite.sha384PrfSuites \
-                   else 'sha256'
+        prf_name = "sha384" if cipherSuite in CipherSuite.sha384PrfSuites else "sha256"
 
-        key_length, iv_length, cipher_func = \
-            self._getCipherSettings(cipherSuite)
+        key_length, iv_length, cipher_func = self._getCipherSettings(cipherSuite)
         iv_length = 12
 
         clientPendingState = ConnectionState()
         serverPendingState = ConnectionState()
 
         clientPendingState.macContext = None
-        clientPendingState.encContext = \
-            cipher_func(HKDF_expand_label(cl_traffic_secret,
-                                          b"key", b"",
-                                          key_length,
-                                          prf_name),
-                        implementations)
-        clientPendingState.fixedNonce = HKDF_expand_label(cl_traffic_secret,
-                                                          b"iv", b"",
-                                                          iv_length,
-                                                          prf_name)
+        clientPendingState.encContext = cipher_func(
+            HKDF_expand_label(cl_traffic_secret, b"key", b"", key_length, prf_name),
+            implementations,
+        )
+        clientPendingState.fixedNonce = HKDF_expand_label(
+            cl_traffic_secret, b"iv", b"", iv_length, prf_name
+        )
 
         serverPendingState.macContext = None
-        serverPendingState.encContext = \
-            cipher_func(HKDF_expand_label(sr_traffic_secret,
-                                          b"key", b"",
-                                          key_length,
-                                          prf_name),
-                        implementations)
-        serverPendingState.fixedNonce = HKDF_expand_label(sr_traffic_secret,
-                                                          b"iv", b"",
-                                                          iv_length,
-                                                          prf_name)
+        serverPendingState.encContext = cipher_func(
+            HKDF_expand_label(sr_traffic_secret, b"key", b"", key_length, prf_name),
+            implementations,
+        )
+        serverPendingState.fixedNonce = HKDF_expand_label(
+            sr_traffic_secret, b"iv", b"", iv_length, prf_name
+        )
 
         if self.client:
             self._pendingWriteState = clientPendingState
@@ -1323,53 +1361,51 @@ class RecordLayer(object):
             self._pendingReadState = clientPendingState
 
     def _calcTLS1_3KeyUpdate(self, cipherSuite, app_secret):
-        prf_name, prf_length = ('sha384', 48) if cipherSuite \
-                                in CipherSuite.sha384PrfSuites \
-                                else ('sha256', 32)
-        key_length, iv_length, cipher_func = \
-            self._getCipherSettings(cipherSuite)
+        prf_name, prf_length = (
+            ("sha384", 48)
+            if cipherSuite in CipherSuite.sha384PrfSuites
+            else ("sha256", 32)
+        )
+        key_length, iv_length, cipher_func = self._getCipherSettings(cipherSuite)
         iv_length = 12
 
-        new_app_secret = HKDF_expand_label(app_secret,
-                                           b"traffic upd", b"",
-                                           prf_length,
-                                           prf_name)
+        new_app_secret = HKDF_expand_label(
+            app_secret, b"traffic upd", b"", prf_length, prf_name
+        )
         new_state = ConnectionState()
         new_state.macContext = None
-        new_state.encContext = \
-            cipher_func(HKDF_expand_label(new_app_secret,
-                                          b"key", b"",
-                                          key_length,
-                                          prf_name),
-                        None)
-        new_state.fixedNonce = HKDF_expand_label(new_app_secret,
-                                                 b"iv", b"",
-                                                 iv_length,
-                                                 prf_name)
+        new_state.encContext = cipher_func(
+            HKDF_expand_label(new_app_secret, b"key", b"", key_length, prf_name), None
+        )
+        new_state.fixedNonce = HKDF_expand_label(
+            new_app_secret, b"iv", b"", iv_length, prf_name
+        )
         return new_app_secret, new_state
 
-    def calcTLS1_3KeyUpdate_sender(self, cipherSuite, cl_app_secret,
-                                   sr_app_secret):
+    def calcTLS1_3KeyUpdate_sender(self, cipherSuite, cl_app_secret, sr_app_secret):
         if self.client:
             new_sr_app_secret, server_state = self._calcTLS1_3KeyUpdate(
-                cipherSuite, sr_app_secret)
+                cipherSuite, sr_app_secret
+            )
             self._readState = server_state
             return cl_app_secret, new_sr_app_secret
         else:
             new_cl_app_secret, client_state = self._calcTLS1_3KeyUpdate(
-                cipherSuite, cl_app_secret)
+                cipherSuite, cl_app_secret
+            )
             self._readState = client_state
             return new_cl_app_secret, sr_app_secret
 
-    def calcTLS1_3KeyUpdate_reciever(self, cipherSuite, cl_app_secret,
-                                     sr_app_secret):
+    def calcTLS1_3KeyUpdate_reciever(self, cipherSuite, cl_app_secret, sr_app_secret):
         if self.client:
             new_cl_app_secret, client_state = self._calcTLS1_3KeyUpdate(
-                cipherSuite, cl_app_secret)
+                cipherSuite, cl_app_secret
+            )
             self._writeState = client_state
             return new_cl_app_secret, sr_app_secret
         else:
             new_sr_app_secret, server_state = self._calcTLS1_3KeyUpdate(
-                cipherSuite, sr_app_secret)
+                cipherSuite, sr_app_secret
+            )
             self._writeState = server_state
             return cl_app_secret, new_sr_app_secret

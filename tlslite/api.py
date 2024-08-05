@@ -23,8 +23,7 @@ from .integration.httptlsconnection import HTTPTLSConnection
 from .integration.tlssocketservermixin import TLSSocketServerMixIn
 
 try:
-    from .integration.tlsasynciodispatchermixin \
-        import TLSAsyncioDispatcherMixIn
+    from .integration.tlsasynciodispatchermixin import TLSAsyncioDispatcherMixIn
 
 except ImportError:
     # NOTE: asyncio is not available in base python 2, so this try-except
@@ -44,13 +43,24 @@ from .integration.pop3_tls import POP3_TLS
 from .integration.imap4_tls import IMAP4_TLS
 from .integration.smtp_tls import SMTP_TLS
 from .integration.xmlrpctransport import XMLRPCTransport
-from .integration.xmlrpcserver import TLSXMLRPCRequestHandler, \
-                                      TLSXMLRPCServer, \
-                                      MultiPathTLSXMLRPCServer
+from .integration.xmlrpcserver import (
+    TLSXMLRPCRequestHandler,
+    TLSXMLRPCServer,
+    MultiPathTLSXMLRPCServer,
+)
 
-from .utils.cryptomath import m2cryptoLoaded, gmpyLoaded, \
-                             pycryptoLoaded, prngName, GMPY2_LOADED
-from .utils.keyfactory import generateRSAKey, parsePEMKey, \
-                             parseAsPublicKey, parsePrivateKey
+from .utils.cryptomath import (
+    m2cryptoLoaded,
+    gmpyLoaded,
+    pycryptoLoaded,
+    prngName,
+    GMPY2_LOADED,
+)
+from .utils.keyfactory import (
+    generateRSAKey,
+    parsePEMKey,
+    parseAsPublicKey,
+    parsePrivateKey,
+)
 from .utils.tackwrapper import tackpyLoaded
 from .dh import parse as parseDH

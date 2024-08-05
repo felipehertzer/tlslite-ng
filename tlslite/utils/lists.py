@@ -45,5 +45,9 @@ def to_str_delimiter(values, delim=", ", last_delim=" or "):
     """
     # we need to slice the iterator, so we need a copy
     values = list(values)
-    return delim.join(chain((str(i) for i in values[:-2]),
-                            [last_delim.join(str(i) for i in values[-2:])]))
+    return delim.join(
+        chain(
+            (str(i) for i in values[:-2]),
+            [last_delim.join(str(i) for i in values[-2:])],
+        )
+    )

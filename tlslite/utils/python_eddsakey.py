@@ -57,8 +57,7 @@ class Python_EdDSAKey(EdDSAKey):
 
     def _hashAndVerify(self, signature, data):
         try:
-            return self.public_key.verify(compatHMAC(signature),
-                                          compatHMAC(data))
+            return self.public_key.verify(compatHMAC(signature), compatHMAC(data))
         # https://github.com/warner/python-ecdsa/issues/114
         except (BadSignatureError, UnexpectedDER, IndexError, AssertionError):
             return False

@@ -13,6 +13,8 @@ except ImportError:
     import unittest.mock as mock
 
 from tlslite.handshakesettings import HandshakeSettings, Keypair, VirtualHost
+from tlslite.utils import compression
+
 
 class TestHandshakeSettings(unittest.TestCase):
     def test___init__(self):
@@ -139,7 +141,7 @@ class TestHandshakeSettings(unittest.TestCase):
         hs = HandshakeSettings()
         hs.maxVersion = (3, 2)
 
-        self.assertTrue('sha256' in hs.macNames)
+        self.assertTrue("sha256" in hs.macNames)
 
         new_hs = hs.validate()
 
@@ -216,23 +218,68 @@ class TestHandshakeSettings(unittest.TestCase):
         with self.assertRaises(ValueError):
             hs.validate()
 
+    def test_use_compress_cert_with_wrong_value(self):
+        hs = HandshakeSettings()
+        hs.use_certificate_compression = 3
+
+        with self.assertRaises(ValueError):
+            hs.validate()
+
+    def test_cert_compress_algorithms_with_empty_value(self):
+        hs = HandshakeSettings()
+        hs.use_certificate_compression = True
+        hs.certificate_compression_algorithms = ()
+
+        with self.assertRaises(ValueError):
+            hs.validate()
+
+    def test_cert_compress_algorithms_with_invalid_value(self):
+        hs = HandshakeSettings()
+        hs.use_certificate_compression = True
+        hs.certificate_compression_algorithms = (0, 1, 2)
+
+        with self.assertRaises(ValueError):
+            hs.validate()
+
+    @unittest.skipIf(
+        compression.is_installed(2), "Skipping because brotli is already installed"
+    )
+    def test_cert_compress_algorithms_without_brotli(self):
+        hs = HandshakeSettings()
+        hs.use_certificate_compression = True
+        hs.certificate_compression_algorithms = (2,)
+
+        with self.assertRaises(ValueError):
+            hs.validate()
+
+    @unittest.skipIf(
+        compression.is_installed(3), "Skipping because zstandard is already installed"
+    )
+    def test_cert_compress_algorithms_without_zstd(self):
+        hs = HandshakeSettings()
+        hs.use_certificate_compression = True
+        hs.certificate_compression_algorithms = (3,)
+
+        with self.assertRaises(ValueError):
+            hs.validate()
+
     def test_invalid_MAC(self):
         hs = HandshakeSettings()
-        hs.macNames = ['sha1', 'whirpool']
+        hs.macNames = ["sha1", "whirpool"]
 
         with self.assertRaises(ValueError):
             hs.validate()
 
     def test_invalid_KEX(self):
         hs = HandshakeSettings()
-        hs.keyExchangeNames = ['rsa', 'ecdhe_rsa', 'gost']
+        hs.keyExchangeNames = ["rsa", "ecdhe_rsa", "gost"]
 
         with self.assertRaises(ValueError):
             hs.validate()
 
     def test_invalid_signature_algorithm(self):
         hs = HandshakeSettings()
-        hs.rsaSigHashes += ['md2']
+        hs.rsaSigHashes += ["md2"]
         with self.assertRaises(ValueError):
             hs.validate()
 
@@ -255,13 +302,13 @@ class TestHandshakeSettings(unittest.TestCase):
 
     def test_invalid_signature_ecdsa_algorithm(self):
         hs = HandshakeSettings()
-        hs.ecdsaSigHashes += ['md5']
+        hs.ecdsaSigHashes += ["md5"]
         with self.assertRaises(ValueError):
             hs.validate()
 
     def test_invalid_curve_name(self):
         hs = HandshakeSettings()
-        hs.eccCurves = ['P-256']
+        hs.eccCurves = ["P-256"]
         with self.assertRaises(ValueError):
             hs.validate()
 
@@ -283,7 +330,7 @@ class TestHandshakeSettings(unittest.TestCase):
 
     def test_invalid_dhParams(self):
         hs = HandshakeSettings()
-        hs.dhParams = (2, 'bd')
+        hs.dhParams = (2, "bd")
         with self.assertRaises(ValueError):
             hs.validate()
 
@@ -335,19 +382,19 @@ class TestHandshakeSettings(unittest.TestCase):
         hs = hs.validate()
 
         self.assertNotIn((3, 4), hs.versions)
-        self.assertNotIn((0x7f, 21), hs.versions)
+        self.assertNotIn((0x7F, 21), hs.versions)
 
     def test_pskConfigs(self):
         hs = HandshakeSettings()
-        hs.pskConfigs = [(b'test', b'sicritz', 'sha384')]
+        hs.pskConfigs = [(b"test", b"sicritz", "sha384")]
 
         hs = hs.validate()
 
-        self.assertEqual(hs.pskConfigs, [(b'test', b'sicritz', 'sha384')])
+        self.assertEqual(hs.pskConfigs, [(b"test", b"sicritz", "sha384")])
 
     def test_pskConfigs_invalid_tuple(self):
         hs = HandshakeSettings()
-        hs.pskConfigs = [(b'test', b'sicrits'), tuple([b'invalid'])]
+        hs.pskConfigs = [(b"test", b"sicrits"), tuple([b"invalid"])]
 
         with self.assertRaises(ValueError) as e:
             hs.validate()
@@ -356,7 +403,7 @@ class TestHandshakeSettings(unittest.TestCase):
 
     def test_pskConfig_invalid_hash(self):
         hs = HandshakeSettings()
-        hs.pskConfigs = [(b'test', b'sicrits', 'wrong-hash')]
+        hs.pskConfigs = [(b"test", b"sicrits", "wrong-hash")]
 
         with self.assertRaises(ValueError) as e:
             hs.validate()
@@ -419,8 +466,10 @@ class TestHandshakeSettings(unittest.TestCase):
 
     def test_invalid_heartbeat_extension_combination(self):
         hs = HandshakeSettings()
+
         def heartbeatResponseCallback(message):
             return message
+
         hs.heartbeat_response_callback = heartbeatResponseCallback
         hs.use_heartbeat_extension = False
 
@@ -440,7 +489,7 @@ class TestHandshakeSettings(unittest.TestCase):
 
     def test_too_big_record_size_limit(self):
         hs = HandshakeSettings()
-        hs.record_size_limit = 2**14+2
+        hs.record_size_limit = 2**14 + 2
 
         with self.assertRaises(ValueError) as e:
             hs.validate()
@@ -517,15 +566,15 @@ class TestVirtualHost(unittest.TestCase):
 
     def test_matches_hostname_with_non_matching_name(self):
         v_h = VirtualHost()
-        v_h.hostnames = set([b'example.com'])
+        v_h.hostnames = set([b"example.com"])
 
-        self.assertFalse(v_h.matches_hostname(b'example.org'))
+        self.assertFalse(v_h.matches_hostname(b"example.org"))
 
     def test_matches_hostname_with_matching_name(self):
         v_h = VirtualHost()
-        v_h.hostnames = set([b'example.com'])
+        v_h.hostnames = set([b"example.com"])
 
-        self.assertTrue(v_h.matches_hostname(b'example.com'))
+        self.assertTrue(v_h.matches_hostname(b"example.com"))
 
     def test_validate_without_keys(self):
         v_h = VirtualHost()
@@ -542,5 +591,5 @@ class TestVirtualHost(unittest.TestCase):
         v_h.keys[0].validate.assert_called_once_with()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

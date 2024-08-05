@@ -11,6 +11,7 @@ except ImportError:
 
 from tlslite.utils.compat import remove_whitespace
 
+
 class TestRemoveWhitespace(unittest.TestCase):
     def test_no_remove(self):
         text = "somestring"

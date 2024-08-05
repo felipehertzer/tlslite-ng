@@ -5,6 +5,7 @@
 A state machine for using TLS Lite with asynchronous I/O.
 """
 
+
 class AsyncStateMachine:
     """
     This is an abstract class that's used to integrate TLS Lite with
@@ -30,24 +31,24 @@ class AsyncStateMachine:
         self._clear()
 
     def _clear(self):
-        #These store the various asynchronous operations (i.e.
-        #generators).  Only one of them, at most, is ever active at a
-        #time.
+        # These store the various asynchronous operations (i.e.
+        # generators).  Only one of them, at most, is ever active at a
+        # time.
         self.handshaker = None
         self.closer = None
         self.reader = None
         self.writer = None
 
-        #This stores the result from the last call to the
-        #currently active operation.  If 0 it indicates that the
-        #operation wants to read, if 1 it indicates that the
-        #operation wants to write.  If None, there is no active
-        #operation.
+        # This stores the result from the last call to the
+        # currently active operation.  If 0 it indicates that the
+        # operation wants to read, if 1 it indicates that the
+        # operation wants to write.  If None, there is no active
+        # operation.
         self.result = None
 
     def _checkAssert(self, maxActive=1):
-        #This checks that only one operation, at most, is
-        #active, and that self.result is set appropriately.
+        # This checks that only one operation, at most, is
+        # active, and that self.result is set appropriately.
         activeOps = 0
         if self.handshaker:
             activeOps += 1
@@ -61,7 +62,7 @@ class AsyncStateMachine:
         if self.result == None:
             if activeOps != 0:
                 raise AssertionError()
-        elif self.result in (0,1):
+        elif self.result in (0, 1):
             if activeOps != 1:
                 raise AssertionError()
         else:
@@ -178,7 +179,7 @@ class AsyncStateMachine:
 
     def _doReadOp(self):
         self.result = next(self.reader)
-        if not self.result in (0,1):
+        if not self.result in (0, 1):
             readBuffer = self.result
             self.reader = None
             self.result = None
@@ -217,8 +218,7 @@ class AsyncStateMachine:
         self.setHandshakeOp(handshaker)
 
     def setCloseOp(self):
-        """Start a close operation.
-        """
+        """Start a close operation."""
         try:
             self._checkAssert(0)
             self.closer = self.tlsConnection.closeAsync()
@@ -239,4 +239,3 @@ class AsyncStateMachine:
         except:
             self._clear()
             raise
-

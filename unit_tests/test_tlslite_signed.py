@@ -8,7 +8,12 @@ try:
 except ImportError:
     import unittest
 
-from tlslite.signed import SignatureSettings, SignedObject, RSA_SIGNATURE_HASHES, RSA_SCHEMES
+from tlslite.signed import (
+    SignatureSettings,
+    SignedObject,
+    RSA_SIGNATURE_HASHES,
+    RSA_SCHEMES,
+)
 
 
 class TestSignatureSettings(unittest.TestCase):
@@ -51,9 +56,12 @@ class TestSignatureSettings(unittest.TestCase):
         self.assertIn("max_key_size smaller than min_key_size", str(ctx.exception))
 
     def test_signature_settings_invalid_sig_alg(self):
-        settings = SignatureSettings(rsa_sig_hashes=list(['sha1', 'sha128', 'sha129']))
+        settings = SignatureSettings(rsa_sig_hashes=list(["sha1", "sha128", "sha129"]))
         with self.assertRaises(ValueError) as ctx:
             settings.validate()
-        self.assertIn("Following signature algorithms are not allowed: sha128, sha129",
-                      str(ctx.exception))
+        self.assertIn(
+            "Following signature algorithms are not allowed: sha128, sha129",
+            str(ctx.exception),
+        )
+
     # verify_signature method testing is happening in the test_tlslite_ocsp.py

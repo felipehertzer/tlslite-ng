@@ -1,5 +1,6 @@
 """Abstract class for DSA."""
 
+
 class DSAKey(object):
     """This is an abstract base class for DSA keys.
 

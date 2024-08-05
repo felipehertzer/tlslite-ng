@@ -7,8 +7,8 @@ except ImportError:
 
 from tlslite.session import Session
 
-class TestSession(unittest.TestCase):
 
+class TestSession(unittest.TestCase):
     def test___init__(self):
         session = Session()
 
@@ -19,15 +19,17 @@ class TestSession(unittest.TestCase):
 
     def test_create(self):
         session = Session()
-        session.create(masterSecret=1,
-                       sessionID=2,
-                       cipherSuite=3,
-                       srpUsername=4,
-                       clientCertChain=5,
-                       serverCertChain=6,
-                       tackExt=7,
-                       tackInHelloExt=8,
-                       serverName=9)
+        session.create(
+            masterSecret=1,
+            sessionID=2,
+            cipherSuite=3,
+            srpUsername=4,
+            clientCertChain=5,
+            serverCertChain=6,
+            tackExt=7,
+            tackInHelloExt=8,
+            serverName=9,
+        )
 
         self.assertEqual(session.masterSecret, 1)
         self.assertEqual(session.sessionID, 2)
@@ -45,10 +47,9 @@ class TestSession(unittest.TestCase):
 
     def test_create_with_new_additions(self):
         session = Session()
-        session.create(1, 2, 3, 4, 5, 6, 7, 8, 9,
-                       encryptThenMAC=10,
-                       extendedMasterSecret=11)
+        session.create(
+            1, 2, 3, 4, 5, 6, 7, 8, 9, encryptThenMAC=10, extendedMasterSecret=11
+        )
 
         self.assertEqual(session.encryptThenMAC, 10)
         self.assertEqual(session.extendedMasterSecret, 11)
-

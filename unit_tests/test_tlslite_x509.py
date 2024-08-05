@@ -16,19 +16,21 @@ from tlslite.utils.python_dsakey import Python_DSAKey
 from tlslite.utils.python_eddsakey import Python_EdDSAKey
 from tlslite.x509certchain import X509CertChain
 
+
 class Test_DSA_X509(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.data = (
-                "-----BEGIN CERTIFICATE-----\n"
-                "MIIBQjCCAQACFFyBKCftN0cXDwuMuZWvtW7uG2xGMAsGCWCGSAFlAwQDAjAUMRIw\n"
-                "EAYDVQQDDAlsb2NhbGhvc3QwHhcNMjAwOTAzMDkwNzUxWhcNMjAxMDAzMDkwNzUx\n"
-                "WjAUMRIwEAYDVQQDDAlsb2NhbGhvc3QwgY4wZwYHKoZIzjgEATBcAiEAmeFbCUhV\n"
-                "UZgVpljXObhmRaQYIQ12YSr9zlCja2kpTiUCFQCfCyagvEDkgK5nHqscaYlF32ek\n"
-                "RwIgYgpNP8JjVxfJ4P3IErO07qqzWS21hSyMhsaCN0an0OsDIwACICUjj3Np+JO4\n"
-                "2v8Mc8oH6T8yNd5X0ssy8XdK3Bo9nfNpMAsGCWCGSAFlAwQDAgMvADAsAhRgjSkX\n"
-                "k9nkSQc2P3uA+fFEH2OOnAIUZnBeKDjTEMawkvRSXoGHhA93qQ4=\n"
-                "-----END CERTIFICATE-----\n")
+            "-----BEGIN CERTIFICATE-----\n"
+            "MIIBQjCCAQACFFyBKCftN0cXDwuMuZWvtW7uG2xGMAsGCWCGSAFlAwQDAjAUMRIw\n"
+            "EAYDVQQDDAlsb2NhbGhvc3QwHhcNMjAwOTAzMDkwNzUxWhcNMjAxMDAzMDkwNzUx\n"
+            "WjAUMRIwEAYDVQQDDAlsb2NhbGhvc3QwgY4wZwYHKoZIzjgEATBcAiEAmeFbCUhV\n"
+            "UZgVpljXObhmRaQYIQ12YSr9zlCja2kpTiUCFQCfCyagvEDkgK5nHqscaYlF32ek\n"
+            "RwIgYgpNP8JjVxfJ4P3IErO07qqzWS21hSyMhsaCN0an0OsDIwACICUjj3Np+JO4\n"
+            "2v8Mc8oH6T8yNd5X0ssy8XdK3Bo9nfNpMAsGCWCGSAFlAwQDAgMvADAsAhRgjSkX\n"
+            "k9nkSQc2P3uA+fFEH2OOnAIUZnBeKDjTEMawkvRSXoGHhA93qQ4=\n"
+            "-----END CERTIFICATE-----\n"
+        )
 
     def test_pem(self):
         x509 = X509()
@@ -36,14 +38,21 @@ class Test_DSA_X509(unittest.TestCase):
 
         self.assertIsNotNone(x509.publicKey)
         self.assertIsInstance(x509.publicKey, Python_DSAKey)
-        self.assertEqual(x509.publicKey.public_key,
-                16798405106129606882295006910154614336997455047535738179977898112652777747305)
-        self.assertEqual(x509.publicKey.p,
-                69602034731989554929546346371414762967051205729581487767213360812510562307621)
-        self.assertEqual(x509.publicKey.q,
-                907978205720450240238233398695599264980368073799)
-        self.assertEqual(x509.publicKey.g,
-                44344860785224683582210580276798141855549498608976964582640232671615126065387)
+        self.assertEqual(
+            x509.publicKey.public_key,
+            16798405106129606882295006910154614336997455047535738179977898112652777747305,
+        )
+        self.assertEqual(
+            x509.publicKey.p,
+            69602034731989554929546346371414762967051205729581487767213360812510562307621,
+        )
+        self.assertEqual(
+            x509.publicKey.q, 907978205720450240238233398695599264980368073799
+        )
+        self.assertEqual(
+            x509.publicKey.g,
+            44344860785224683582210580276798141855549498608976964582640232671615126065387,
+        )
 
 
 class TestX509(unittest.TestCase):
@@ -59,7 +68,8 @@ class TestX509(unittest.TestCase):
             "A1UdIwQYMBaAFPfFTUg9o3t6ehLsschSnC8Te8oaMAwGA1UdEwQFMAMBAf8wCQYH\n"
             "KoZIzj0EAQNIADBFAiA6p0YM5ZzfW+klHPRU2r13/IfKgeRfDR3dtBngmPvxUgIh\n"
             "APTeSDeJvYWVBLzyrKTeSerNDKKHU2Rt7sufipv76+7s\n"
-            "-----END CERTIFICATE-----\n")
+            "-----END CERTIFICATE-----\n"
+        )
 
     def test_pem(self):
         x509 = X509()
@@ -67,10 +77,14 @@ class TestX509(unittest.TestCase):
 
         self.assertIsNotNone(x509.publicKey)
         self.assertIsInstance(x509.publicKey, Python_ECDSAKey)
-        self.assertEqual(x509.publicKey.public_key.pubkey.point.x(),
-            90555129468518880658937518803653422065597446465131062487534800201457796212578)
-        self.assertEqual(x509.publicKey.public_key.pubkey.point.y(),
-            12490546948316647166662676770106859255378658810545502161335656899238893361610)
+        self.assertEqual(
+            x509.publicKey.public_key.pubkey.point.x(),
+            90555129468518880658937518803653422065597446465131062487534800201457796212578,
+        )
+        self.assertEqual(
+            x509.publicKey.public_key.pubkey.point.y(),
+            12490546948316647166662676770106859255378658810545502161335656899238893361610,
+        )
         self.assertEqual(x509.publicKey.curve_name, "NIST256p")
 
     def test_hash(self):
@@ -82,6 +96,7 @@ class TestX509(unittest.TestCase):
 
         self.assertEqual(hash(x509_1), hash(x509_2))
         self.assertEqual(x509_1, x509_2)
+
 
 class TestX509CertChain(unittest.TestCase):
     @classmethod
@@ -96,7 +111,8 @@ class TestX509CertChain(unittest.TestCase):
             "A1UdIwQYMBaAFPfFTUg9o3t6ehLsschSnC8Te8oaMAwGA1UdEwQFMAMBAf8wCQYH\n"
             "KoZIzj0EAQNIADBFAiA6p0YM5ZzfW+klHPRU2r13/IfKgeRfDR3dtBngmPvxUgIh\n"
             "APTeSDeJvYWVBLzyrKTeSerNDKKHU2Rt7sufipv76+7s\n"
-            "-----END CERTIFICATE-----\n")
+            "-----END CERTIFICATE-----\n"
+        )
 
     def test_pem(self):
         x509cc = X509CertChain()
@@ -125,11 +141,13 @@ class TestX509WithEdDSA(unittest.TestCase):
             "ESAh1DAfBgNVHSMEGDAWgBTHKWv5l/SxnkkYJhh5r3PvESAh1DAPBgNVHRMBAf8E\n"
             "BTADAQH/MAUGAytlcANBAF/vSBfOHAdRl29sWDTkuqy1dCuSf7j7jKE/Be8Fk7xs\n"
             "WteXJmIa0HlRAZjxNfWbsSGLnTYbsGTbxKx3QU9H9g0=\n"
-            "-----END CERTIFICATE-----\n")
+            "-----END CERTIFICATE-----\n"
+        )
         cls.priv_key = (
             "-----BEGIN PRIVATE KEY-----\n"
             "MC4CAQAwBQYDK2VwBCIEIAjtEwCECqbot5RZxSmiNDWcPp+Xc9Y9WJcUhti3JgSP\n"
-            "-----END PRIVATE KEY-----\n")
+            "-----END PRIVATE KEY-----\n"
+        )
         cls.ed448_data = (
             "-----BEGIN CERTIFICATE-----\n"
             "MIIBiDCCAQigAwIBAgIUZoaDDgE5Cy2GuAMtk4lnsmrPF04wBQYDK2VxMBQxEjAQ\n"
@@ -141,7 +159,8 @@ class TestX509WithEdDSA(unittest.TestCase):
             "u+56ebfiGjdE++H+YvHVxxxycqKAIAikfsLFfw2LUGQVBMhl+nzS4zRDOKa34uGz\n"
             "DwEApFuOWurH/y8zqM5NFyXfwbHRlhG4xwUet52CbrtC7Dy1HYnvWdEjbKDSJXpJ\n"
             "MmNSiO0oBtQ62CsA\n"
-            "-----END CERTIFICATE-----\n")
+            "-----END CERTIFICATE-----\n"
+        )
 
     def test_pem_cert(self):
         x509 = X509()

@@ -15,13 +15,14 @@ except ImportError:
     import unittest.mock as mock
     from unittest.mock import call
 
-class TestTLSHashlib(unittest.TestCase):
 
+class TestTLSHashlib(unittest.TestCase):
     def test_in_fips_mode(self):
         def m(*args, **kwargs):
-            if 'usedforsecurity' not in kwargs:
+            if "usedforsecurity" not in kwargs:
                 raise ValueError("MD5 disabled in FIPS mode")
 
-        with mock.patch('hashlib.md5', m):
+        with mock.patch("hashlib.md5", m):
             from tlslite.utils.tlshashlib import md5
+
             md5()

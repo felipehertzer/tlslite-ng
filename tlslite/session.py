@@ -1,4 +1,4 @@
-# Authors: 
+# Authors:
 #   Trevor Perrin
 #   Dave Baggett (Arcode Corporation) - canonicalCipherName
 #
@@ -9,6 +9,7 @@
 from .utils.compat import *
 from .mathtls import *
 from .constants import *
+
 
 class Session(object):
     """
@@ -95,14 +96,28 @@ class Session(object):
         self.tickets = None
         self.tls_1_0_tickets = None
 
-    def create(self, masterSecret, sessionID, cipherSuite,
-               srpUsername, clientCertChain, serverCertChain,
-               tackExt, tackInHelloExt, serverName, resumable=True,
-               encryptThenMAC=False, extendedMasterSecret=False,
-               appProto=bytearray(0), cl_app_secret=bytearray(0),
-               sr_app_secret=bytearray(0), exporterMasterSecret=bytearray(0),
-               resumptionMasterSecret=bytearray(0), tickets=None,
-               tls_1_0_tickets=None):
+    def create(
+        self,
+        masterSecret,
+        sessionID,
+        cipherSuite,
+        srpUsername,
+        clientCertChain,
+        serverCertChain,
+        tackExt,
+        tackInHelloExt,
+        serverName,
+        resumable=True,
+        encryptThenMAC=False,
+        extendedMasterSecret=False,
+        appProto=bytearray(0),
+        cl_app_secret=bytearray(0),
+        sr_app_secret=bytearray(0),
+        exporterMasterSecret=bytearray(0),
+        resumptionMasterSecret=bytearray(0),
+        tickets=None,
+        tls_1_0_tickets=None,
+    ):
         self.masterSecret = masterSecret
         self.sessionID = sessionID
         self.cipherSuite = cipherSuite
@@ -110,7 +125,7 @@ class Session(object):
         self.clientCertChain = clientCertChain
         self.serverCertChain = serverCertChain
         self.tackExt = tackExt
-        self.tackInHelloExt = tackInHelloExt  
+        self.tackInHelloExt = tackInHelloExt
         self.serverName = serverName
         self.resumable = resumable
         self.encryptThenMAC = encryptThenMAC
@@ -154,11 +169,12 @@ class Session(object):
         :returns: If this session can be used for session resumption.
         """
         # TODO add checks for tickets received from server (freshness etc.)
-        return self.resumable and (self.sessionID or self.tickets or
-                                   self.tls_1_0_tickets)
+        return self.resumable and (
+            self.sessionID or self.tickets or self.tls_1_0_tickets
+        )
 
     def _setResumable(self, boolean):
-        #Only let it be set to True if the sessionID is non-null
+        # Only let it be set to True if the sessionID is non-null
         if (not boolean) or (boolean and self.sessionID):
             self.resumable = boolean
 
@@ -167,7 +183,7 @@ class Session(object):
             return self.tackExt.tack.getTackId()
         else:
             return None
-        
+
     def getBreakSigs(self):
         if self.tackExt and self.tackExt.break_sigs:
             return self.tackExt.break_sigs
@@ -181,7 +197,7 @@ class Session(object):
         :returns: The name of the cipher used with this connection.
         """
         return CipherSuite.canonicalCipherName(self.cipherSuite)
-        
+
     def getMacName(self):
         """Get the name of the HMAC hash algo used with this connection.
 

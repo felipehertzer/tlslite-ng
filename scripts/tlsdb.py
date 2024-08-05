@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Authors: 
+# Authors:
 #   Trevor Perrin
 #   Martin von Loewis - python 3 port
 #
@@ -19,7 +19,7 @@ if __name__ != "__main__":
 from tlslite import *
 from tlslite import __version__
 
-if len(sys.argv) == 1 or (len(sys.argv)==2 and sys.argv[1].lower().endswith("help")):
+if len(sys.argv) == 1 or (len(sys.argv) == 2 and sys.argv[1].lower().endswith("help")):
     print("")
     print("Version: %s" % __version__)
     print("")
@@ -51,19 +51,24 @@ if len(sys.argv) == 1 or (len(sys.argv)==2 and sys.argv[1].lower().endswith("hel
 
 cmd = sys.argv[1].lower()
 
+
 class Args:
     def __init__(self, argv):
         self.argv = argv
+
     def get(self, index):
-        if len(self.argv)<=index:
+        if len(self.argv) <= index:
             raise SyntaxError("Not enough arguments")
         return self.argv[index]
+
     def getLast(self, index):
-        if len(self.argv)>index+1:
+        if len(self.argv) > index + 1:
             raise SyntaxError("Too many arguments")
         return self.get(index)
 
+
 args = Args(sys.argv)
+
 
 def reformatDocString(s):
     lines = s.splitlines()
@@ -71,6 +76,7 @@ def reformatDocString(s):
     for line in lines:
         newLines.append("  " + line.strip())
     return "\n".join(newLines)
+
 
 try:
     if cmd == "help":
@@ -105,12 +111,12 @@ try:
         username = args.getLast(3)
         db = VerifierDB(dbName)
         db.open()
-        del(db[username])
+        del db[username]
 
     elif cmd == "check":
         dbName = args.get(2)
         username = args.get(3)
-        if len(sys.argv)>=5:
+        if len(sys.argv) >= 5:
             password = args.getLast(4)
         else:
             password = None
@@ -137,10 +143,12 @@ try:
         db.open()
 
         print("Verifier Database")
+
         def numBits(n):
-            if n==0:
+            if n == 0:
                 return 0
-            return int(math.floor(math.log(n, 2))+1)
+            return int(math.floor(math.log(n, 2)) + 1)
+
         for username in db.keys():
             N, g, s, v = db[username]
             print(numBits(N), username)

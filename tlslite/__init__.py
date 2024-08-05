@@ -23,4 +23,4 @@ Then use the :py:class:`TLSConnection` class with a socket.
 """
 
 from tlslite.api import *
-from tlslite.api import __version__ # Unsure why this is needed, but it is
+from tlslite.api import __version__  # Unsure why this is needed, but it is

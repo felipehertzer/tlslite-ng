@@ -7,12 +7,13 @@ print("gmpy: {0}".format(gmpyLoaded))
 print("gmpy2: {0}".format(GMPY2_LOADED))
 print("")
 
+
 def do(setup_statements, statement):
     # extracted from timeit.py
     t = timeit.Timer(stmt=statement, setup="\n".join(setup_statements))
     # determine number so that 0.2 <= total time < 2.0
     for i in range(1, 10):
-        number = 10 ** i
+        number = 10**i
         x = t.timeit(number)
         if x >= 0.2:
             break
@@ -71,4 +72,3 @@ for size in [1024, 2048, 3072, 4096]:
     )
 
 print("")
-

@@ -7,6 +7,7 @@ except ImportError:
 
 from tlslite.sessioncache import SessionCache
 
+
 class TestGetAttributeAfterPurge(unittest.TestCase):
     """
     This tests the following scenario
@@ -22,24 +23,24 @@ class TestGetAttributeAfterPurge(unittest.TestCase):
         self.session_cache = SessionCache(maxAge=0)
 
     def test_fetch_after_expire(self):
-        key = bytearray(b'hello world')
+        key = bytearray(b"hello world")
         self.session_cache[key] = "42"
         with self.assertRaises(KeyError):
-            self.session_cache[key] 
+            self.session_cache[key]
+
 
 class TestFillLinkedList(unittest.TestCase):
-    """ check what happens if the linked list gets full
-    """
+    """check what happens if the linked list gets full"""
 
     def setUp(self):
-        self.session_cache = SessionCache(maxEntries = 10)
+        self.session_cache = SessionCache(maxEntries=10)
 
     def test_fill_linked_list(self):
         """this test should not throw an exception"""
         for i in range(20):
-            key = bytearray(b'prefill-') + bytearray(str(i), "ascii")
+            key = bytearray(b"prefill-") + bytearray(str(i), "ascii")
             self.session_cache[key] = "forty-two"
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

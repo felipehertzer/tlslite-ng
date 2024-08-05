@@ -1,4 +1,3 @@
-
 try:
     import unittest2 as unittest
 except ImportError:
@@ -14,6 +13,7 @@ except ImportError:
 from tlslite.utils.python_key import Python_Key
 from tlslite.utils.python_ecdsakey import Python_ECDSAKey
 
+
 class TestECDSAKey(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -22,12 +22,13 @@ class TestECDSAKey(unittest.TestCase):
         cls.key = Python_ECDSAKey(None, None, "NIST256p", 45)
 
         # sha1 signature of message 'some message to sign'
-        cls.sha1_sig = \
-                bytearray(b'0E\x02!\x00\xf7Q\x97.\xcfv\x03\xf0\xff,^\xb9'
-                          b'\nZ\xbd\x0e\xaaf\xf2]\xe0\xb0\x91\xa6cY\xa9\xff'
-                          b'{@\x18\xc8\x02 <\x80\x1a\xfa\x14\xd2\\\x02\xfe'
-                          b'\x1a\xb7\x07X\xba\xd8`\xd4\x1d\xa9\x9cm\xc7\xcd'
-                          b'\x11\xbb\x1b\xd1A\xcdO\xa2?')
+        cls.sha1_sig = bytearray(
+            b"0E\x02!\x00\xf7Q\x97.\xcfv\x03\xf0\xff,^\xb9"
+            b"\nZ\xbd\x0e\xaaf\xf2]\xe0\xb0\x91\xa6cY\xa9\xff"
+            b"{@\x18\xc8\x02 <\x80\x1a\xfa\x14\xd2\\\x02\xfe"
+            b"\x1a\xb7\x07X\xba\xd8`\xd4\x1d\xa9\x9cm\xc7\xcd"
+            b"\x11\xbb\x1b\xd1A\xcdO\xa2?"
+        )
 
     def test_parse_from_pem(self):
         key = (
@@ -35,7 +36,8 @@ class TestECDSAKey(unittest.TestCase):
             "MHcCAQEEIAjma9Dr7NHgpoflzEFg2FabEPrCXY4qv4raf5GJ1jUmoAoGCCqGSM49\n"
             "AwEHoUQDQgAEyDRjEAJe3F5T62MyZbhjoJnPLGL2nrTthLFymBupZ2IbnWYnqVWD\n"
             "kT/L6i8sQhf2zCLrlSjj1kn7ERqPx/KZyg==\n"
-            "-----END EC PRIVATE KEY-----\n")
+            "-----END EC PRIVATE KEY-----\n"
+        )
 
         parsed_key = Python_Key.parsePEM(key)
         self.assertIsInstance(parsed_key, Python_ECDSAKey)
@@ -62,7 +64,7 @@ class TestECDSAKey(unittest.TestCase):
         self.assertEqual(sig, self.sha1_sig)
 
     def test_verify(self):
-        msg = b'some message to sign'
+        msg = b"some message to sign"
 
         r = self.key.hashAndVerify(self.sha1_sig, msg)
 
@@ -72,7 +74,7 @@ class TestECDSAKey(unittest.TestCase):
         with self.assertRaises(ValueError) as e:
             Python_ECDSAKey(None, None, "secp256r1", 45)
 
-        self.assertIn('not supported by python-ecdsa', str(e.exception))
+        self.assertIn("not supported by python-ecdsa", str(e.exception))
 
     def test_no_curve_name(self):
         with self.assertRaises(ValueError) as e:
